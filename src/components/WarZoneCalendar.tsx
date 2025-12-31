@@ -4,85 +4,91 @@ import { useState } from 'react';
 import { X, Calendar } from 'lucide-react';
 
 export default function WarZoneCalendar() {
-  const [isMinimized, setIsMinimized] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <>
-      {/* Floating Button */}
-      {isMinimized && (
-        <button
-          onClick={() => setIsMinimized(false)}
-          className="fixed bottom-20 left-4 md:left-6 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white p-3 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-110 flex items-center gap-2 animate-pulse"
-          style={{ zIndex: 9998 }}
-          title="Open War Zone Calendar"
-        >
-          <Calendar className="w-5 h-5" />
-          <span className="hidden sm:inline text-xs font-bold">War Zone</span>
-        </button>
-      )}
+      {/* Floating Button - SAMA SEPERTI SOS */}
+      <button
+        onClick={() => setShowModal(true)}
+        className="fixed bottom-32 left-4 md:bottom-6 md:left-6 z-40 group"
+        aria-label="War Zone Calendar"
+      >
+        <div className="relative">
+          {/* Ping animation */}
+          <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75"></span>
+          
+          {/* Button */}
+          <div className="relative flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white px-4 py-3 rounded-full shadow-lg shadow-red-500/50 transition-all duration-300 hover:scale-105">
+            <Calendar className="w-5 h-5 animate-pulse" />
+            <span className="font-bold text-sm hidden md:inline">War Zone</span>
+          </div>
+        </div>
+      </button>
 
-      {/* BACKDROP - Highest z-index */}
-      {!isMinimized && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-          style={{ zIndex: 9999 }}
-          onClick={() => setIsMinimized(true)}
-        />
-      )}
-
-      {/* MODAL - Higher than backdrop */}
-      {!isMinimized && (
-        <div 
-          className="fixed inset-0 flex items-end md:items-center justify-center"
-          style={{ zIndex: 10000 }}
-        >
-          <div 
-            className="w-full h-[85vh] md:h-[90vh] md:w-full md:max-w-5xl bg-slate-950 border border-red-500/50 rounded-t-3xl md:rounded-2xl shadow-2xl shadow-red-500/30 flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 duration-300"
-            onClick={(e) => e.stopPropagation()}
-          >
-            
-            {/* HEADER */}
-            <div className="bg-gradient-to-r from-red-600 to-orange-600 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between border-b border-red-700/50 flex-shrink-0">
-              <div className="flex items-center gap-3 min-w-0">
-                <Calendar className="w-5 md:w-6 h-5 md:h-6 text-white flex-shrink-0" />
-                <div className="min-w-0">
-                  <h2 className="text-lg md:text-xl font-black tracking-wider text-white truncate">WAR ZONE CALENDAR</h2>
-                  <p className="text-xs text-red-100">📊 Economic Events Calendar</p>
+      {/* Modal - SAMA SEPERTI SOS */}
+      {showModal && (
+        <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="w-full max-w-4xl bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl border border-red-500/30 overflow-hidden">
+            {/* Header - SAMA SEPERTI SOS */}
+            <div className="bg-gradient-to-r from-red-600 to-orange-600 p-6 relative">
+              <button
+                onClick={() => setShowModal(false)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white hover:rotate-90 transition-all duration-300"
+                aria-label="Close"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-white/20 rounded-xl">
+                  <Calendar className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-white tracking-wider">
+                    📊 WAR ZONE CALENDAR
+                  </h2>
+                  <p className="text-red-100 text-sm mt-1">
+                    Economic Events Real-Time
+                  </p>
                 </div>
               </div>
-
-              {/* CLOSE BUTTON */}
-              <button
-                onClick={() => setIsMinimized(true)}
-                className="p-2 hover:bg-red-700 rounded-lg transition-colors duration-200 flex-shrink-0"
-              >
-                <X className="w-5 h-5 text-white" />
-              </button>
             </div>
 
-            {/* CONTENT */}
-            <div className="flex-1 overflow-auto w-full bg-slate-900/50">
-              <iframe
-                title="TradingView Economic Calendar"
-                src="https://www.tradingview.com/events/"
-                className="w-full h-full border-none"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  border: 'none',
-                  backgroundColor: '#030712',
-                }}
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              />
+            {/* Content */}
+            <div className="p-6 max-h-[70vh] overflow-y-auto">
+              <div className="w-full h-[500px] border border-slate-700 rounded-xl overflow-hidden">
+                <iframe
+                  title="TradingView Economic Calendar"
+                  src="https://www.tradingview.com/events/"
+                  className="w-full h-full"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    backgroundColor: '#030712',
+                  }}
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                />
+              </div>
             </div>
 
-            {/* FOOTER */}
-            <div className="bg-red-950/40 border-t border-red-500/30 px-4 md:px-6 py-2 md:py-3 text-xs text-red-200 flex-shrink-0">
-              <p className="flex items-center gap-2">
-                <span>⚠️</span>
-                <span><strong>High Impact Events</strong> = Hindari trading atau ketatkan SL!</span>
+            {/* Footer */}
+            <div className="bg-gradient-to-r from-slate-800 to-slate-700 border-t border-red-500/30 p-6">
+              <p className="text-slate-300 text-center">
+                <strong className="text-red-400">⚠️ HIGH IMPACT EVENTS</strong> = Hindari trade atau ketatkan SL
               </p>
+            </div>
+
+            {/* Action Button */}
+            <div className="px-6 pb-6">
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-full bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-black py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg shadow-red-500/30"
+              >
+                CLOSE ✅
+              </button>
             </div>
           </div>
         </div>
