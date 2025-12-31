@@ -8,10 +8,10 @@ export default function TradingViewCalendar() {
 
   return (
     <>
-      {/* Floating Button - RESPONSIVE SIZE */}
+      {/* Floating Button */}
       <button
         onClick={() => setShowModal(true)}
-        className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40 group"
+        className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40"
         aria-label="War Zone Calendar"
       >
         <div className="relative">
@@ -32,24 +32,19 @@ export default function TradingViewCalendar() {
         </div>
       </button>
 
-      {/* Modal Portal - FULL SCREEN OVERLAY */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex flex-col">
-          {/* Backdrop */}
+        <div className="fixed inset-0 z-50">
           <div 
             className="fixed inset-0 bg-black/70 backdrop-blur-md z-40"
             onClick={() => setShowModal(false)}
           />
           
-          {/* Modal Container */}
           <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-3 md:p-4">
-            {/* Modal Box */}
             <div 
               className="w-full max-h-[95vh] md:max-h-[92vh] md:w-full md:max-w-5xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 rounded-t-3xl md:rounded-2xl shadow-2xl shadow-red-500/50 border border-red-500/40 overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               
-              {/* Header */}
               <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-600 px-4 md:px-8 py-4 md:py-7 flex-shrink-0 relative">
                 <button
                   onClick={() => setShowModal(false)}
@@ -78,12 +73,10 @@ export default function TradingViewCalendar() {
                 </div>
               </div>
 
-              {/* Content - Calendar */}
               <div className="flex-1 overflow-auto w-full bg-slate-950">
-                {/* Investing.com Calendar Embed */}
                 <iframe
-                  title="Economic Calendar"
-                  src="https://www.investing.com/economic-calendar/"
+                  title="TradingView Economic Calendar"
+                  src="https://www.tradingview.com/events/"
                   className="w-full h-full"
                   style={{
                     width: '100%',
@@ -91,12 +84,11 @@ export default function TradingViewCalendar() {
                     border: 'none',
                     backgroundColor: '#030712',
                   }}
-                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 />
               </div>
 
-              {/* Footer */}
               <div className="bg-gradient-to-r from-slate-800 to-slate-700 border-t border-red-500/40 px-3 md:px-8 py-2 md:py-4 flex-shrink-0">
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-yellow-400 text-base md:text-xl">⚠️</span>
@@ -106,7 +98,6 @@ export default function TradingViewCalendar() {
                 </div>
               </div>
 
-              {/* Button */}
               <div className="px-3 md:px-8 pb-3 md:pb-6 pt-2 md:pt-4 flex-shrink-0 bg-gradient-to-t from-slate-900 to-transparent">
                 <button
                   onClick={() => setShowModal(false)}
