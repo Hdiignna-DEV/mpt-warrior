@@ -8,11 +8,12 @@ export default function WarZoneCalendar() {
 
   return (
     <>
-      {/* Floating Button - ALWAYS VISIBLE */}
+      {/* Floating Button */}
       {isMinimized && (
         <button
           onClick={() => setIsMinimized(false)}
-          className="fixed bottom-20 left-4 md:left-6 z-40 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white p-3 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-110 flex items-center gap-2 animate-pulse"
+          className="fixed bottom-20 left-4 md:left-6 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white p-3 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-110 flex items-center gap-2 animate-pulse"
+          style={{ zIndex: 9998 }}
           title="Open War Zone Calendar"
         >
           <Calendar className="w-5 h-5" />
@@ -20,19 +21,23 @@ export default function WarZoneCalendar() {
         </button>
       )}
 
-      {/* BACKDROP - Full screen (z-50) */}
+      {/* BACKDROP - Highest z-index */}
       {!isMinimized && (
         <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+          style={{ zIndex: 9999 }}
           onClick={() => setIsMinimized(true)}
         />
       )}
 
-      {/* MODAL - On top of everything (z-50 + content) */}
+      {/* MODAL - Higher than backdrop */}
       {!isMinimized && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 pointer-events-none">
+        <div 
+          className="fixed inset-0 flex items-end md:items-center justify-center"
+          style={{ zIndex: 10000 }}
+        >
           <div 
-            className="w-full h-[85vh] md:h-[90vh] md:w-full md:max-w-5xl bg-slate-950 border border-red-500/50 rounded-t-3xl md:rounded-2xl shadow-2xl shadow-red-500/30 flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 duration-300 pointer-events-auto"
+            className="w-full h-[85vh] md:h-[90vh] md:w-full md:max-w-5xl bg-slate-950 border border-red-500/50 rounded-t-3xl md:rounded-2xl shadow-2xl shadow-red-500/30 flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
             
@@ -49,26 +54,25 @@ export default function WarZoneCalendar() {
               {/* CLOSE BUTTON */}
               <button
                 onClick={() => setIsMinimized(true)}
-                className="p-2 hover:bg-red-700 rounded-lg transition-colors duration-200 flex-shrink-0 ml-2"
-                title="Close War Zone Calendar"
+                className="p-2 hover:bg-red-700 rounded-lg transition-colors duration-200 flex-shrink-0"
               >
                 <X className="w-5 h-5 text-white" />
               </button>
             </div>
 
-            {/* CONTENT - TradingView Calendar */}
+            {/* CONTENT */}
             <div className="flex-1 overflow-auto w-full bg-slate-900/50">
               <iframe
                 title="TradingView Economic Calendar"
                 src="https://www.tradingview.com/events/"
-                className="w-full h-full"
+                className="w-full h-full border-none"
                 style={{
                   width: '100%',
                   height: '100%',
                   border: 'none',
                   backgroundColor: '#030712',
                 }}
-                sandbox="allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               />
             </div>
@@ -77,7 +81,7 @@ export default function WarZoneCalendar() {
             <div className="bg-red-950/40 border-t border-red-500/30 px-4 md:px-6 py-2 md:py-3 text-xs text-red-200 flex-shrink-0">
               <p className="flex items-center gap-2">
                 <span>⚠️</span>
-                <span>High Impact Events = Hindari trading! Ketatkan SL atau skip trade!</span>
+                <span><strong>High Impact Events</strong> = Hindari trading atau ketatkan SL!</span>
               </p>
             </div>
           </div>
