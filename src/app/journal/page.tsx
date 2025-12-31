@@ -6,7 +6,7 @@ interface Trade {
   id: string;
   pair: string;
   posisi: 'BUY' | 'SELL';
-  hasil: 'MENANG' | 'KALAH';
+  hasil: 'WIN' | 'LOSS';
   pip: number;
   tanggal: string;
   catatan: string;
@@ -16,7 +16,7 @@ export default function JurnalTrading() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [pair, setPair] = useState('');
   const [posisi, setPosisi] = useState<'BUY' | 'SELL'>('BUY');
-  const [hasil, setHasil] = useState<'MENANG' | 'KALAH'>('MENANG');
+  const [hasil, setHasil] = useState<'WIN' | 'LOSS'>('WIN');
   const [pip, setPip] = useState('');
   const [catatan, setCatatan] = useState('');
 
@@ -51,7 +51,7 @@ export default function JurnalTrading() {
     setPair('');
     setPip('');
     setCatatan('');
-    setHasil('MENANG');
+    setHasil('WIN');
   };
 
   const hapusTrade = (id: string) => {
@@ -59,9 +59,10 @@ export default function JurnalTrading() {
   };
 
   const totalTrade = trades.length;
-  const menang = trades.filter((t) => t.hasil === 'MENANG').length;
-  const kalah = totalTrade - menang;
-  const winRate = totalTrade > 0 ? Math.round((menang / totalTrade) * 100) : 0;
+  const win = trades.filter((t) => t.hasil === 'WIN').length;
+  const loss = totalTrade - win;
+  const winRate = totalTrade > 0 ? Math.round((win / totalTrade) * 100) : 0;
+  const totalPips = trades.reduce((acc, t) => acc + t.pip, 0);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 pt-24 md:pt-8">
@@ -80,22 +81,28 @@ export default function JurnalTrading() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-8">
         <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-800/50">
-          <p className="text-slate-400 text-xs md:text-sm mb-1">Total Trade</p>
+          <p className="text-slate-400 text-xs md:text-sm mb-1">Total</p>
           <p className="text-2xl md:text-3xl font-black text-white">{totalTrade}</p>
         </div>
         <div className="bg-slate-900/60 rounded-xl p-4 border border-green-500/30">
-          <p className="text-slate-400 text-xs md:text-sm mb-1">Menang</p>
-          <p className="text-2xl md:text-3xl font-black text-green-400">{menang}</p>
+          <p className="text-slate-400 text-xs md:text-sm mb-1">WIN</p>
+          <p className="text-2xl md:text-3xl font-black text-green-400">{win}</p>
         </div>
         <div className="bg-slate-900/60 rounded-xl p-4 border border-red-500/30">
-          <p className="text-slate-400 text-xs md:text-sm mb-1">Kalah</p>
-          <p className="text-2xl md:text-3xl font-black text-red-400">{kalah}</p>
+          <p className="text-slate-400 text-xs md:text-sm mb-1">LOSS</p>
+          <p className="text-2xl md:text-3xl font-black text-red-400">{loss}</p>
         </div>
         <div className="bg-slate-900/60 rounded-xl p-4 border border-yellow-500/30">
           <p className="text-slate-400 text-xs md:text-sm mb-1">Win Rate</p>
           <p className="text-2xl md:text-3xl font-black text-yellow-400">{winRate}%</p>
+        </div>
+        <div className={`bg-slate-900/60 rounded-xl p-4 border ${totalPips >= 0 ? 'border-green-500/30' : 'border-red-500/30'}`}>
+          <p className="text-slate-400 text-xs md:text-sm mb-1">Total Pips</p>
+          <p className={`text-2xl md:text-3xl font-black ${totalPips >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            {totalPips >= 0 ? '+' : ''}{totalPips}
+          </p>
         </div>
       </div>
 
@@ -150,24 +157,24 @@ export default function JurnalTrading() {
             <label className="block text-sm font-semibold text-slate-300 mb-2">Hasil</label>
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => setHasil('MENANG')}
+                onClick={() => setHasil('WIN')}
                 className={`py-3 rounded-lg font-bold transition-all ${
-                  hasil === 'MENANG'
+                  hasil === 'WIN'
                     ? 'bg-green-500 text-white'
                     : 'bg-slate-800/50 text-slate-300 border border-slate-700'
                 }`}
               >
-                ✅ MENANG
+                ✅ WIN
               </button>
               <button
-                onClick={() => setHasil('KALAH')}
+                onClick={() => setHasil('LOSS')}
                 className={`py-3 rounded-lg font-bold transition-all ${
-                  hasil === 'KALAH'
+                  hasil === 'LOSS'
                     ? 'bg-red-500 text-white'
                     : 'bg-slate-800/50 text-slate-300 border border-slate-700'
                 }`}
               >
-                ❌ KALAH
+                ❌ LOSS
               </button>
             </div>
           </div>
@@ -242,7 +249,7 @@ export default function JurnalTrading() {
                     {trade.posisi}
                   </span>
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    trade.hasil === 'MENANG' ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
+                    trade.hasil === 'WIN' ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
                   }`}>
                     {trade.hasil}
                   </span>
