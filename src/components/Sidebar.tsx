@@ -8,9 +8,12 @@ import {
   Calculator, 
   Bot,
   Menu,
-  X
+  X,
+  Settings,
+  LogOut,
+  ChevronRight
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const menuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -22,85 +25,122 @@ const menuItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const isMobileDevice = window.innerWidth < 768;
+    setIsMobile(isMobileDevice);
+    setIsOpen(!isMobileDevice);
+
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) setIsOpen(false);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isActive = (href: string) => {
+    if (href === '/' && pathname === '/') return true;
+    if (href !== '/' && pathname.startsWith(href)) return true;
+    return false;
+  };
+
+  const handleMenuClick = () => {
+    if (isMobile) setIsOpen(false);
+  };
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile Menu Toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-slate-800 rounded-lg text-yellow-500"
+        className="fixed top-4 left-4 z-50 p-2 bg-slate-800 hover:bg-slate-700 rounded-lg md:hidden transition-all"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
       {/* Overlay for mobile */}
-      {isOpen && (
+      {isOpen && isMobile && (
         <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => setIsOpen(false)}
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
         />
       )}
 
       {/* Sidebar */}
-      <aside
-        className={`
-          fixed lg:static inset-y-0 left-0 z-40
-          w-64 bg-slate-900 border-r border-slate-700
-          flex flex-col transition-transform duration-300
-          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        `}
+      <div
+        className={`fixed md:relative z-40 h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 border-r border-slate-800 transition-all duration-300 overflow-y-auto ${
+          isOpen ? 'w-64' : 'w-0 md:w-20'
+        } ${isMobile ? 'md:w-20' : ''}`}
       >
-        {/* Logo/Header */}
-        <div className="p-6 border-b border-slate-700 flex flex-col items-center">
-          <div className="w-32 h-32 mb-3 relative">
-            <Image
-              src="/mpt-logo.png"
-              alt="MPT Logo"
-              fill
-              className="object-contain"
-              priority
-            />
+        {/* Logo Section */}
+        <div className={`${isOpen ? 'p-6' : 'p-4'} border-b border-slate-800/50 sticky top-0 bg-slate-950/80 backdrop-blur-sm`}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="relative w-12 h-12 flex-shrink-0">
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center font-bold text-black shadow-lg shadow-yellow-500/30">
+                M
+              </div>
+            </div>
+            {isOpen && (
+              <div className="min-w-0">
+                <p className="font-bold text-white text-sm leading-tight">MPT</p>
+                <p className="text-xs text-yellow-400">Warrior Hub</p>
+              </div>
+            )}
           </div>
-          <h1 className="text-xl font-bold text-yellow-500 text-center">
-            MINDSET PLAN TRADER
-          </h1>
-          <p className="text-xs text-slate-400 mt-1 text-center">Warrior Trading Hub</p>
         </div>
 
-        {/* Navigation Menu */}
-        <nav className="flex-1 p-4 space-y-2">
+        {/* Menu Items */}
+        <nav className={`${isOpen ? 'p-4' : 'p-2'} space-y-2 mt-4`}>
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
-            
+            const active = isActive(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`
-                  flex items-center gap-3 px-4 py-3 rounded-lg
-                  transition-colors duration-200
-                  ${isActive 
-                    ? 'bg-yellow-500 text-slate-900 font-bold' 
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-yellow-500'
-                  }
-                `}
+                onClick={handleMenuClick}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group relative ${
+                  active
+                    ? 'bg-gradient-to-r from-yellow-500/30 to-orange-500/30 text-yellow-300 border border-yellow-500/50 shadow-lg shadow-yellow-500/20'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+                }`}
               >
-                <Icon size={20} />
-                <span>{item.label}</span>
+                <Icon size={20} className={active ? 'text-yellow-400' : 'group-hover:text-yellow-400 transition-colors'} />
+                {isOpen && (
+                  <>
+                    <span className="font-medium text-sm flex-1">{item.label}</span>
+                    {active && <ChevronRight size={16} />}
+                  </>
+                )}
+                {!isOpen && (
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-slate-900 border border-slate-700 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    {item.label}
+                  </div>
+                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-slate-700">
-          <p className="text-xs text-slate-500 text-center">
-            v4.0 (Tactical)
-          </p>
-        </div>
-      </aside>
+        {/* Footer Menu */}
+        {isOpen && (
+          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-800 bg-gradient-to-t from-slate-950 to-transparent space-y-2">
+            <button className="w-full flex items-center gap-3 px-4 py-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800/50 transition-all group">
+              <Settings size={18} />
+              <span className="text-sm font-medium group-hover:text-yellow-400 transition-colors">Settings</span>
+            </button>
+            <button className="w-full flex items-center gap-3 px-4 py-2 text-red-400 hover:text-red-300 rounded-lg hover:bg-red-500/10 transition-all">
+              <LogOut size={18} />
+              <span className="text-sm font-medium">Logout</span>
+            </button>
+          </div>
+        )}
+      </div>
     </>
   );
 }

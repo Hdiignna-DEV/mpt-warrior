@@ -1,191 +1,247 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Bot, Send, Paperclip, X } from 'lucide-react';
+import { Bot, Send, Paperclip, X, Image as ImageIcon, Loader } from 'lucide-react';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  image?: string;
+}
 
 export default function AIMentor() {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Siap, Bro. **MPT Warrior AI** aktif. Kirim chart atau tanya strategi trading.' }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const messagesEndRef = useRef<null | HTMLDivElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { 
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); 
-  }, [messages]);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-      setSelectedImage((reader.result as string).split(',')[1]); 
-    };
-    reader.readAsDataURL(file);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleSubmit = async (e: any, overrideInput?: string) => {
-    if (e) e.preventDefault();
-    const textToSend = overrideInput || input;
-    if ((!textToSend.trim() && !selectedImage) || isLoading) return;
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-    const userMessageContent = selectedImage ? `[IMAGE]\n${textToSend}` : textToSend;
-    const userMessage = { role: 'user', content: userMessageContent };
-    
+  useEffect(() => {
+    setMessages([{
+      id: '0',
+      role: 'assistant',
+      content: 'Selamat datang di MPT AI Mentor! Saya siap membantu Anda dengan pertanyaan trading, analisis chart, dan mindset trading. Apa yang bisa saya bantu hari ini?',
+    }]);
+  }, []);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim() && !image) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input,
+      image: image || undefined,
+    };
+
     setMessages((prev) => [...prev, userMessage]);
-    const currentImage = selectedImage;
-    setInput(''); 
-    setSelectedImage(null); 
-    setImagePreview(null); 
-    setIsLoading(true);
+    setInput('');
+    setImage(null);
+    setLoading(true);
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          messages: [...messages, { role: 'user', content: textToSend }], 
-          image: currentImage 
+        body: JSON.stringify({
+          messages: messages.map((m) => ({
+            role: m.role,
+            content:
+              m.image && m.image.includes('base64')
+                ? [
+                    { type: 'text', text: m.content },
+                    {
+                      type: 'image',
+                      source: { type: 'base64', media_type: 'image/jpeg', data: m.image.split(',')[1] },
+                    },
+                  ]
+                : m.content,
+          })),
+          userMessage: {
+            role: 'user',
+            content:
+              image && image.includes('base64')
+                ? [
+                    { type: 'text', text: input },
+                    {
+                      type: 'image',
+                      source: { type: 'base64', media_type: 'image/jpeg', data: image.split(',')[1] },
+                    },
+                  ]
+                : input,
+          },
         }),
       });
+
       const data = await response.json();
-      setMessages((prev) => [...prev, data.choices[0].message]);
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.response || 'Terjadi kesalahan. Silakan coba lagi.',
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      setMessages((prev) => [...prev, { 
-        role: 'assistant', 
-        content: '⚠️ Gagal koneksi ke AI. Cek API Key atau koneksi internet.' 
-      }]);
+      console.error(error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const quickActions = [
-    { label: "🛡️ Cek Risk 1%", prompt: "Hitung lot size. Balance $1000, Risk 1%, SL 30 Pips." },
-    { label: "🧘 Reset Mental", prompt: "Gue lagi FOMO/Emosi. Reset mindset gue sekarang." },
-    { label: "🦅 Analisa Chart", prompt: "Lihat chart ini. Tentukan Structure & Key Level." },
-  ];
-
   return (
-    <div className="flex flex-col h-screen bg-slate-950">
+    <div className="flex flex-col h-[calc(100vh-120px)] bg-slate-950 rounded-none md:rounded-xl md:m-8 border-0 md:border md:border-slate-700">
       {/* Header */}
-      <header className="p-6 border-b border-slate-800 flex items-center gap-3">
-        <div className="p-2 bg-purple-500/20 rounded-lg">
-          <Bot className="text-purple-500" size={24} />
-        </div>
+      <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex items-center gap-3 rounded-t-none md:rounded-t-lg border-b border-slate-700">
+        <Bot size={24} className="text-white" />
         <div>
-          <h1 className="font-bold text-xl text-yellow-500">AI Mentor</h1>
-          <p className="text-xs text-slate-400">Chart Analysis & Trading Guidance</p>
+          <h1 className="font-bold text-white text-lg">MPT AI Mentor</h1>
+          <p className="text-blue-100 text-xs">Powered by Gemini AI</p>
         </div>
-      </header>
+      </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-4 rounded-2xl ${
-              m.role === 'user' 
-                ? 'bg-yellow-600 text-white' 
-                : 'bg-slate-900 border border-slate-800'
-            }`}>
-              <ReactMarkdown 
-                components={{ 
-                  strong: ({node, ...props}) => <span className="font-bold text-yellow-400" {...props} /> 
-                }}
-              >
-                {m.content}
-              </ReactMarkdown>
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex gap-3 animate-in fade-in slide-in-from-bottom-2 duration-300 ${
+              msg.role === 'user' ? 'justify-end' : 'justify-start'
+            }`}
+          >
+            {msg.role === 'assistant' && (
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                <Bot size={18} className="text-cyan-400" />
+              </div>
+            )}
+
+            <div
+              className={`max-w-xs md:max-w-2xl ${
+                msg.role === 'user'
+                  ? 'bg-gradient-to-br from-yellow-500 to-orange-500 text-black rounded-3xl rounded-tr-lg'
+                  : 'bg-slate-800 text-slate-100 rounded-3xl rounded-tl-lg'
+              } px-5 py-3 shadow-lg`}
+            >
+              {msg.image && (
+                <img
+                  src={msg.image}
+                  alt="Chart"
+                  className="max-w-full h-auto rounded-lg mb-2 border border-slate-600"
+                />
+              )}
+              <div className="prose prose-invert max-w-none text-sm">
+                <ReactMarkdown
+                  components={{
+                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                    strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                    em: ({ children }) => <em className="italic">{children}</em>,
+                    ul: ({ children }) => <ul className="list-disc list-inside mb-2">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside mb-2">{children}</ol>,
+                    li: ({ children }) => <li className="mb-1">{children}</li>,
+                    code: ({ children }) => (
+                      <code className={`${msg.role === 'user' ? 'bg-black/20' : 'bg-slate-900'} px-2 py-1 rounded text-xs`}>
+                        {children}
+                      </code>
+                    ),
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
+              </div>
             </div>
+
+            {msg.role === 'user' && (
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+                <span className="text-black font-bold text-sm">You</span>
+              </div>
+            )}
           </div>
         ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-              <div className="flex items-center gap-2 text-slate-400">
-                <div className="animate-spin">⚙️</div>
-                <span className="text-sm italic">Analyzing...</span>
-              </div>
+
+        {loading && (
+          <div className="flex gap-3 justify-start">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center">
+              <Bot size={18} className="text-cyan-400" />
+            </div>
+            <div className="bg-slate-800 rounded-3xl rounded-tl-lg px-5 py-4 flex gap-2">
+              <Loader size={18} className="text-cyan-400 animate-spin" />
+              <span className="text-slate-400 text-sm">MPT AI Mentor sedang berpikir...</span>
             </div>
           </div>
         )}
+
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="bg-slate-900 p-6 border-t border-slate-800">
-        {/* Quick Actions */}
-        <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-          {quickActions.map((action, idx) => (
+      {/* Image Preview */}
+      {image && (
+        <div className="px-6 py-3 border-t border-slate-700 bg-slate-900/50">
+          <div className="relative inline-block">
+            <img src={image} alt="Preview" className="max-h-24 rounded-lg border border-slate-600" />
             <button
-              key={idx}
-              onClick={() => setInput(action.prompt)}
-              className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-full text-xs text-yellow-500 whitespace-nowrap hover:bg-slate-700 transition-colors"
+              onClick={() => setImage(null)}
+              className="absolute top-1 right-1 p-1 bg-red-500 hover:bg-red-600 rounded-full transition-all"
             >
-              {action.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Image Preview */}
-        {imagePreview && (
-          <div className="mb-3 relative w-fit">
-            <img 
-              src={imagePreview} 
-              alt="Preview" 
-              className="h-20 rounded-lg border-2 border-yellow-500"
-            />
-            <button
-              onClick={() => {
-                setImagePreview(null);
-                setSelectedImage(null);
-              }}
-              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 rounded-full w-6 h-6 flex items-center justify-center transition-colors"
-            >
-              <X size={14} />
+              <X size={14} className="text-white" />
             </button>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Input Form */}
-        <form onSubmit={handleSubmit} className="flex gap-3">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            className="hidden" 
-            accept="image/*" 
-          />
-          
+      {/* Input Area */}
+      <div className="border-t border-slate-700 p-4 md:p-6 bg-slate-900/50 rounded-b-none md:rounded-b-lg">
+        <div className="flex gap-3">
           <button
-            type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition-colors"
-            title="Upload Chart"
+            className="flex-shrink-0 p-3 hover:bg-slate-800 rounded-lg transition-all text-slate-400 hover:text-yellow-400"
           >
-            <Paperclip size={20} className="text-slate-400" />
+            <Paperclip size={20} />
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
 
           <input
-            className="flex-1 p-3 bg-slate-950 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-yellow-500 focus:outline-none transition-colors"
+            type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask anything or upload chart..."
-            disabled={isLoading}
+            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+            placeholder="Tanya tentang trading, analisis chart, atau mindset..."
+            className="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 outline-none transition-all placeholder-slate-500"
+            disabled={loading}
           />
 
           <button
-            type="submit"
-            disabled={isLoading}
-            className="p-3 bg-yellow-500 hover:bg-yellow-600 disabled:bg-slate-700 disabled:cursor-not-allowed text-slate-900 font-bold rounded-xl transition-colors"
+            onClick={sendMessage}
+            disabled={loading || (!input.trim() && !image)}
+            className="flex-shrink-0 p-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:shadow-lg hover:shadow-cyan-500/50 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Send size={20} />
+            <Send size={20} className="text-white" />
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );
