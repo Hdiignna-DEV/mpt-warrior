@@ -26,8 +26,8 @@ export default function WarZoneCalendar() {
 
       {/* Modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="w-full max-w-4xl bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl border border-red-500/30 overflow-hidden max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 pb-24 md:pb-4 animate-in fade-in duration-300">
+          <div className="w-full max-w-4xl bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl border border-red-500/30 overflow-hidden max-h-[80vh] md:max-h-[90vh] flex flex-col">
             {/* Header */}
             <div className="bg-gradient-to-r from-red-600 via-orange-600 to-red-600 p-4 md:p-6 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3">
@@ -61,7 +61,7 @@ export default function WarZoneCalendar() {
             <div className="flex-1 overflow-hidden bg-slate-900">
               <iframe
                 src="https://economic-calendar.tradingview.com?colorTheme=dark&lang=en"
-                className="w-full h-full min-h-[500px] md:min-h-[600px]"
+                className="w-full h-full min-h-[400px] md:min-h-[600px]"
                 title="Economic Calendar"
               />
             </div>
