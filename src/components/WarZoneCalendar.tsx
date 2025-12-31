@@ -8,7 +8,6 @@ export default function WarZoneCalendar() {
 
   return (
     <>
-      {/* Floating Button - Improved positioning */}
       <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40 group"
@@ -23,12 +22,10 @@ export default function WarZoneCalendar() {
         </div>
       </button>
 
-      {/* Modal - FULL SCREEN (Same as SOS Modal) */}
       {isOpen && (
         <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 animate-in fade-in duration-300">
           <div className="w-full h-full bg-gradient-to-br from-slate-900 to-slate-800 flex flex-col">
             
-            {/* Header - Fixed at Top */}
             <div className="bg-gradient-to-r from-red-600 via-orange-600 to-red-600 p-4 md:p-6 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div className="p-2 md:p-3 bg-white/20 rounded-xl">
@@ -49,7 +46,6 @@ export default function WarZoneCalendar() {
                 </div>
               </div>
               
-              {/* Close Button - Large & Easy to Click */}
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-white/80 hover:text-white hover:rotate-90 transition-all duration-300 p-2 bg-white/10 rounded-lg hover:bg-white/20"
@@ -59,17 +55,14 @@ export default function WarZoneCalendar() {
               </button>
             </div>
 
-            {/* Content - Full Height Calendar */}
             <div className="flex-1 overflow-hidden bg-slate-900">
               <iframe
                 src="https://economic-calendar.tradingview.com?colorTheme=dark&lang=en"
                 className="w-full h-full border-0"
                 title="Economic Calendar"
-                style={{ border: 'none' }}
               />
             </div>
 
-            {/* Footer Warning - Fixed at Bottom */}
             <div className="bg-gradient-to-r from-red-950 to-orange-950 border-t border-red-500/30 p-4 flex items-center gap-3 flex-shrink-0">
               <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 animate-pulse" />
               <div>
