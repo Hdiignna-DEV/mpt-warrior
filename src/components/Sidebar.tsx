@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -50,9 +51,20 @@ export default function Sidebar() {
         `}
       >
         {/* Logo/Header */}
-        <div className="p-6 border-b border-slate-700">
-          <h1 className="text-2xl font-bold text-yellow-500">⚔️ MPT</h1>
-          <p className="text-xs text-slate-400 mt-1">Warrior Trading Hub</p>
+        <div className="p-6 border-b border-slate-700 flex flex-col items-center">
+          <div className="w-32 h-32 mb-3 relative">
+            <Image
+              src="/mpt-logo.png"
+              alt="MPT Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+          <h1 className="text-xl font-bold text-yellow-500 text-center">
+            MINDSET PLAN TRADER
+          </h1>
+          <p className="text-xs text-slate-400 mt-1 text-center">Warrior Trading Hub</p>
         </div>
 
         {/* Navigation Menu */}

@@ -44,13 +44,18 @@ export default function Dashboard() {
   return (
     <div className="p-6 lg:p-8 space-y-8">
       {/* Header */}
-      <div className="border-b border-slate-800 pb-6">
-        <h1 className="text-3xl font-bold text-yellow-500 mb-2">
-          ⚔️ Command Center
-        </h1>
-        <p className="text-slate-400">
-          Your tactical overview, Warrior. Stay disciplined, stay profitable.
-        </p>
+      <div className="border-b border-slate-800 pb-6 flex items-center gap-4">
+        <div className="w-16 h-16 relative hidden md:block">
+          <img src="/mpt-logo.png" alt="MPT" className="w-full h-full object-contain" />
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold text-yellow-500 mb-2">
+            Command Center
+          </h1>
+          <p className="text-slate-400">
+            Your tactical overview, Warrior. Stay disciplined, stay profitable.
+          </p>
+        </div>
       </div>
 
       {/* Stats Grid */}
