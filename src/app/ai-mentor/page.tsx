@@ -3,6 +3,76 @@ import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Bot, Send, Paperclip, X, Sparkles, Zap, Brain, TrendingUp, Shield, Target } from 'lucide-react';
 
+// Risk Calculator Table Component
+function RiskCalculatorTable({ data }: { data: any }) {
+  // Try to parse structured data from AI response
+  const parseRiskData = (text: string) => {
+    const balanceMatch = text.match(/Balance[:\s]+\$?([\d,]+)/i);
+    const riskMatch = text.match(/Risk[:\s]+(\d+(?:\.\d+)?)\s*%/i);
+    const slMatch = text.match(/SL[:\s]+(\d+)\s*Pips/i);
+    const lotMatch = text.match(/LOT SIZE[:\s]+(\d+\.?\d*)\s*(?:lot)?/i);
+    const maxRiskMatch = text.match(/Maksimal Kerugian[:\s]+\$?([\d,]+)/i);
+    const pipValueMatch = text.match(/Nilai Per Pip[:\s]+\$?([\d.]+)/i);
+
+    return {
+      balance: balanceMatch ? balanceMatch[1] : '$1000',
+      risk: riskMatch ? riskMatch[1] : '1%',
+      sl: slMatch ? slMatch[1] : '30',
+      lotSize: lotMatch ? lotMatch[1] : '0.03',
+      maxRisk: maxRiskMatch ? maxRiskMatch[1] : '$10',
+      pipValue: pipValueMatch ? pipValueMatch[1] : '$0.33'
+    };
+  };
+
+  const riskData = parseRiskData(data);
+
+  return (
+    <div className="bg-slate-800/50 border border-yellow-500/30 rounded-xl p-4 my-3 overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-yellow-500/50">
+            <th className="text-left py-2 px-3 text-yellow-400 font-bold">Parameter</th>
+            <th className="text-left py-2 px-3 text-yellow-400 font-bold">Nilai</th>
+            <th className="text-left py-2 px-3 text-yellow-400 font-bold">Keterangan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
+            <td className="py-2 px-3 text-slate-300 font-semibold">💰 Balance Akun</td>
+            <td className="py-2 px-3 text-yellow-300 font-bold">{riskData.balance}</td>
+            <td className="py-2 px-3 text-slate-400 text-xs">Modal trading Anda</td>
+          </tr>
+          <tr className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
+            <td className="py-2 px-3 text-slate-300 font-semibold">⚡ Risk Per Trade</td>
+            <td className="py-2 px-3 text-yellow-300 font-bold">{riskData.risk}</td>
+            <td className="py-2 px-3 text-slate-400 text-xs">% maksimal dari balance</td>
+          </tr>
+          <tr className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
+            <td className="py-2 px-3 text-slate-300 font-semibold">🎯 Stop Loss (SL)</td>
+            <td className="py-2 px-3 text-yellow-300 font-bold">{riskData.sl} Pips</td>
+            <td className="py-2 px-3 text-slate-400 text-xs">Distance dari entry</td>
+          </tr>
+          <tr className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors bg-red-500/10">
+            <td className="py-2 px-3 text-slate-300 font-semibold">💸 Maksimal Kerugian</td>
+            <td className="py-2 px-3 text-red-400 font-bold">{riskData.maxRisk}</td>
+            <td className="py-2 px-3 text-slate-400 text-xs">Uang maksimal yang bisa hilang</td>
+          </tr>
+          <tr className="border-b border-slate-700 hover:bg-slate-700/30 transition-colors">
+            <td className="py-2 px-3 text-slate-300 font-semibold">💵 Nilai Per Pip</td>
+            <td className="py-2 px-3 text-yellow-300 font-bold">{riskData.pipValue}</td>
+            <td className="py-2 px-3 text-slate-400 text-xs">Value setiap pips SL</td>
+          </tr>
+          <tr className="bg-green-500/10 border-t-2 border-green-500/50">
+            <td className="py-2 px-3 text-slate-300 font-semibold">✅ LOT SIZE MAKSIMAL</td>
+            <td className="py-2 px-3 text-green-400 font-black text-lg">{riskData.lotSize} Lot</td>
+            <td className="py-2 px-3 text-slate-400 text-xs">Gunakan maksimal ini!</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function AIMentor() {
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Siap, Bro! 🚀 **MPT Warrior AI** aktif. Gue ready untuk:\n\n✅ **Analisa Chart** - Struktur, key level, entry points\n✅ **Hitung Risk** - Lot size dengan manajemen risk\n✅ **Reset Mental** - Mindset, affirmation, motivasi\n✅ **Strategy Review** - Evaluasi strategi trading Anda\n\nKirim chart atau tanya strategi. Mari kita menang! 💪' }
@@ -54,7 +124,9 @@ export default function AIMentor() {
         }),
       });
       const data = await response.json();
-      setMessages((prev) => [...prev, data.choices[0].message]);
+      const aiMessage = data.choices[0].message;
+      
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       setMessages((prev) => [...prev, { 
         role: 'assistant', 
@@ -66,7 +138,7 @@ export default function AIMentor() {
   };
 
   const quickActions = [
-    { label: "⚡ Hitung Risk 1%", prompt: "Balance $1000, Risk 1%, SL 30 Pips. Hitung lot size dan format dengan table yang rapi.", icon: <Zap size={16} /> },
+    { label: "⚡ Hitung Risk 1%", prompt: "Balance $1000, Risk 1%, SL 30 Pips. Hitung lot size dan buat tabel dengan format:\nBalance | Risk | SL | Maksimal Kerugian | Nilai Per Pip | LOT SIZE MAKSIMAL", icon: <Zap size={16} /> },
     { label: "🧠 Reset Mental", prompt: "Gue lagi FOMO/Emosi. Berikan 3 affirmation trader dan reset mindset gue untuk trading lebih disiplin.", icon: <Brain size={16} /> },
     { label: "📊 Analisa Chart", prompt: "Lihat chart ini. Tentukan Structure, Support/Resistance, Key Level, dan potential entry points.", icon: <Sparkles size={16} /> },
     { label: "📈 Review Strategi", prompt: "Review strategi trading gue. Apa kelebihan dan kekurangan? Bagaimana improve konsistensi?", icon: <TrendingUp size={16} /> },
@@ -91,19 +163,37 @@ export default function AIMentor() {
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[85%] p-4 rounded-2xl ${
+            <div className={`max-w-[85%] ${
               m.role === 'user' 
                 ? 'bg-yellow-600 text-white' 
                 : 'bg-slate-900 border border-slate-800'
-            }`}>
-              <ReactMarkdown 
-                components={{ 
-                  strong: ({node, ...props}) => <span className="font-bold text-yellow-400" {...props} />,
-                  code: ({node, ...props}) => <code className="bg-slate-800 px-2 py-1 rounded text-xs" {...props} />
-                }}
-              >
-                {m.content}
-              </ReactMarkdown>
+            } p-4 rounded-2xl`}>
+              {/* Cek apakah ada risk calculation */}
+              {m.role === 'assistant' && m.content.includes('LOT SIZE') && m.content.includes('Balance') ? (
+                <>
+                  <RiskCalculatorTable data={m.content} />
+                  <ReactMarkdown 
+                    components={{ 
+                      strong: ({node, ...props}) => <span className="font-bold text-yellow-400" {...props} />,
+                      code: ({node, ...props}) => <code className="bg-slate-800 px-2 py-1 rounded text-xs" {...props} />,
+                      table: ({node, ...props}) => <div className="hidden" {...props} />,
+                      thead: ({node, ...props}) => <div className="hidden" {...props} />,
+                      tbody: ({node, ...props}) => <div className="hidden" {...props} />,
+                    }}
+                  >
+                    {m.content.split('Balance')[0] + m.content.split('LOT SIZE')[1]?.split('\n').slice(1).join('\n')}
+                  </ReactMarkdown>
+                </>
+              ) : (
+                <ReactMarkdown 
+                  components={{ 
+                    strong: ({node, ...props}) => <span className="font-bold text-yellow-400" {...props} />,
+                    code: ({node, ...props}) => <code className="bg-slate-800 px-2 py-1 rounded text-xs" {...props} />
+                  }}
+                >
+                  {m.content}
+                </ReactMarkdown>
+              )}
             </div>
           </div>
         ))}
