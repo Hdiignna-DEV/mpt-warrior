@@ -11,7 +11,7 @@ export default function TradingViewCalendar() {
       {/* Floating Button */}
       <button
         onClick={() => setShowModal(true)}
-        className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40"
+        className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40 group"
         aria-label="War Zone Calendar"
       >
         <div className="relative">
@@ -34,76 +34,90 @@ export default function TradingViewCalendar() {
         <div className="fixed inset-0 z-50 flex flex-col">
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-md z-40"
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-40"
             onClick={() => setShowModal(false)}
           />
           
           {/* Modal Container */}
-          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
+          <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-3 md:p-4">
             {/* Modal Box */}
             <div 
-              className="w-full h-[90vh] md:h-auto md:max-w-4xl md:max-h-[90vh] bg-gradient-to-br from-slate-900 to-slate-800 rounded-t-3xl md:rounded-2xl shadow-2xl border border-red-500/30 overflow-hidden flex flex-col"
+              className="w-full max-h-[95vh] md:max-h-[92vh] md:w-full md:max-w-5xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 rounded-t-3xl md:rounded-2xl shadow-2xl shadow-red-500/50 border border-red-500/40 overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               
-              {/* Header */}
-              <div className="bg-gradient-to-r from-red-600 to-orange-600 px-4 md:px-6 py-4 md:py-6 flex-shrink-0 relative">
+              {/* Header - PREMIUM DESIGN */}
+              <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-600 px-4 md:px-8 py-5 md:py-7 flex-shrink-0 relative">
+                {/* Close Button */}
                 <button
                   onClick={() => setShowModal(false)}
-                  className="absolute top-3 right-3 md:top-4 md:right-4 text-white hover:text-white/80 transition-all p-1 z-10"
+                  className="absolute top-4 right-4 md:top-6 md:right-6 text-white hover:text-white/80 transition-all p-2 hover:bg-white/10 rounded-lg z-10"
                   aria-label="Close"
                 >
                   <X className="w-6 h-6 md:w-7 md:h-7" />
                 </button>
                 
-                <div className="flex items-center gap-2 md:gap-4 pr-10">
-                  <div className="p-2 md:p-3 bg-white/20 rounded-lg md:rounded-xl flex-shrink-0">
-                    <AlertTriangle className="w-5 h-5 md:w-8 md:h-8 text-white" />
+                {/* Header Content */}
+                <div className="flex items-center gap-3 md:gap-5 pr-12">
+                  {/* Icon */}
+                  <div className="p-2 md:p-4 bg-white/20 rounded-xl md:rounded-2xl flex-shrink-0 backdrop-blur-sm">
+                    <AlertTriangle className="w-6 h-6 md:w-8 md:h-8 text-white drop-shadow-lg" />
                   </div>
+                  
+                  {/* Title */}
                   <div className="min-w-0">
-                    <h2 className="text-lg md:text-2xl font-black text-white tracking-wider truncate">
-                      🚨 WAR ZONE CALENDAR
-                    </h2>
-                    <p className="text-xs md:text-sm text-red-100 truncate">
-                      Real-Time Economic Events
+                    <div className="flex items-center gap-2 md:gap-3">
+                      <h2 className="text-xl md:text-3xl font-black text-white tracking-wider drop-shadow-lg">
+                        🚨 WAR ZONE CALENDAR
+                      </h2>
+                      <span className="hidden md:inline text-xs bg-white/30 text-white px-3 py-1 rounded-full font-bold">LIVE</span>
+                    </div>
+                    <p className="text-xs md:text-sm text-red-100 mt-1 drop-shadow">
+                      Real-Time Economic Events via TradingView
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto w-full px-4 md:px-6 py-4 md:py-6">
-                <div className="w-full h-[350px] md:h-[500px] border border-slate-700 rounded-xl overflow-hidden bg-slate-950">
-                  <iframe
-                    title="TradingView Economic Calendar"
-                    src="https://www.tradingview.com/events/"
-                    className="w-full h-full"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      border: 'none',
-                      backgroundColor: '#030712',
-                    }}
-                    sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  />
+              {/* Content - Calendar Container */}
+              <div className="flex-1 overflow-hidden w-full flex flex-col bg-gradient-to-b from-slate-800 to-slate-900">
+                {/* Calendar Wrapper */}
+                <div className="flex-1 overflow-auto w-full">
+                  <div className="w-full h-full bg-slate-950/50">
+                    <iframe
+                      title="TradingView Economic Calendar"
+                      src="https://www.tradingview.com/events/"
+                      className="w-full h-full"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        border: 'none',
+                        backgroundColor: '#030712',
+                      }}
+                      sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Footer */}
-              <div className="bg-slate-950/50 border-t border-red-500/30 px-4 md:px-6 py-3 md:py-4 flex-shrink-0">
-                <p className="text-slate-300 text-xs md:text-sm text-center">
-                  <strong className="text-red-400">⚠️ HIGH IMPACT</strong> = Stay away or tighten SL
-                </p>
+              {/* Footer - Warning */}
+              <div className="bg-gradient-to-r from-slate-800 to-slate-700 border-t border-red-500/40 px-4 md:px-8 py-3 md:py-4 flex-shrink-0">
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-yellow-400 text-lg md:text-xl">⚠️</span>
+                  <p className="text-slate-300 text-xs md:text-sm font-semibold text-center">
+                    <strong className="text-red-400">HIGH IMPACT EVENTS</strong> = Stay away or tighten SL!
+                  </p>
+                </div>
               </div>
 
               {/* Action Button */}
-              <div className="px-4 md:px-6 pb-4 md:pb-6 flex-shrink-0">
+              <div className="px-4 md:px-8 pb-4 md:pb-6 pt-3 md:pt-4 flex-shrink-0 bg-gradient-to-t from-slate-900 to-transparent">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-slate-900 font-black py-3 md:py-4 rounded-lg md:rounded-xl transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/30 text-sm md:text-base"
+                  className="w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 hover:from-yellow-500 hover:via-yellow-600 hover:to-yellow-700 text-slate-900 font-black py-3 md:py-4 rounded-xl md:rounded-2xl transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/40 text-sm md:text-base tracking-wider"
                 >
-                  CLOSE ✅
+                  ✅ CLOSE WAR ZONE
                 </button>
               </div>
             </div>
