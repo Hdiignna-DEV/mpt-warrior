@@ -4,6 +4,7 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import PanicButton from "@/components/PanicButton";
 import InvestingCalendar from "@/components/InvestingCalendar";
+import TradingViewCalendar from "@/components/TradingViewCalendar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,7 +32,7 @@ export default function RootLayout({
 
           {/* Global Components */}
           <PanicButton />
-          <InvestingCalendar />
+          <TradingViewCalendar />
         </div>
       </body>
     </html>
