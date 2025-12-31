@@ -62,7 +62,7 @@ export default function WarZoneCalendar() {
                   </div>
                   <div className="min-w-0">
                     <h2 className="text-lg md:text-2xl font-black text-white tracking-wider truncate">
-                      🚨 WAR ZONE NIH
+                      🚨 WAR ZONE CALENDAR
                     </h2>
                     <p className="text-xs md:text-sm text-red-100 truncate">
                       Real-Time Economic Events
