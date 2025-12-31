@@ -1,248 +1,84 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { Siren, Calendar, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
 
-interface NewsEvent {
-  time: string;
-  currency: string;
-  event: string;
-  impact: 'HIGH' | 'MEDIUM' | 'LOW';
-  actual?: string;
-  forecast?: string;
-  previous?: string;
-}
+import { useState } from 'react';
+import { Calendar, X, ChevronUp, AlertTriangle } from 'lucide-react';
 
 export default function WarZoneCalendar() {
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [events, setEvents] = useState<NewsEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFallback, setIsFallback] = useState(false);
-
-  // Fetch economic calendar data
-  useEffect(() => {
-    fetchCalendarData();
-    // Refresh every hour
-    const interval = setInterval(fetchCalendarData, 3600000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchCalendarData = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/economic-calendar');
-      const data = await response.json();
-      
-      if (data.success) {
-        setEvents(data.events);
-        setIsFallback(false);
-      } else {
-        setEvents(data.events || []);
-        setIsFallback(true);
-      }
-    } catch (error) {
-      console.error('Failed to fetch calendar:', error);
-      // Fallback dummy data
-      setEvents([
-        { time: '08:30', currency: 'USD', event: 'Non-Farm Payrolls', impact: 'HIGH' },
-        { time: '14:00', currency: 'EUR', event: 'ECB Interest Rate Decision', impact: 'HIGH' },
-      ]);
-      setIsFallback(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Update current time every second
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const highImpactEvents = events.filter(e => e.impact === 'HIGH');
-  
-  const nextEvent = events.find(e => {
-    const eventTime = new Date();
-    const [hours, minutes] = e.time.split(':');
-    eventTime.setHours(parseInt(hours), parseInt(minutes), 0);
-    return eventTime > currentTime;
-  });
-
-  const formatCurrentTime = () => {
-    return currentTime.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false 
-    });
-  };
-
-  const isPast = (timeStr: string) => {
-    const eventTime = new Date();
-    const [hours, minutes] = timeStr.split(':');
-    eventTime.setHours(parseInt(hours), parseInt(minutes), 0);
-    return eventTime < currentTime;
-  };
-
-  if (!isExpanded) {
-    return (
-      <div className="fixed bottom-6 left-6 z-50">
-        <button
-          onClick={() => setIsExpanded(true)}
-          className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 hover:border-yellow-500 transition-all shadow-xl group"
-        >
-          <div className="flex items-center gap-3">
-            <Siren size={20} className="text-red-500 animate-pulse" />
-            <div className="text-left">
-              <p className="text-xs text-slate-400">WAR ZONE ALERT</p>
-              <p className="text-sm font-bold text-yellow-500">
-                {isLoading ? 'Loading...' : `${highImpactEvents.length} High Impact News Today`}
-              </p>
-            </div>
-          </div>
-        </button>
-      </div>
-    );
-  }
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 w-96 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 border-b border-red-500/30 p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Siren size={20} className="text-red-500 animate-pulse" />
-            <h3 className="font-bold text-red-500">ZONA PERANG</h3>
-            {isFallback && (
-              <span className="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded">
-                DEMO
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={fetchCalendarData}
-              className="text-slate-400 hover:text-yellow-500 transition-colors"
-              title="Refresh"
-            >
-              <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-            </button>
-            <button
-              onClick={() => setIsExpanded(false)}
-              className="text-slate-400 hover:text-white text-xl"
-            >
-              ×
-            </button>
+    <>
+      {/* Floating Button - Improved positioning */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40 group"
+        aria-label="War Zone Economic Calendar"
+      >
+        <div className="flex items-center gap-2 bg-gradient-to-r from-red-600 via-orange-600 to-red-600 hover:from-red-700 hover:via-orange-700 hover:to-red-700 text-white px-4 py-3 rounded-full shadow-lg shadow-red-500/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm">
+          <AlertTriangle className="w-5 h-5 animate-pulse" />
+          <div className="hidden md:flex flex-col items-start">
+            <span className="text-xs font-bold uppercase tracking-wider">War Zone Alert</span>
+            <span className="text-[10px] text-red-100">Economic Calendar</span>
           </div>
         </div>
-        <p className="text-xs text-slate-400">
-          {isFallback ? 'Demo Mode - Check ForexFactory for real data' : 'Economic Events - High Volatility Expected'}
-        </p>
-      </div>
+      </button>
 
-      {/* Current Time */}
-      <div className="bg-slate-950 p-3 border-b border-slate-800 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Clock size={16} className="text-slate-400" />
-          <span className="text-sm text-slate-400">Server Time:</span>
-        </div>
-        <span className="font-mono text-lg font-bold text-yellow-500">
-          {formatCurrentTime()}
-        </span>
-      </div>
+      {/* Modal */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="w-full max-w-4xl bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl shadow-2xl border border-red-500/30 overflow-hidden max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-red-600 via-orange-600 to-red-600 p-4 md:p-6 flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-2 md:p-3 bg-white/20 rounded-xl">
+                  <AlertTriangle className="w-6 h-6 md:w-8 md:h-8 text-white" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl md:text-2xl font-black text-white tracking-wider">
+                      ZONA PERANG
+                    </h2>
+                    <span className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full animate-pulse">
+                      LIVE
+                    </span>
+                  </div>
+                  <p className="text-red-100 text-xs md:text-sm mt-1">
+                    Real-Time Economic Events via TradingView
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-white/80 hover:text-white hover:rotate-90 transition-all duration-300 p-2"
+                aria-label="Close"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
-      {/* Next Event Alert */}
-      {nextEvent && (
-        <div className="bg-red-500/10 border-b border-red-500/30 p-3">
-          <div className="flex items-start gap-2">
-            <AlertTriangle size={16} className="text-red-500 mt-0.5" />
-            <div>
-              <p className="text-xs text-slate-400 mb-1">NEXT HIGH IMPACT:</p>
-              <p className="text-sm font-bold text-white">
-                {nextEvent.time} - {nextEvent.currency} - {nextEvent.event}
-              </p>
+            {/* Content */}
+            <div className="flex-1 overflow-hidden bg-slate-900">
+              <iframe
+                src="https://economic-calendar.tradingview.com?colorTheme=dark&lang=en"
+                className="w-full h-full min-h-[500px] md:min-h-[600px]"
+                title="Economic Calendar"
+              />
+            </div>
+
+            {/* Footer Warning */}
+            <div className="bg-gradient-to-r from-red-950 to-orange-950 border-t border-red-500/30 p-4 flex items-center gap-3 flex-shrink-0">
+              <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 animate-pulse" />
+              <div>
+                <p className="text-yellow-500 font-bold text-sm">⚠️ NO PLAN, NO TRADE</p>
+                <p className="text-slate-400 text-xs mt-1">
+                  Stay away during HIGH impact (red flag) events
+                </p>
+              </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* Events List */}
-      <div className="p-4 space-y-2 max-h-64 overflow-y-auto">
-        {isLoading ? (
-          <div className="text-center py-8 text-slate-400">
-            <RefreshCw size={24} className="animate-spin mx-auto mb-2" />
-            <p className="text-sm">Loading calendar data...</p>
-          </div>
-        ) : events.length === 0 ? (
-          <div className="text-center py-8 text-slate-400">
-            <Calendar size={32} className="mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No high impact events today</p>
-            <p className="text-xs mt-1">Safe trading window 🎯</p>
-          </div>
-        ) : (
-          events.map((event, idx) => (
-            <div
-              key={idx}
-              className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-                isPast(event.time)
-                  ? 'bg-slate-800/50 border-slate-800 opacity-50'
-                  : event.impact === 'HIGH'
-                  ? 'bg-red-500/10 border-red-500/30'
-                  : 'bg-slate-800 border-slate-700'
-              }`}
-            >
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  event.impact === 'HIGH'
-                    ? 'bg-red-500 animate-pulse'
-                    : event.impact === 'MEDIUM'
-                    ? 'bg-yellow-500'
-                    : 'bg-green-500'
-                }`}
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <span className="font-mono text-sm font-bold text-yellow-500">
-                    {event.time}
-                  </span>
-                  <span className="text-xs bg-slate-700 px-2 py-0.5 rounded">
-                    {event.currency}
-                  </span>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded font-bold ${
-                      event.impact === 'HIGH'
-                        ? 'bg-red-500/20 text-red-500'
-                        : event.impact === 'MEDIUM'
-                        ? 'bg-yellow-500/20 text-yellow-500'
-                        : 'bg-green-500/20 text-green-500'
-                    }`}
-                  >
-                    {event.impact}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300">{event.event}</p>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Warning Footer */}
-      <div className="bg-slate-950 border-t border-slate-800 p-3 space-y-2">
-        <p className="text-xs text-slate-400 text-center">
-          ⚠️ <strong className="text-yellow-500">NO PLAN, NO TRADE</strong> - Stay away during high impact news
-        </p>
-        <div className="text-center">
-          <a
-            href="https://www.forexfactory.com/calendar"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-blue-400 hover:text-blue-300 underline"
-          >
-            📅 View Full Calendar at ForexFactory →
-          </a>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
