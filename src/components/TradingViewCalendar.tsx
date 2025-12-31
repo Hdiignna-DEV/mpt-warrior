@@ -1,24 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
 
 export default function TradingViewCalendar() {
   const [showModal, setShowModal] = useState(false);
-
-  useEffect(() => {
-    if (showModal) {
-      // Load TradingView script when modal opens
-      const script = document.createElement('script');
-      script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-events.js';
-      script.async = true;
-
-      const container = document.getElementById('tradingview-widget');
-      if (container && !container.querySelector('script')) {
-        container.appendChild(script);
-      }
-    }
-  }, [showModal]);
 
   return (
     <>
@@ -63,9 +49,8 @@ export default function TradingViewCalendar() {
               onClick={(e) => e.stopPropagation()}
             >
               
-              {/* Header - PREMIUM DESIGN */}
+              {/* Header */}
               <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-600 px-4 md:px-8 py-4 md:py-7 flex-shrink-0 relative">
-                {/* Close Button */}
                 <button
                   onClick={() => setShowModal(false)}
                   className="absolute top-3 right-3 md:top-6 md:right-6 text-white hover:text-white/80 transition-all p-2 hover:bg-white/10 rounded-lg z-10"
@@ -74,14 +59,11 @@ export default function TradingViewCalendar() {
                   <X className="w-5 h-5 md:w-7 md:h-7" />
                 </button>
                 
-                {/* Header Content */}
                 <div className="flex items-center gap-2 md:gap-5 pr-10">
-                  {/* Icon */}
                   <div className="p-2 md:p-4 bg-white/20 rounded-lg md:rounded-2xl flex-shrink-0 backdrop-blur-sm">
                     <AlertTriangle className="w-5 h-5 md:w-8 md:h-8 text-white drop-shadow-lg" />
                   </div>
                   
-                  {/* Title */}
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 md:gap-3 flex-wrap">
                       <h2 className="text-base md:text-3xl font-black text-white tracking-wider drop-shadow-lg">
@@ -96,39 +78,25 @@ export default function TradingViewCalendar() {
                 </div>
               </div>
 
-              {/* Content - Calendar Container */}
-              <div className="flex-1 overflow-y-auto w-full bg-gradient-to-b from-slate-800 to-slate-900">
-                <div className="w-full bg-slate-950">
-                  {/* TradingView Widget Container */}
-                  <div 
-                    id="tradingview-widget"
-                    className="tradingview-widget-container w-full"
-                    style={{ height: '100%' }}
-                  >
-                    <div className="tradingview-widget-container__widget" style={{ height: '100%' }}></div>
-                    <script type="text/plain" className="tradingview-widget-script">
-                      {`{
-                        "colorTheme": "dark",
-                        "isTransparent": false,
-                        "width": "100%",
-                        "height": "600",
-                        "locale": "en",
-                        "importanceFilter": "0,1"
-                      }`}
-                    </script>
-                  </div>
-
-                  {/* Fallback: Invest.com Calendar */}
-                  <div className="p-4 text-center text-slate-300">
-                    <p className="text-sm">📊 Economic Calendar Loading...</p>
-                    <p className="text-xs text-slate-500 mt-2">
-                      Powered by TradingView
-                    </p>
-                  </div>
-                </div>
+              {/* Content - Calendar */}
+              <div className="flex-1 overflow-auto w-full bg-slate-950">
+                {/* Investing.com Calendar Embed */}
+                <iframe
+                  title="Economic Calendar"
+                  src="https://www.investing.com/economic-calendar/"
+                  className="w-full h-full"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    backgroundColor: '#030712',
+                  }}
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                />
               </div>
 
-              {/* Footer - Warning */}
+              {/* Footer */}
               <div className="bg-gradient-to-r from-slate-800 to-slate-700 border-t border-red-500/40 px-3 md:px-8 py-2 md:py-4 flex-shrink-0">
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-yellow-400 text-base md:text-xl">⚠️</span>
@@ -138,7 +106,7 @@ export default function TradingViewCalendar() {
                 </div>
               </div>
 
-              {/* Action Button */}
+              {/* Button */}
               <div className="px-3 md:px-8 pb-3 md:pb-6 pt-2 md:pt-4 flex-shrink-0 bg-gradient-to-t from-slate-900 to-transparent">
                 <button
                   onClick={() => setShowModal(false)}
