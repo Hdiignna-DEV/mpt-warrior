@@ -1,27 +1,32 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Calendar } from 'lucide-react';
+import { X, Calendar, AlertTriangle } from 'lucide-react';
 
 export default function WarZoneCalendar() {
   const [showModal, setShowModal] = useState(false);
 
   return (
     <>
-      {/* Floating Button - SAMA SEPERTI SOS */}
+      {/* Floating Button - BESAR & PROMINENT SEPERTI SOS */}
       <button
         onClick={() => setShowModal(true)}
-        className="fixed bottom-32 left-4 md:bottom-6 md:left-6 z-40 group"
+        className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40 group"
         aria-label="War Zone Calendar"
       >
         <div className="relative">
           {/* Ping animation */}
           <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75"></span>
           
-          {/* Button */}
-          <div className="relative flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white px-4 py-3 rounded-full shadow-lg shadow-red-500/50 transition-all duration-300 hover:scale-105">
-            <Calendar className="w-5 h-5 animate-pulse" />
-            <span className="font-bold text-sm hidden md:inline">War Zone</span>
+          {/* Button BESAR */}
+          <div className="relative flex items-center gap-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white px-6 py-4 rounded-full shadow-lg shadow-red-500/50 transition-all duration-300 hover:scale-105">
+            <AlertTriangle className="w-6 h-6 animate-pulse" />
+            <div className="text-left">
+              <p className="text-xs text-red-100">WAR ZONE ALERT</p>
+              <p className="text-sm font-bold text-yellow-300">
+                Economic Calendar (Live)
+              </p>
+            </div>
           </div>
         </div>
       </button>
@@ -42,11 +47,11 @@ export default function WarZoneCalendar() {
               
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-white/20 rounded-xl">
-                  <Calendar className="w-8 h-8 text-white" />
+                  <AlertTriangle className="w-8 h-8 text-white" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-black text-white tracking-wider">
-                    📊 WAR ZONE CALENDAR
+                    🚨 WAR ZONE CALENDAR
                   </h2>
                   <p className="text-red-100 text-sm mt-1">
                     Economic Events Real-Time
@@ -85,9 +90,9 @@ export default function WarZoneCalendar() {
             <div className="px-6 pb-6">
               <button
                 onClick={() => setShowModal(false)}
-                className="w-full bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-black py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg shadow-red-500/30"
+                className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-slate-900 font-black py-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/30"
               >
-                CLOSE ✅
+                TUTUP ✅
               </button>
             </div>
           </div>
