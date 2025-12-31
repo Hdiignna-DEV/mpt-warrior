@@ -86,7 +86,7 @@ export default function TradingViewCalendar() {
                   <div className="w-full h-full bg-slate-950/50">
                     <iframe
                       title="TradingView Economic Calendar"
-                      src="https://www.tradingview.com/events/"
+                      src="https://s3.tradingview.com/external-embedding/embed-widget-events.js"
                       className="w-full h-full"
                       style={{
                         width: '100%',
