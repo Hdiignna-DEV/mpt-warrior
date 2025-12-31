@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
+import PanicButton from "@/components/PanicButton";
+import WarZoneCalendar from "@/components/WarZoneCalendar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,6 +28,10 @@ export default function RootLayout({
           <main className="flex-1 overflow-y-auto">
             {children}
           </main>
+
+          {/* Global Components */}
+          <PanicButton />
+          <WarZoneCalendar />
         </div>
       </body>
     </html>

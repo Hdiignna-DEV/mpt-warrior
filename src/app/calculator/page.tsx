@@ -18,6 +18,13 @@ export default function RiskCalculator() {
       return;
     }
 
+    // Warning jika risk terlalu tinggi
+    if (riskNum > 2) {
+      if (!confirm('⚠️ WARNING: Risk lebih dari 2%! Ini melanggar aturan MPT. Yakin melanjutkan?')) {
+        return;
+      }
+    }
+
     // Formula: Lot Size = (Balance × Risk%) / (SL Pips × Pip Value)
     // Pip Value untuk 1 lot standard = $10 (untuk pair dengan USD sebagai quote currency)
     const riskAmount = (balanceNum * riskNum) / 100;
@@ -72,8 +79,11 @@ export default function RiskCalculator() {
               className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none transition-colors"
               placeholder="1"
             />
-            <p className="text-xs text-slate-500 mt-1">
-              Recommended: 1-2% per trade
+            <p className={`text-xs mt-1 ${parseFloat(riskPercent) > 2 ? 'text-red-500 font-bold' : 'text-slate-500'}`}>
+              {parseFloat(riskPercent) > 2 
+                ? '⚠️ DANGER ZONE! Risk terlalu tinggi!' 
+                : 'Recommended: 1-2% per trade'
+              }
             </p>
           </div>
 
