@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import PanicButton from "@/components/PanicButton";
-import WarZoneCalendar from "@/components/WarZoneCalendar";
+import InvestingCalendar from "@/components/InvestingCalendar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,7 +31,7 @@ export default function RootLayout({
 
           {/* Global Components */}
           <PanicButton />
-          <WarZoneCalendar />
+          <InvestingCalendar />
         </div>
       </body>
     </html>
