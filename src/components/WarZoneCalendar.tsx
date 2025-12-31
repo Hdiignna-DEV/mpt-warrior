@@ -6,22 +6,12 @@ import { X, AlertTriangle } from 'lucide-react';
 export default function WarZoneCalendar() {
   const [showModal, setShowModal] = useState(false);
 
-  const handleOpen = () => {
-    console.log('✅ BUTTON CLICKED');
-    setShowModal(true);
-  };
-
-  const handleClose = () => {
-    console.log('✅ CLOSE CLICKED');
-    setShowModal(false);
-  };
-
   return (
     <>
       {/* Floating Button */}
       <button
-        onClick={handleOpen}
-        className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40 group"
+        onClick={() => setShowModal(true)}
+        className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40"
         aria-label="War Zone Calendar"
       >
         <div className="relative">
@@ -39,48 +29,49 @@ export default function WarZoneCalendar() {
         </div>
       </button>
 
-      {/* Modal */}
+      {/* Modal Portal - FULL SCREEN OVERLAY */}
       {showModal && (
-        <>
-          {/* Backdrop - clickable to close */}
+        <div className="fixed inset-0 z-50 flex flex-col">
+          {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            onClick={handleClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-40"
+            onClick={() => setShowModal(false)}
           />
           
-          {/* Modal Container - MOBILE OPTIMIZED */}
+          {/* Modal Container */}
           <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
             {/* Modal Box */}
-            <div className="w-full h-[90vh] md:h-auto md:max-w-4xl md:max-h-[90vh] bg-gradient-to-br from-slate-900 to-slate-800 rounded-t-3xl md:rounded-2xl shadow-2xl border border-red-500/30 overflow-hidden flex flex-col">
+            <div 
+              className="w-full h-[90vh] md:h-auto md:max-w-4xl md:max-h-[90vh] bg-gradient-to-br from-slate-900 to-slate-800 rounded-t-3xl md:rounded-2xl shadow-2xl border border-red-500/30 overflow-hidden flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
               
-              {/* Header - FIXED */}
+              {/* Header */}
               <div className="bg-gradient-to-r from-red-600 to-orange-600 px-4 md:px-6 py-4 md:py-6 flex-shrink-0 relative">
-                {/* Close Button - Always visible */}
                 <button
-                  onClick={handleClose}
-                  className="absolute top-3 right-3 md:top-4 md:right-4 text-white hover:text-white/80 transition-all p-1"
+                  onClick={() => setShowModal(false)}
+                  className="absolute top-3 right-3 md:top-4 md:right-4 text-white hover:text-white/80 transition-all p-1 z-10"
                   aria-label="Close"
                 >
                   <X className="w-6 h-6 md:w-7 md:h-7" />
                 </button>
                 
-                {/* Header Content */}
                 <div className="flex items-center gap-2 md:gap-4 pr-10">
                   <div className="p-2 md:p-3 bg-white/20 rounded-lg md:rounded-xl flex-shrink-0">
                     <AlertTriangle className="w-5 h-5 md:w-8 md:h-8 text-white" />
                   </div>
                   <div className="min-w-0">
                     <h2 className="text-lg md:text-2xl font-black text-white tracking-wider truncate">
-                      🚨 WAR ZONE
+                      🚨 WAR ZONE CALENDAR
                     </h2>
                     <p className="text-xs md:text-sm text-red-100 truncate">
-                      Economic Events Real-Time
+                      Real-Time Economic Events
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Content - SCROLLABLE */}
+              {/* Content */}
               <div className="flex-1 overflow-y-auto w-full px-4 md:px-6 py-4 md:py-6">
                 <div className="w-full h-[350px] md:h-[500px] border border-slate-700 rounded-xl overflow-hidden bg-slate-950">
                   <iframe
@@ -102,22 +93,22 @@ export default function WarZoneCalendar() {
               {/* Footer */}
               <div className="bg-slate-950/50 border-t border-red-500/30 px-4 md:px-6 py-3 md:py-4 flex-shrink-0">
                 <p className="text-slate-300 text-xs md:text-sm text-center">
-                  <strong className="text-red-400">⚠️ HIGH IMPACT</strong> = Hindari trade atau ketatkan SL
+                  <strong className="text-red-400">⚠️ HIGH IMPACT</strong> = Stay away or tighten SL
                 </p>
               </div>
 
               {/* Action Button */}
               <div className="px-4 md:px-6 pb-4 md:pb-6 flex-shrink-0">
                 <button
-                  onClick={handleClose}
+                  onClick={() => setShowModal(false)}
                   className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-slate-900 font-black py-3 md:py-4 rounded-lg md:rounded-xl transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/30 text-sm md:text-base"
                 >
-                  TUTUP ✅
+                  CLOSE ✅
                 </button>
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
     </>
   );
