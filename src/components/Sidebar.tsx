@@ -2,105 +2,122 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Calculator, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  Calculator,
   Bot,
   Menu,
-  X
+  X,
 } from 'lucide-react';
 import { useState } from 'react';
 
 const menuItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/journal', label: 'Trading Journal', icon: BookOpen },
-  { href: '/calculator', label: 'Risk Calculator', icon: Calculator },
-  { href: '/ai-mentor', label: 'AI Mentor', icon: Bot },
+  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Trading Journal', href: '/journal', icon: BookOpen },
+  { name: 'Risk Calculator', href: '/calculator', icon: Calculator },
+  { name: 'AI Mentor', href: '/ai-mentor', icon: Bot },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 
+  const closeSidebar = () => setIsOpen(false);
+
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Mobile Hamburger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-slate-800 rounded-lg text-yellow-500"
+        className="fixed top-4 left-4 z-50 md:hidden bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-lg transition-colors"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Overlay for mobile */}
+      {/* Mobile Overlay */}
       {isOpen && (
         <div
-          onClick={() => setIsOpen(false)}
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
-        />
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={closeSidebar}
+        ></div>
       )}
 
       {/* Sidebar */}
       <aside
-        className={`
-          fixed lg:static inset-y-0 left-0 z-40
-          w-64 bg-slate-900 border-r border-slate-700
-          flex flex-col transition-transform duration-300
-          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        `}
+        className={`fixed md:relative w-64 h-screen bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800 flex flex-col p-6 z-40 transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0`}
       >
-        {/* Logo/Header */}
-        <div className="p-6 border-b border-slate-700 flex flex-col items-center">
-          <div className="w-32 h-32 mb-3 relative">
-            <Image
+        {/* Logo Section */}
+        <div className="mb-8 md:mb-10 text-center">
+          <div className="relative w-20 h-20 mx-auto mb-4">
+            <img
               src="/mpt-logo.png"
               alt="MPT Logo"
-              fill
-              className="object-contain"
-              priority
+              className="w-full h-full object-contain drop-shadow-lg"
             />
           </div>
-          <h1 className="text-xl font-bold text-yellow-500 text-center">
-            MINDSET PLAN TRADER
-          </h1>
-          <p className="text-xs text-slate-400 mt-1 text-center">Warrior Trading Hub</p>
+          <h2 className="text-sm font-black text-yellow-500 tracking-wider">
+            MINDSET PLAN
+          </h2>
+          <h2 className="text-sm font-black text-yellow-500 tracking-wider mb-1">
+            TRADER
+          </h2>
+          <p className="text-xs text-slate-400 italic">Warrior Trading Hub</p>
         </div>
 
-        {/* Navigation Menu */}
-        <nav className="flex-1 p-4 space-y-2">
+        {/* Menu Items */}
+        <nav className="flex-1 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
-            
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setIsOpen(false)}
-                className={`
-                  flex items-center gap-3 px-4 py-3 rounded-lg
-                  transition-colors duration-200
-                  ${isActive 
-                    ? 'bg-yellow-500 text-slate-900 font-bold' 
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-yellow-500'
-                  }
-                `}
+                onClick={closeSidebar}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
+                  isActive
+                    ? 'bg-yellow-500 text-slate-900 font-bold shadow-lg shadow-yellow-500/30'
+                    : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                }`}
               >
-                <Icon size={20} />
-                <span>{item.label}</span>
+                <Icon
+                  size={20}
+                  className={isActive ? 'text-slate-900' : 'text-slate-400 group-hover:text-yellow-500'}
+                />
+                <span className="text-sm font-semibold">{item.name}</span>
+                {isActive && (
+                  <div className="ml-auto w-2 h-2 bg-slate-900 rounded-full"></div>
+                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-slate-700">
-          <p className="text-xs text-slate-500 text-center">
-            v4.0 (Tactical)
-          </p>
+        {/* Footer - Motivational Section */}
+        <div className="mt-auto pt-6 border-t border-slate-800/50">
+          <div className="bg-slate-800/40 rounded-xl p-4 text-center">
+            <p className="text-xs font-bold text-yellow-400 mb-2">
+              ⚡ PRO TIP
+            </p>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Discipline is your competitive advantage. Follow the rules, always.
+            </p>
+          </div>
+
+          <div className="mt-4 text-center">
+            <p className="text-xs text-slate-500">
+              Version 1.0 • MPT Community
+            </p>
+          </div>
         </div>
       </aside>
+
+      {/* Main Content Area - Add padding for mobile */}
+      <div className="md:hidden h-16"></div>
     </>
   );
 }

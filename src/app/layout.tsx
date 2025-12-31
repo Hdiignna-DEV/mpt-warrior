@@ -9,31 +9,35 @@ import TradingViewCalendar from "@/components/TradingViewCalendar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MPT Warrior Hub - Trading System",
-  description: "Mindset Plan Trader - Full Trading Management System",
+  title: "MPT Warrior Hub - Trading Excellence",
+  description: "Mindset Plan Trader Warrior Hub - Complete Trading System",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} bg-slate-950 text-slate-100`}>
-        <div className="flex h-screen overflow-hidden">
+    <html lang="en" className="scroll-smooth">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <meta name="theme-color" content="#0f172a" />
+      </head>
+      <body className={`${inter.className} bg-slate-950 text-slate-100 overflow-x-hidden`}>
+        <div className="flex h-screen md:h-auto overflow-hidden md:overflow-auto">
           {/* Sidebar */}
           <Sidebar />
-          
+
           {/* Main Content */}
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-950">
             {children}
           </main>
-
-          {/* Global Components */}
-          <PanicButton />
-          <TradingViewCalendar />
         </div>
+
+        {/* Global Floating Components */}
+        <PanicButton />
+        <TradingViewCalendar />
       </body>
     </html>
   );

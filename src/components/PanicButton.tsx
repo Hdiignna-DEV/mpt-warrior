@@ -4,12 +4,12 @@ import { AlertTriangle, X } from 'lucide-react';
 
 export default function PanicButton() {
   const [isSOSActive, setIsSOSActive] = useState(false);
-  const [countdown, setCountdown] = useState(900); // 15 menit = 900 detik
+  const [countdown, setCountdown] = useState(900); // 15 minutes = 900 seconds
 
   useEffect(() => {
     if (!isSOSActive) return;
 
-    const interval = setInterval(() => {
+    const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
           setIsSOSActive(false);
@@ -19,102 +19,126 @@ export default function PanicButton() {
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, [isSOSActive]);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  const minutes = Math.floor(countdown / 60);
+  const seconds = countdown % 60;
 
   if (isSOSActive) {
     return (
-      <div className="fixed inset-0 z-[100] bg-gradient-to-b from-slate-900 via-blue-900/30 to-slate-900 flex items-center justify-center p-6 animate-fadeIn">
-        <div className="max-w-2xl w-full space-y-8 text-center">
-          {/* Close Button */}
-          <button
-            onClick={() => {
-              setIsSOSActive(false);
-              setCountdown(900);
-            }}
-            className="absolute top-6 right-6 text-slate-400 hover:text-white"
-          >
-            <X size={32} />
-          </button>
+      <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-0">
+        {/* Close Button */}
+        <button
+          onClick={() => setIsSOSActive(false)}
+          className="absolute top-6 right-6 md:top-8 md:right-8 text-slate-400 hover:text-white transition-colors z-10"
+        >
+          <X size={32} />
+        </button>
 
-          {/* Icon */}
-          <div className="flex justify-center">
-            <div className="w-32 h-32 rounded-full bg-red-500/20 flex items-center justify-center animate-pulse">
-              <AlertTriangle size={64} className="text-red-500" />
+        {/* Main Content - Scrollable for mobile */}
+        <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-gradient-to-b from-slate-900 to-slate-950 rounded-2xl p-6 md:p-12 border border-red-900/50 shadow-2xl">
+            
+            {/* Header with icon */}
+            <div className="text-center mb-8 md:mb-12">
+              <div className="flex justify-center mb-4">
+                <div className="p-4 bg-red-500/20 rounded-full border-2 border-red-500 animate-pulse">
+                  <AlertTriangle size={48} className="text-red-500" />
+                </div>
+              </div>
+              <h1 className="text-3xl md:text-5xl font-black text-red-500 mb-2">
+                PROTOKOL SOS AKTIF
+              </h1>
+              <p className="text-yellow-400 text-lg md:text-xl font-bold">⚠️ EMERGENCY MODE ⚠️</p>
             </div>
+
+            {/* Instructions */}
+            <div className="space-y-4 md:space-y-6 mb-10 md:mb-14">
+              <div className="bg-slate-800/60 rounded-xl p-4 md:p-6 border-l-4 border-yellow-500">
+                <div className="flex gap-3 md:gap-4">
+                  <span className="text-yellow-500 font-black text-2xl md:text-3xl shrink-0">1.</span>
+                  <div>
+                    <p className="text-yellow-400 font-bold text-base md:text-lg mb-1">Tarik napas dalam-dalam</p>
+                    <p className="text-slate-300 text-sm md:text-base">Hitungan 5 detik, tahan, lalu hembuskan perlahan. Ulangi 3-5 kali.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-800/60 rounded-xl p-4 md:p-6 border-l-4 border-red-500">
+                <div className="flex gap-3 md:gap-4">
+                  <span className="text-red-500 font-black text-2xl md:text-3xl shrink-0">2.</span>
+                  <div>
+                    <p className="text-red-400 font-bold text-base md:text-lg mb-1">Tutup MetaTrader SEKARANG</p>
+                    <p className="text-slate-300 text-sm md:text-base">Jangan lihat chart. Jangan open posisi baru. STOP semua aktivitas trading.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-slate-800/60 rounded-xl p-4 md:p-6 border-l-4 border-blue-500">
+                <div className="flex gap-3 md:gap-4">
+                  <span className="text-blue-500 font-black text-2xl md:text-3xl shrink-0">3.</span>
+                  <div>
+                    <p className="text-blue-400 font-bold text-base md:text-lg mb-1">Menjauh dari layar</p>
+                    <p className="text-slate-300 text-sm md:text-base">Jalan kaki, minum air, atau mandi. Biarkan otak Anda cool down.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-red-900/40 rounded-xl p-4 md:p-6 border-2 border-red-500">
+                <div className="flex gap-3 md:gap-4">
+                  <span className="text-red-500 font-black text-2xl md:text-3xl shrink-0">⚡</span>
+                  <div>
+                    <p className="text-red-300 font-bold text-base md:text-lg mb-1">INGAT: Penting Banget!</p>
+                    <p className="text-slate-200 text-sm md:text-base font-bold">Market akan SELALU ada besok. Tapi uangmu belum tentu aman jika Anda revenge trade sekarang. <span className="text-yellow-400">Tapi uangmu belum tentu.</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Countdown Timer */}
+            <div className="text-center mb-10 md:mb-14">
+              <p className="text-slate-400 text-sm md:text-base mb-3">Waktu cooldown tersisa:</p>
+              <div className="text-5xl md:text-7xl font-black text-yellow-500 font-mono tracking-wider">
+                {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+              </div>
+              <p className="text-slate-400 text-xs md:text-sm mt-4">Gunakan waktu ini untuk reset mental Anda.</p>
+            </div>
+
+            {/* MPT Philosophy Quote */}
+            <div className="bg-slate-800/40 rounded-xl p-4 md:p-6 border border-yellow-500/30 text-center mb-8 md:mb-10">
+              <p className="text-yellow-400 italic text-base md:text-lg font-semibold">
+                "Mindset → Plan → Trader"
+              </p>
+              <p className="text-slate-400 text-sm md:text-base mt-2">
+                Discipline adalah competitive advantage terbesar Anda di market. Jangan sakiti diri sendiri.
+              </p>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setIsSOSActive(false)}
+              className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white font-bold py-3 md:py-4 px-6 rounded-xl transition-all text-base md:text-lg active:scale-95"
+            >
+              ✓ Saya Sudah Tenang, Lanjut Trading Disiplin
+            </button>
           </div>
-
-          {/* Title */}
-          <h1 className="text-4xl md:text-5xl font-bold text-red-500">
-            PROTOKOL SOS AKTIF
-          </h1>
-
-          {/* Instructions */}
-          <div className="space-y-6 text-left bg-slate-800/50 border border-slate-700 rounded-2xl p-8">
-            <div className="flex items-start gap-4">
-              <span className="text-3xl font-bold text-yellow-500">1.</span>
-              <p className="text-xl text-slate-200">
-                <strong className="text-yellow-500">Tarik napas dalam-dalam.</strong> Hitung sampai 5, tahan, lalu hembuskan perlahan.
-              </p>
-            </div>
-            <div className="flex items-start gap-4">
-              <span className="text-3xl font-bold text-yellow-500">2.</span>
-              <p className="text-xl text-slate-200">
-                <strong className="text-yellow-500">Tutup MetaTrader/Trading View SEKARANG.</strong> Jangan buka lagi sampai timer selesai.
-              </p>
-            </div>
-            <div className="flex items-start gap-4">
-              <span className="text-3xl font-bold text-yellow-500">3.</span>
-              <p className="text-xl text-slate-200">
-                <strong className="text-yellow-500">Menjauh dari layar.</strong> Jalan kaki, minum air, atau cuci muka.
-              </p>
-            </div>
-            <div className="flex items-start gap-4">
-              <span className="text-3xl font-bold text-yellow-500">4.</span>
-              <p className="text-xl text-slate-200">
-                <strong className="text-yellow-500">INGAT:</strong> Market akan selalu ada besok. <span className="text-red-500 font-bold">Tapi uangmu belum tentu.</span>
-              </p>
-            </div>
-          </div>
-
-          {/* Countdown Timer */}
-          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-            <p className="text-slate-400 text-sm mb-2">Waktu Cooldown Tersisa:</p>
-            <p className="text-6xl font-bold text-yellow-500 font-mono">
-              {formatTime(countdown)}
-            </p>
-            <p className="text-slate-400 text-sm mt-2">
-              Gunakan waktu ini untuk reset mental Anda.
-            </p>
-          </div>
-
-          {/* Quote */}
-          <blockquote className="text-slate-300 italic text-lg border-l-4 border-yellow-500 pl-6">
-            "The market is not going anywhere. Your capital is. Protect it with your life."
-            <br />
-            <span className="text-slate-500 text-sm not-italic">— MPT Warrior Principle</span>
-          </blockquote>
         </div>
       </div>
     );
   }
 
+  // Floating Button
   return (
     <button
-      onClick={() => setIsSOSActive(true)}
-      className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center shadow-2xl transition-all hover:scale-110 group"
-      title="Panic Button - Klik jika mental sedang kacau"
+      onClick={() => {
+        setIsSOSActive(true);
+        setCountdown(900);
+      }}
+      className="fixed bottom-6 md:bottom-8 right-6 md:right-8 w-14 h-14 md:w-16 md:h-16 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-40 border-2 border-red-400 animate-pulse"
+      title="Emergency Protocol - Klik jika sedang tilt/revenge"
     >
-      <AlertTriangle size={28} className="text-white animate-pulse" />
-      <span className="absolute -top-12 right-0 bg-slate-900 border border-slate-700 text-xs text-slate-300 px-3 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-        SOS Button
-      </span>
+      <AlertTriangle size={28} className="md:block" />
     </button>
   );
 }
