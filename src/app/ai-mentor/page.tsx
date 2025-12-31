@@ -1,11 +1,11 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Bot, Send, Paperclip, X, Sparkles, Zap, Brain } from 'lucide-react';
+import { Bot, Send, Paperclip, X, Sparkles, Zap, Brain, TrendingUp, Shield, Target } from 'lucide-react';
 
 export default function AIMentor() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: '🚀 **MPT Warrior AI Mentor** activated. Ready to analyze charts, calculate risk, or reset your mindset. What\'s on your mind, Warrior?' }
+    { role: 'assistant', content: 'Siap, Bro! 🚀 **MPT Warrior AI** aktif. Gue ready untuk:\n\n✅ **Analisa Chart** - Struktur, key level, entry points\n✅ **Hitung Risk** - Lot size dengan manajemen risk\n✅ **Reset Mental** - Mindset, affirmation, motivasi\n✅ **Strategy Review** - Evaluasi strategi trading Anda\n\nKirim chart atau tanya strategi. Mari kita menang! 💪' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +58,7 @@ export default function AIMentor() {
     } catch (error) {
       setMessages((prev) => [...prev, { 
         role: 'assistant', 
-        content: '⚠️ Connection failed. Check API Key or internet connection.' 
+        content: '⚠️ Gagal koneksi ke AI. Cek API Key atau koneksi internet.' 
       }]);
     } finally {
       setIsLoading(false);
@@ -66,52 +66,40 @@ export default function AIMentor() {
   };
 
   const quickActions = [
-    { label: "⚡ Risk Calculator", prompt: "Hitung lot size. Balance $1000, Risk 1%, SL 30 Pips. Format hasil dengan table.", icon: <Zap size={16} /> },
-    { label: "🧠 Mental Reset", prompt: "Gue lagi FOMO/Emosi. Reset mindset gue dengan 3 affirmation trader.", icon: <Brain size={16} /> },
-    { label: "📊 Chart Analysis", prompt: "Analyze this chart. Identify structure, support/resistance, entry points.", icon: <Sparkles size={16} /> },
+    { label: "⚡ Hitung Risk 1%", prompt: "Balance $1000, Risk 1%, SL 30 Pips. Hitung lot size dan format dengan table yang rapi.", icon: <Zap size={16} /> },
+    { label: "🧠 Reset Mental", prompt: "Gue lagi FOMO/Emosi. Berikan 3 affirmation trader dan reset mindset gue untuk trading lebih disiplin.", icon: <Brain size={16} /> },
+    { label: "📊 Analisa Chart", prompt: "Lihat chart ini. Tentukan Structure, Support/Resistance, Key Level, dan potential entry points.", icon: <Sparkles size={16} /> },
+    { label: "📈 Review Strategi", prompt: "Review strategi trading gue. Apa kelebihan dan kekurangan? Bagaimana improve konsistensi?", icon: <TrendingUp size={16} /> },
+    { label: "🛡️ Money Management", prompt: "Jelasin best practice money management untuk trader. Berapa % per trade yang aman?", icon: <Shield size={16} /> },
+    { label: "🎯 Entry Points", prompt: "Berikan 3 setup entry points yang paling profitable untuk pair ini. Jelaskan confirmation signals.", icon: <Target size={16} /> },
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 overflow-hidden">
-      {/* Animated Background Effect */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
-      </div>
-
+    <div className="flex flex-col h-screen bg-slate-950">
       {/* Header */}
-      <header className="relative z-10 p-6 border-b border-purple-500/20 backdrop-blur-md bg-slate-950/50">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl shadow-lg shadow-purple-500/50">
-            <Bot className="text-white" size={28} />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-black text-2xl text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-blue-400 to-purple-400">
-                AI Mentor
-              </h1>
-              <span className="text-xs px-2 py-1 bg-gradient-to-r from-purple-500/30 to-blue-500/30 border border-purple-500/50 rounded-full text-purple-300 font-semibold">
-                BETA
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">Chart Analysis • Risk Management • Mental Training</p>
-          </div>
+      <header className="p-6 border-b border-slate-800 flex items-center gap-3">
+        <div className="p-2 bg-purple-500/20 rounded-lg">
+          <Bot className="text-purple-500" size={24} />
+        </div>
+        <div>
+          <h1 className="font-bold text-xl text-yellow-500">AI Mentor</h1>
+          <p className="text-xs text-slate-400">Analisa Chart & Trading Guidance</p>
         </div>
       </header>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-5 scrollbar-thin scrollbar-thumb-purple-500/30 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-3 duration-300`}>
-            <div className={`max-w-[85%] ${
+          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] p-4 rounded-2xl ${
               m.role === 'user' 
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/20' 
-                : 'bg-slate-900/80 border border-purple-500/30 text-slate-100 shadow-lg shadow-purple-500/10'
-            } p-4 rounded-2xl backdrop-blur-sm`}>
+                ? 'bg-yellow-600 text-white' 
+                : 'bg-slate-900 border border-slate-800'
+            }`}>
               <ReactMarkdown 
                 components={{ 
-                  strong: ({node, ...props}) => <span className="font-bold bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent" {...props} />,
-                  code: ({node, ...props}) => <code className="bg-slate-800/50 px-2 py-1 rounded text-xs font-mono text-blue-300" {...props} />,
+                  strong: ({node, ...props}) => <span className="font-bold text-yellow-400" {...props} />,
+                  code: ({node, ...props}) => <code className="bg-slate-800 px-2 py-1 rounded text-xs" {...props} />
                 }}
               >
                 {m.content}
@@ -119,17 +107,12 @@ export default function AIMentor() {
             </div>
           </div>
         ))}
-        
         {isLoading && (
-          <div className="flex justify-start animate-in fade-in">
-            <div className="bg-slate-900/80 border border-purple-500/30 rounded-2xl p-4 backdrop-blur-sm">
-              <div className="flex items-center gap-3 text-purple-300">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0s'}}></div>
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></div>
-                </div>
-                <span className="text-sm italic">Analyzing your request...</span>
+          <div className="flex justify-start">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+              <div className="flex items-center gap-2 text-slate-400">
+                <div className="animate-spin">⚙️</div>
+                <span className="text-sm italic">Sedang analisa...</span>
               </div>
             </div>
           </div>
@@ -138,48 +121,45 @@ export default function AIMentor() {
       </div>
 
       {/* Input Area */}
-      <div className="relative z-10 bg-slate-950/80 backdrop-blur-md p-6 border-t border-purple-500/20">
-        {/* Quick Actions - Enhanced */}
+      <div className="bg-slate-900 p-6 border-t border-slate-800">
+        {/* Quick Actions - Grid */}
         <div className="mb-4">
-          <p className="text-xs text-slate-400 mb-2 font-semibold tracking-wider">QUICK ACTIONS</p>
-          <div className="flex gap-2 overflow-x-auto pb-2">
+          <p className="text-xs text-slate-400 mb-3 font-semibold">⚡ QUICK ACTIONS</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {quickActions.map((action, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSubmit(null, action.prompt)}
-                className="group flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-slate-800 to-slate-900 border border-purple-500/30 hover:border-purple-500/60 rounded-lg text-xs text-slate-300 hover:text-purple-300 whitespace-nowrap transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20"
+                className="flex flex-col items-start gap-1.5 p-3 bg-slate-800 border border-slate-700 rounded-lg hover:border-purple-500 hover:bg-slate-700 transition-all group text-left text-xs"
               >
-                <span className="group-hover:scale-110 transition-transform">{action.icon}</span>
-                {action.label}
+                <span className="text-slate-400 group-hover:text-purple-400 transition-colors">{action.icon}</span>
+                <span className="text-slate-300 group-hover:text-white font-semibold text-xs">{action.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Image Preview - Enhanced */}
+        {/* Image Preview */}
         {imagePreview && (
-          <div className="mb-4 relative w-fit animate-in fade-in">
-            <div className="relative">
-              <img 
-                src={imagePreview} 
-                alt="Preview" 
-                className="h-24 rounded-lg border-2 border-gradient-to-r from-purple-500 to-blue-500 shadow-lg shadow-purple-500/30"
-              />
-              <button
-                onClick={() => {
-                  setImagePreview(null);
-                  setSelectedImage(null);
-                }}
-                className="absolute -top-3 -right-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-full w-7 h-7 flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
-              >
-                <X size={16} className="text-white" />
-              </button>
-            </div>
-            <p className="text-xs text-slate-400 mt-2">Chart uploaded • Ready to analyze</p>
+          <div className="mb-3 relative w-fit">
+            <img 
+              src={imagePreview} 
+              alt="Preview" 
+              className="h-20 rounded-lg border-2 border-yellow-500"
+            />
+            <button
+              onClick={() => {
+                setImagePreview(null);
+                setSelectedImage(null);
+              }}
+              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 rounded-full w-6 h-6 flex items-center justify-center transition-colors"
+            >
+              <X size={14} />
+            </button>
           </div>
         )}
 
-        {/* Input Form - Enhanced */}
+        {/* Input Form */}
         <form onSubmit={handleSubmit} className="flex gap-3">
           <input 
             type="file" 
@@ -192,31 +172,31 @@ export default function AIMentor() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-3 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-purple-900/50 hover:to-blue-900/50 border border-slate-700 hover:border-purple-500/50 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/20"
+            className="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition-colors"
             title="Upload Chart"
           >
-            <Paperclip size={20} className="text-slate-400 group-hover:text-purple-400" />
+            <Paperclip size={20} className="text-slate-400" />
           </button>
 
           <input
-            className="flex-1 p-3 bg-slate-900/50 border border-slate-700 hover:border-purple-500/50 focus:border-purple-500 rounded-xl text-white placeholder-slate-500 focus:outline-none transition-all duration-300 backdrop-blur-sm"
+            className="flex-1 p-3 bg-slate-950 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-yellow-500 focus:outline-none transition-colors"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask anything or upload chart..."
+            placeholder="Tanya apa atau upload chart..."
             disabled={isLoading}
           />
 
           <button
             type="submit"
             disabled={isLoading}
-            className="p-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 disabled:scale-100"
+            className="p-3 bg-yellow-500 hover:bg-yellow-600 disabled:bg-slate-700 disabled:cursor-not-allowed text-slate-900 font-bold rounded-xl transition-colors"
           >
             <Send size={20} />
           </button>
         </form>
 
-        {/* Footer Hint */}
-        <p className="text-xs text-slate-500 mt-3 text-center">💡 Upload charts or describe your trading situation for personalized guidance</p>
+        {/* Footer Info */}
+        <p className="text-xs text-slate-500 mt-3 text-center">💡 Upload chart atau pilih quick action untuk guidance</p>
       </div>
     </div>
   );
