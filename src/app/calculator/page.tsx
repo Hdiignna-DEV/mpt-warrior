@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
-import { Calculator, DollarSign, Percent, TrendingDown, AlertTriangle, Info } from 'lucide-react';
+import { Calculator, DollarSign, Percent, TrendingDown, AlertTriangle, Info, Zap } from 'lucide-react';
 
 interface HasilKalkulator {
   risikoRp: number;
@@ -15,10 +15,39 @@ export default function KalkulatorRisiko() {
   const [risikoPersen, setRisikoPersen] = useState<string>('1');
   const [stopLossPips, setStopLossPips] = useState<string>('50');
   const [takeProfitPips, setTakeProfitPips] = useState<string>('100');
-  const [nilaiPip, setNilaiPip] = useState<string>('10');
   const [error, setError] = useState<string>('');
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<HasilKalkulator[]>([]);
+
+  // Auto-calculate Nilai Per Pip based on saldo
+  const nilaiPipAuto = useMemo(() => {
+    const saldoNum = parseFloat(saldo) || 0;
+    
+    if (saldoNum < 1000) {
+      return 0.1; // Micro lot untuk saldo < $1000
+    } else if (saldoNum < 10000) {
+      return 1; // Mini lot untuk saldo $1000-$10000
+    } else if (saldoNum < 100000) {
+      return 10; // Standard lot untuk saldo $10000-$100000
+    } else {
+      return 100; // Multi lot untuk saldo > $100000
+    }
+  }, [saldo]);
+
+  // Kategori rekomendasi
+  const kategoriSaldo = useMemo(() => {
+    const saldoNum = parseFloat(saldo) || 0;
+    
+    if (saldoNum < 1000) {
+      return { name: 'Micro (Demo/Testing)', icon: '🟢', color: 'green' };
+    } else if (saldoNum < 10000) {
+      return { name: 'Mini (Pemula)', icon: '🟡', color: 'yellow' };
+    } else if (saldoNum < 100000) {
+      return { name: 'Standard (Menengah)', icon: '🟠', color: 'orange' };
+    } else {
+      return { name: 'Professional (Advanced)', icon: '🔴', color: 'red' };
+    }
+  }, [saldo]);
 
   const hasil = useMemo(() => {
     setError('');
@@ -27,10 +56,10 @@ export default function KalkulatorRisiko() {
     const risikoNum = parseFloat(risikoPersen);
     const slPipsNum = parseFloat(stopLossPips);
     const tpPipsNum = parseFloat(takeProfitPips);
-    const nilaiPipNum = parseFloat(nilaiPip);
+    const nilaiPipNum = nilaiPipAuto;
 
     // Validasi input
-    if (!saldo || !risikoPersen || !stopLossPips || !nilaiPip) {
+    if (!saldo || !risikoPersen || !stopLossPips) {
       return null;
     }
 
@@ -54,11 +83,6 @@ export default function KalkulatorRisiko() {
       return null;
     }
 
-    if (nilaiPipNum <= 0) {
-      setError('Nilai per pip harus lebih dari 0!');
-      return null;
-    }
-
     // Kalkulasi
     const risikoRp = (saldoNum * risikoNum) / 100;
     const lotSize = risikoRp / (slPipsNum * nilaiPipNum);
@@ -73,7 +97,7 @@ export default function KalkulatorRisiko() {
       profitTarget: Math.round(profitTarget * 100) / 100,
       riskRewardRatio: Math.round(riskRewardRatio * 100) / 100,
     };
-  }, [saldo, risikoPersen, stopLossPips, takeProfitPips, nilaiPip]);
+  }, [saldo, risikoPersen, stopLossPips, takeProfitPips, nilaiPipAuto]);
 
   const hitungDanSimpan = () => {
     if (hasil) {
@@ -95,7 +119,7 @@ export default function KalkulatorRisiko() {
           </div>
           <div>
             <h1 className="text-2xl md:text-4xl font-black text-white">Kalkulator Risiko Pro</h1>
-            <p className="text-slate-400 text-sm md:text-base">Smart Risk Calculator dengan Real-time Analytics</p>
+            <p className="text-slate-400 text-sm md:text-base">Smart Risk Calculator dengan Auto-Adjust Nilai Per Pip</p>
           </div>
         </div>
         <div className="h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-slate-700 rounded-full"></div>
@@ -150,6 +174,17 @@ export default function KalkulatorRisiko() {
                   placeholder="10000"
                   className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none"
                 />
+                {saldo && (
+                  <div className="mt-3 p-3 bg-slate-800/40 rounded-lg border border-slate-700/50">
+                    <p className="text-xs text-slate-400 mb-1">📈 Kategori Akun:</p>
+                    <p className="text-sm font-bold text-white">
+                      {kategoriSaldo.icon} {kategoriSaldo.name}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      💡 Nilai Per Pip otomatis: <span className="font-bold text-yellow-400">{nilaiPipAuto}</span> USD
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Risk Percent dengan Slider */}
@@ -218,33 +253,21 @@ export default function KalkulatorRisiko() {
                 </div>
               </div>
 
-              {/* Nilai Per Pip */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-300 mb-2">Nilai Per Pip (USD)</label>
-                <div className="flex gap-2">
-                  {['10', '1', '0.1'].map((val) => (
-                    <button
-                      key={val}
-                      onClick={() => setNilaiPip(val)}
-                      className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
-                        nilaiPip === val
-                          ? 'bg-purple-500 text-white'
-                          : 'bg-slate-800/50 text-slate-300 border border-slate-700'
-                      }`}
-                    >
-                      {val} ({val === '10' ? '1 lot' : val === '1' ? '0.1 lot' : '0.01 lot'})
-                    </button>
-                  ))}
+              {/* Auto Nilai Per Pip Info */}
+              <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-4 border border-purple-500/30">
+                <div className="flex items-start gap-3">
+                  <Zap className="text-purple-400 flex-shrink-0 mt-0.5" size={20} />
+                  <div>
+                    <p className="text-sm font-bold text-purple-300 mb-1">⚡ Auto-Adjust Aktif</p>
+                    <p className="text-xs text-purple-200">
+                      Nilai Per Pip otomatis menyesuaikan dengan saldo Anda. Tidak perlu diatur manual!
+                    </p>
+                    <p className="text-xs text-purple-300 mt-2 font-mono">
+                      Saldo: <span className="text-yellow-400">${parseFloat(saldo).toLocaleString()}</span> → 
+                      Nilai Per Pip: <span className="text-yellow-400">${nilaiPipAuto}</span>
+                    </p>
+                  </div>
                 </div>
-                <input
-                  type="number"
-                  value={nilaiPip}
-                  onChange={(e) => setNilaiPip(e.target.value)}
-                  placeholder="10"
-                  step="0.1"
-                  min="0.1"
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 mt-2 text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none"
-                />
               </div>
 
               {/* Error Message */}
@@ -282,7 +305,7 @@ export default function KalkulatorRisiko() {
                 {history.map((h, idx) => (
                   <div key={idx} className="text-xs bg-slate-800/50 p-2 rounded border border-slate-700/50">
                     <p className="text-slate-300">
-                      <span className="text-green-400">💰 {h.risikoRp}</span> | 
+                      <span className="text-green-400">💰 ${h.risikoRp}</span> | 
                       <span className="text-blue-400"> 📦 {h.lotSize} lot</span> | 
                       <span className="text-yellow-400"> 🎯 {h.riskRewardRatio}</span>
                     </p>
@@ -319,6 +342,9 @@ export default function KalkulatorRisiko() {
                     </p>
                     <p className="text-2xl md:text-3xl font-black text-green-400">
                       {hasil.lotSize.toFixed(4)}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      @ {nilaiPipAuto} USD/pip
                     </p>
                   </div>
 
@@ -387,9 +413,9 @@ export default function KalkulatorRisiko() {
                       <Info size={16} /> Pro Tips
                     </p>
                     <ul className="text-xs text-green-300 space-y-1">
-                      <li>✓ Selalu gunakan lot size ini</li>
+                      <li>✓ Lot size sudah sesuai saldo Anda</li>
+                      <li>✓ Nilai Per Pip auto-adjust</li>
                       <li>✓ Jangan pernah overlot</li>
-                      <li>✓ Target R:R minimal 1:1</li>
                       <li>✓ Disiplin = Profit Jangka Panjang</li>
                     </ul>
                   </div>
