@@ -51,13 +51,20 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 pt-24 md:pt-8">
-      {/* Header */}
+      {/* Header dengan Logo */}
       <div className="mb-8 md:mb-10">
-        <div className="flex items-center gap-3 md:gap-4 mb-4">
-          <div className="p-2 md:p-3 bg-yellow-500/20 rounded-lg border border-yellow-500/30">
-            <Target className="text-yellow-400" size={24} />
+        <div className="flex items-center gap-4 md:gap-6 mb-4">
+          {/* Logo Community */}
+          <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
+            <img 
+              src="/mpt-logo.png" 
+              alt="MPT Logo" 
+              className="w-full h-full object-contain drop-shadow-lg"
+            />
           </div>
-          <div>
+          
+          {/* Text Content */}
+          <div className="flex-1">
             <h1 className="text-2xl md:text-4xl font-black text-white">Command Center</h1>
             <p className="text-slate-400 text-sm md:text-base">Your tactical overview, Warrior. Stay disciplined, stay profitable.</p>
           </div>

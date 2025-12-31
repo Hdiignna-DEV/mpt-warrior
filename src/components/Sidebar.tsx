@@ -14,8 +14,8 @@ import { useState } from 'react';
 
 const menuItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Trading Journal', href: '/journal', icon: BookOpen },
-  { name: 'Risk Calculator', href: '/calculator', icon: Calculator },
+  { name: 'Jurnal Trading', href: '/journal', icon: BookOpen },
+  { name: 'Kalkulator Risiko', href: '/calculator', icon: Calculator },
   { name: 'AI Mentor', href: '/ai-mentor', icon: Bot },
 ];
 
@@ -101,16 +101,16 @@ export default function Sidebar() {
         <div className="mt-auto pt-6 border-t border-slate-800/50">
           <div className="bg-slate-800/40 rounded-xl p-4 text-center">
             <p className="text-xs font-bold text-yellow-400 mb-2">
-              ⚡ PRO TIP
+              ⚡ TIPS PRO
             </p>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Discipline is your competitive advantage. Follow the rules, always.
+              Disiplin adalah keunggulan kompetitif Anda. Ikuti aturan, selalu.
             </p>
           </div>
 
           <div className="mt-4 text-center">
             <p className="text-xs text-slate-500">
-              Version 1.0 • MPT Community
+              Versi 1.0 • Komunitas MPT
             </p>
           </div>
         </div>

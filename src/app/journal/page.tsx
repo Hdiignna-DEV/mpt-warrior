@@ -5,299 +5,259 @@ import { BookOpen, Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
 interface Trade {
   id: string;
   pair: string;
-  position: 'BUY' | 'SELL';
-  result: 'WIN' | 'LOSS';
-  pips: number;
-  date: string;
-  notes: string;
+  posisi: 'BUY' | 'SELL';
+  hasil: 'MENANG' | 'KALAH';
+  pip: number;
+  tanggal: string;
+  catatan: string;
 }
 
-export default function TradingJournal() {
+export default function JurnalTrading() {
   const [trades, setTrades] = useState<Trade[]>([]);
-  const [pair, setPair] = useState('XAUUSD');
-  const [position, setPosition] = useState<'BUY' | 'SELL'>('BUY');
-  const [result, setResult] = useState<'WIN' | 'LOSS'>('WIN');
-  const [pips, setPips] = useState('');
-  const [notes, setNotes] = useState('');
+  const [pair, setPair] = useState('');
+  const [posisi, setPosisi] = useState<'BUY' | 'SELL'>('BUY');
+  const [hasil, setHasil] = useState<'MENANG' | 'KALAH'>('MENANG');
+  const [pip, setPip] = useState('');
+  const [catatan, setCatatan] = useState('');
 
-  // Load trades from localStorage on mount
+  // Load dari localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('mpt-trades');
-    if (saved) {
-      setTrades(JSON.parse(saved));
-    }
+    const saved = localStorage.getItem('trades');
+    if (saved) setTrades(JSON.parse(saved));
   }, []);
 
-  // Save trades to localStorage whenever trades change
+  // Save ke localStorage
   useEffect(() => {
-    if (trades.length > 0) {
-      localStorage.setItem('mpt-trades', JSON.stringify(trades));
-    }
+    localStorage.setItem('trades', JSON.stringify(trades));
   }, [trades]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!pips || parseFloat(pips) === 0) {
-      alert('⚠️ Please enter pips value');
+  const tambahTrade = () => {
+    if (!pair || !pip) {
+      alert('Isi Pair dan Pip terlebih dahulu!');
       return;
     }
 
-    const newTrade: Trade = {
+    const tradeBaru: Trade = {
       id: Date.now().toString(),
       pair,
-      position,
-      result,
-      pips: parseFloat(pips),
-      date: new Date().toISOString().split('T')[0],
-      notes,
+      posisi,
+      hasil,
+      pip: parseFloat(pip),
+      tanggal: new Date().toISOString().split('T')[0],
+      catatan,
     };
 
-    setTrades([newTrade, ...trades]);
-    
-    // Reset form
-    setPair('XAUUSD');
-    setPosition('BUY');
-    setResult('WIN');
-    setPips('');
-    setNotes('');
+    setTrades([tradeBaru, ...trades]);
+    setPair('');
+    setPip('');
+    setCatatan('');
+    setHasil('MENANG');
   };
 
-  const deleteTrade = (id: string) => {
-    if (confirm('Delete this trade?')) {
-      const updated = trades.filter(t => t.id !== id);
-      setTrades(updated);
-      localStorage.setItem('mpt-trades', JSON.stringify(updated));
-    }
+  const hapusTrade = (id: string) => {
+    setTrades(trades.filter((t) => t.id !== id));
   };
 
-  const stats = {
-    total: trades.length,
-    wins: trades.filter(t => t.result === 'WIN').length,
-    losses: trades.filter(t => t.result === 'LOSS').length,
-    winRate: trades.length > 0 
-      ? ((trades.filter(t => t.result === 'WIN').length / trades.length) * 100).toFixed(1)
-      : '0',
-  };
+  const totalTrade = trades.length;
+  const menang = trades.filter((t) => t.hasil === 'MENANG').length;
+  const kalah = totalTrade - menang;
+  const winRate = totalTrade > 0 ? Math.round((menang / totalTrade) * 100) : 0;
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 pt-24 md:pt-8">
       {/* Header */}
-      <div className="border-b border-slate-800 pb-6">
-        <h1 className="text-3xl font-bold text-yellow-500 mb-2 flex items-center gap-3">
-          <BookOpen size={32} />
-          Trading Journal
-        </h1>
-        <p className="text-slate-400">
-          Log every trade. Learn from your wins and losses.
-        </p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
-          <p className="text-slate-400 text-sm mb-1">Total Trades</p>
-          <p className="text-2xl font-bold">{stats.total}</p>
-        </div>
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
-          <p className="text-slate-400 text-sm mb-1">Win Rate</p>
-          <p className="text-2xl font-bold text-green-500">{stats.winRate}%</p>
-        </div>
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
-          <p className="text-slate-400 text-sm mb-1">Wins</p>
-          <p className="text-2xl font-bold text-green-500">{stats.wins}</p>
-        </div>
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
-          <p className="text-slate-400 text-sm mb-1">Losses</p>
-          <p className="text-2xl font-bold text-red-500">{stats.losses}</p>
-        </div>
-      </div>
-
-      {/* Add Trade Form */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-        <h2 className="text-xl font-bold text-yellow-500 mb-6 flex items-center gap-2">
-          <Plus size={20} />
-          Log New Trade
-        </h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Pair */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Currency Pair
-              </label>
-              <select
-                value={pair}
-                onChange={(e) => setPair(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none"
-              >
-                <option>XAUUSD</option>
-                <option>EURUSD</option>
-                <option>GBPUSD</option>
-                <option>USDJPY</option>
-                <option>AUDUSD</option>
-              </select>
-            </div>
-
-            {/* Position */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Position
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPosition('BUY')}
-                  className={`py-3 rounded-lg font-bold transition-colors ${
-                    position === 'BUY'
-                      ? 'bg-green-500 text-white'
-                      : 'bg-slate-950 border border-slate-700 text-slate-400'
-                  }`}
-                >
-                  <TrendingUp className="inline mr-1" size={16} />
-                  BUY
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPosition('SELL')}
-                  className={`py-3 rounded-lg font-bold transition-colors ${
-                    position === 'SELL'
-                      ? 'bg-red-500 text-white'
-                      : 'bg-slate-950 border border-slate-700 text-slate-400'
-                  }`}
-                >
-                  <TrendingDown className="inline mr-1" size={16} />
-                  SELL
-                </button>
-              </div>
-            </div>
-
-            {/* Result */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Result
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setResult('WIN')}
-                  className={`py-3 rounded-lg font-bold transition-colors ${
-                    result === 'WIN'
-                      ? 'bg-green-500 text-white'
-                      : 'bg-slate-950 border border-slate-700 text-slate-400'
-                  }`}
-                >
-                  ✅ WIN
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setResult('LOSS')}
-                  className={`py-3 rounded-lg font-bold transition-colors ${
-                    result === 'LOSS'
-                      ? 'bg-red-500 text-white'
-                      : 'bg-slate-950 border border-slate-700 text-slate-400'
-                  }`}
-                >
-                  ❌ LOSS
-                </button>
-              </div>
-            </div>
-
-            {/* Pips */}
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                Pips (+ or -)
-              </label>
-              <input
-                type="number"
-                value={pips}
-                onChange={(e) => setPips(e.target.value)}
-                step="0.1"
-                className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none"
-                placeholder="35.5"
-                required
-              />
-            </div>
+      <div className="mb-8 md:mb-10">
+        <div className="flex items-center gap-3 md:gap-4 mb-4">
+          <div className="p-2 md:p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
+            <BookOpen className="text-blue-400" size={24} />
           </div>
-
-          {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Notes (Optional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-yellow-500 focus:outline-none resize-none"
-              rows={3}
-              placeholder="Why did you take this trade? What did you learn?"
+            <h1 className="text-2xl md:text-4xl font-black text-white">Jurnal Trading</h1>
+            <p className="text-slate-400 text-sm md:text-base">Catat setiap trade Anda untuk tracking progress.</p>
+          </div>
+        </div>
+        <div className="h-1 bg-gradient-to-r from-blue-500 via-slate-700 to-transparent rounded-full"></div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
+        <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-800/50">
+          <p className="text-slate-400 text-xs md:text-sm mb-1">Total Trade</p>
+          <p className="text-2xl md:text-3xl font-black text-white">{totalTrade}</p>
+        </div>
+        <div className="bg-slate-900/60 rounded-xl p-4 border border-green-500/30">
+          <p className="text-slate-400 text-xs md:text-sm mb-1">Menang</p>
+          <p className="text-2xl md:text-3xl font-black text-green-400">{menang}</p>
+        </div>
+        <div className="bg-slate-900/60 rounded-xl p-4 border border-red-500/30">
+          <p className="text-slate-400 text-xs md:text-sm mb-1">Kalah</p>
+          <p className="text-2xl md:text-3xl font-black text-red-400">{kalah}</p>
+        </div>
+        <div className="bg-slate-900/60 rounded-xl p-4 border border-yellow-500/30">
+          <p className="text-slate-400 text-xs md:text-sm mb-1">Win Rate</p>
+          <p className="text-2xl md:text-3xl font-black text-yellow-400">{winRate}%</p>
+        </div>
+      </div>
+
+      {/* Form Input */}
+      <div className="bg-slate-900/60 rounded-2xl border border-slate-800/50 p-5 md:p-8 backdrop-blur-sm mb-8">
+        <h2 className="text-lg md:text-xl font-bold text-white mb-6 flex items-center gap-2">
+          <Plus size={24} className="text-blue-400" /> Input Trade Baru
+        </h2>
+
+        <div className="space-y-4 md:space-y-5">
+          {/* Pair */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">Pair</label>
+            <input
+              type="text"
+              placeholder="Contoh: XAUUSD, EURUSD"
+              value={pair}
+              onChange={(e) => setPair(e.target.value.toUpperCase())}
+              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
             />
           </div>
 
+          {/* Posisi */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">Posisi</label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setPosisi('BUY')}
+                className={`py-3 rounded-lg font-bold transition-all ${
+                  posisi === 'BUY'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-slate-800/50 text-slate-300 border border-slate-700'
+                }`}
+              >
+                🟢 BUY
+              </button>
+              <button
+                onClick={() => setPosisi('SELL')}
+                className={`py-3 rounded-lg font-bold transition-all ${
+                  posisi === 'SELL'
+                    ? 'bg-red-500 text-white'
+                    : 'bg-slate-800/50 text-slate-300 border border-slate-700'
+                }`}
+              >
+                🔴 SELL
+              </button>
+            </div>
+          </div>
+
+          {/* Hasil */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">Hasil</label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setHasil('MENANG')}
+                className={`py-3 rounded-lg font-bold transition-all ${
+                  hasil === 'MENANG'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-slate-800/50 text-slate-300 border border-slate-700'
+                }`}
+              >
+                ✅ MENANG
+              </button>
+              <button
+                onClick={() => setHasil('KALAH')}
+                className={`py-3 rounded-lg font-bold transition-all ${
+                  hasil === 'KALAH'
+                    ? 'bg-red-500 text-white'
+                    : 'bg-slate-800/50 text-slate-300 border border-slate-700'
+                }`}
+              >
+                ❌ KALAH
+              </button>
+            </div>
+          </div>
+
+          {/* Pip */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">Pip</label>
+            <input
+              type="number"
+              placeholder="Contoh: 35, -20"
+              value={pip}
+              onChange={(e) => setPip(e.target.value)}
+              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          {/* Catatan */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">Catatan (Opsional)</label>
+            <textarea
+              placeholder="Tulis catatan trade Anda di sini..."
+              value={catatan}
+              onChange={(e) => setCatatan(e.target.value)}
+              rows={3}
+              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          {/* Submit Button */}
           <button
-            type="submit"
-            className="w-full bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold py-3 rounded-lg transition-colors"
+            onClick={tambahTrade}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
-            Log Trade
+            <Plus size={20} /> Tambah Trade
           </button>
-        </form>
+        </div>
       </div>
 
-      {/* Trades History */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-        <h2 className="text-xl font-bold text-yellow-500 mb-6">
-          📊 Trade History
-        </h2>
-        
+      {/* Daftar Trade */}
+      <div className="bg-slate-900/60 rounded-2xl border border-slate-800/50 p-5 md:p-8 backdrop-blur-sm">
+        <h2 className="text-lg md:text-xl font-bold text-white mb-6">📊 Riwayat Trade</h2>
+
         {trades.length === 0 ? (
-          <p className="text-slate-500 text-center py-8">
-            No trades logged yet. Start logging your trades above!
-          </p>
+          <div className="text-center py-12">
+            <BookOpen size={48} className="mx-auto text-slate-600 mb-4" />
+            <p className="text-slate-400 text-lg">Belum ada trade. Mulai input trade Anda!</p>
+          </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 md:space-y-4">
             {trades.map((trade) => (
               <div
                 key={trade.id}
-                className="bg-slate-950 border border-slate-800 rounded-lg p-4 hover:border-slate-700 transition-colors"
+                className="bg-slate-800/50 rounded-lg p-4 md:p-5 border border-slate-700/50 hover:border-slate-600 transition-all"
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="font-bold text-lg">{trade.pair}</span>
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${
-                        trade.position === 'BUY'
-                          ? 'bg-green-500/20 text-green-500'
-                          : 'bg-red-500/20 text-red-500'
-                      }`}>
-                        {trade.position}
-                      </span>
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${
-                        trade.result === 'WIN'
-                          ? 'bg-green-500/20 text-green-500'
-                          : 'bg-red-500/20 text-red-500'
-                      }`}>
-                        {trade.result}
-                      </span>
-                      <span className={`font-bold ${
-                        trade.pips > 0 ? 'text-green-500' : 'text-red-500'
-                      }`}>
-                        {trade.pips > 0 ? '+' : ''}{trade.pips} pips
-                      </span>
-                    </div>
-                    <p className="text-slate-400 text-sm">{trade.date}</p>
-                    {trade.notes && (
-                      <p className="text-slate-300 text-sm mt-2">{trade.notes}</p>
-                    )}
+                    <p className="text-lg md:text-xl font-black text-white">{trade.pair}</p>
+                    <p className="text-xs md:text-sm text-slate-400">{trade.tanggal}</p>
                   </div>
                   <button
-                    onClick={() => deleteTrade(trade.id)}
-                    className="text-red-500 hover:text-red-400 p-2"
-                    title="Delete trade"
+                    onClick={() => hapusTrade(trade.id)}
+                    className="text-red-400 hover:text-red-300 transition-colors ml-2"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={20} />
                   </button>
                 </div>
+
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    trade.posisi === 'BUY' ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
+                  }`}>
+                    {trade.posisi}
+                  </span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    trade.hasil === 'MENANG' ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
+                  }`}>
+                    {trade.hasil}
+                  </span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    trade.pip > 0 ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {trade.pip > 0 ? '+' : ''}{trade.pip} pips
+                  </span>
+                </div>
+
+                {trade.catatan && (
+                  <p className="text-sm text-slate-300 bg-slate-900/40 rounded p-2">
+                    💭 {trade.catatan}
+                  </p>
+                )}
               </div>
             ))}
           </div>
