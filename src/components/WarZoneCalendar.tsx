@@ -1,78 +1,95 @@
 'use client';
 
-import { useState } from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Calendar } from 'lucide-react';
+
+declare global {
+  interface Window {
+    InvestingScript?: any;
+  }
+}
 
 export default function WarZoneCalendar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
+
+  useEffect(() => {
+    // Load Investing.com script ketika modal dibuka
+    if (!isMinimized && !window.InvestingScript) {
+      const script = document.createElement('script');
+      script.src = 'https://www.investing.com/js-en/news.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, [isMinimized]);
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40 group"
-        aria-label="War Zone Economic Calendar"
-      >
-        <div className="flex items-center gap-2 bg-gradient-to-r from-red-600 via-orange-600 to-red-600 hover:from-red-700 hover:via-orange-700 hover:to-red-700 text-white px-4 py-3 rounded-full shadow-lg shadow-red-500/50 transition-all duration-300 hover:scale-105 backdrop-blur-sm">
-          <AlertTriangle className="w-5 h-5 animate-pulse" />
-          <div className="hidden md:flex flex-col items-start">
-            <span className="text-xs font-bold uppercase tracking-wider">War Zone Alert</span>
-            <span className="text-[10px] text-red-100">Economic Calendar</span>
-          </div>
-        </div>
-      </button>
+      {/* Floating Button (saat minimized) */}
+      {isMinimized && (
+        <button
+          onClick={() => setIsMinimized(false)}
+          className="fixed bottom-20 left-4 md:left-6 z-40 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white p-3 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-110 flex items-center gap-2 animate-pulse"
+          title="Open War Zone Calendar"
+        >
+          <Calendar className="w-5 h-5" />
+          <span className="hidden sm:inline text-xs font-bold">War Zone</span>
+        </button>
+      )}
 
-      {isOpen && (
-        <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 animate-in fade-in duration-300">
-          <div className="w-full h-full bg-gradient-to-br from-slate-900 to-slate-800 flex flex-col">
+      {/* Modal Container */}
+      {!isMinimized && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end md:items-center justify-end md:justify-center p-0 md:p-4">
+          {/* Card - Responsive positioning */}
+          <div className="w-full h-[85vh] md:h-[90vh] md:w-full md:max-w-5xl bg-slate-950 border border-red-500/50 rounded-t-3xl md:rounded-2xl shadow-2xl shadow-red-500/30 flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 md:slide-in-from-bottom-0 duration-300">
             
-            <div className="bg-gradient-to-r from-red-600 via-orange-600 to-red-600 p-4 md:p-6 flex items-center justify-between flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="p-2 md:p-3 bg-white/20 rounded-xl">
-                  <AlertTriangle className="w-6 h-6 md:w-8 md:h-8 text-white" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl md:text-2xl font-black text-white tracking-wider">
-                      🚨 ZONA PERANG
-                    </h2>
-                    <span className="px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full animate-pulse">
-                      LIVE
-                    </span>
-                  </div>
-                  <p className="text-red-100 text-xs md:text-sm mt-1">
-                    Real-Time Economic Events via TradingView
-                  </p>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-red-600 to-orange-600 px-4 md:px-6 py-3 md:py-4 flex items-center justify-between border-b border-red-700/50 flex-shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <Calendar className="w-5 md:w-6 h-5 md:h-6 text-white flex-shrink-0" />
+                <div className="min-w-0">
+                  <h2 className="text-lg md:text-xl font-black tracking-wider text-white truncate">WAR ZONE CALENDAR</h2>
+                  <p className="text-xs text-red-100">📊 TradingView Economic Calendar - Real-time Events</p>
                 </div>
               </div>
-              
+
+              {/* Close Button */}
               <button
-                onClick={() => setIsOpen(false)}
-                className="text-white/80 hover:text-white hover:rotate-90 transition-all duration-300 p-2 bg-white/10 rounded-lg hover:bg-white/20"
-                aria-label="Close"
+                onClick={() => setIsMinimized(true)}
+                className="p-2 hover:bg-red-700 rounded-lg transition-colors duration-200 flex-shrink-0"
+                title="Close War Zone Calendar"
               >
-                <X className="w-8 h-8 md:w-10 md:h-10" />
+                <X className="w-5 h-5 text-white" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-hidden bg-slate-900">
-              <iframe
-                src="https://economic-calendar.tradingview.com?colorTheme=dark&lang=en"
-                className="w-full h-full border-0"
-                title="Economic Calendar"
-              />
-            </div>
-
-            <div className="bg-gradient-to-r from-red-950 to-orange-950 border-t border-red-500/30 p-4 flex items-center gap-3 flex-shrink-0">
-              <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 animate-pulse" />
-              <div>
-                <p className="text-yellow-500 font-bold text-sm md:text-base">⚠️ NO PLAN, NO TRADE</p>
-                <p className="text-slate-400 text-xs mt-1">
-                  Stay away during HIGH impact (red flag) events
-                </p>
+            {/* Content - Calendar Embed */}
+            <div className="flex-1 overflow-auto w-full bg-slate-900/50">
+              {/* TradingView Events Widget */}
+              <div className="w-full h-full">
+                <iframe
+                  title="TradingView Economic Calendar"
+                  src="https://www.tradingview.com/events/"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    background: '#030712',
+                  }}
+                  frameBorder="0"
+                  scrolling="auto"
+                  allowFullScreen
+                  allow="autoplay; encrypted-media"
+                ></iframe>
               </div>
             </div>
 
+            {/* Footer Info */}
+            <div className="bg-red-950/40 border-t border-red-500/30 px-4 md:px-6 py-2 md:py-3 text-xs text-red-200 flex-shrink-0">
+              <p className="flex items-center gap-2">
+                <span>⚠️</span>
+                <span><strong>High Impact Events</strong> = Hindari trading atau ketatkan SL! Volatilitas bisa membabi buta!</span>
+              </p>
+            </div>
           </div>
         </div>
       )}
