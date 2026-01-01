@@ -34,53 +34,53 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-white dark:bg-gradient-to-b dark:from-slate-950 dark:via-slate-900 dark:to-slate-950/80 border-b border-yellow-200 dark:border-yellow-500/20 dark:backdrop-blur-md shadow-lg dark:shadow-2xl transition-colors duration-300">
+    <header className="sticky top-0 z-50 bg-white dark:bg-gradient-to-b dark:from-slate-900/95 dark:via-slate-900/90 dark:to-slate-950/80 border-b border-yellow-200 dark:border-yellow-500/20 dark:backdrop-blur-xl shadow-xl dark:shadow-2xl dark:shadow-black/50 transition-all duration-300">
       <div className="w-full">
         {/* Top Bar */}
         <div className="px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center group-hover:shadow-lg group-hover:shadow-orange-500/50 transition-all">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center group-hover:shadow-xl group-hover:shadow-orange-500/50 transition-all duration-300 group-hover:scale-110">
               <Zap className="text-white w-6 h-6" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg md:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
+              <h1 className="text-lg md:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 group-hover:scale-105 transition-transform duration-300">
                 MPT WARRIOR
               </h1>
-              <p className="text-xs text-slate-500">Keunggulan Trading</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Keunggulan Trading</p>
             </div>
           </Link>
 
           {/* Stats Grid */}
           <div className="hidden sm:grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 flex-1 max-w-2xl">
             {/* Total Trades */}
-            <div className="bg-slate-100 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700/30 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-yellow-300 dark:hover:border-yellow-500/40 hover:bg-slate-200 dark:hover:bg-slate-800/70 transition-all">
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">Trades</p>
-              <p className="text-base md:text-lg font-black text-yellow-400 flex items-center gap-0.5">
+            <div className="bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700/40 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-yellow-300 dark:hover:border-yellow-500/50 hover:bg-slate-200 dark:hover:bg-slate-800/80 transition-all duration-300 group cursor-default">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-tight">Trades</p>
+              <p className="text-base md:text-lg font-black text-yellow-500 dark:text-yellow-400 flex items-center gap-0.5 group-hover:scale-105 transition-transform">
                 <TrendingUp className="w-3 h-3" />
                 {stats.totalTrades}
               </p>
             </div>
 
             {/* Win Rate */}
-            <div className="bg-slate-800/50 border border-slate-700/30 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-green-500/40 hover:bg-slate-800/70 transition-all">
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">Menang %</p>
-              <p className="text-base md:text-lg font-black text-green-400">
+            <div className="bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700/40 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-green-300 dark:hover:border-green-500/50 hover:bg-slate-200 dark:hover:bg-slate-800/80 transition-all duration-300 group cursor-default">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-tight">Menang %</p>
+              <p className="text-base md:text-lg font-black text-green-500 dark:text-green-400 group-hover:scale-105 transition-transform">
                 {stats.winRate}%
               </p>
             </div>
 
             {/* Balance */}
-            <div className="bg-slate-800/50 border border-slate-700/30 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-blue-500/40 hover:bg-slate-800/70 transition-all">
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">Saldo</p>
-              <p className="text-base md:text-lg font-black text-blue-400">
+            <div className="bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700/40 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-blue-300 dark:hover:border-blue-500/50 hover:bg-slate-200 dark:hover:bg-slate-800/80 transition-all duration-300 group cursor-default">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-tight">Saldo</p>
+              <p className="text-base md:text-lg font-black text-blue-500 dark:text-blue-400 group-hover:scale-105 transition-transform">
                 ${(stats.balance / 1000).toFixed(1)}k
               </p>
             </div>
 
             {/* Weekly PnL */}
-            <div className="bg-slate-800/50 border border-slate-700/30 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-purple-500/40 hover:bg-slate-800/70 transition-all">
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">PnL</p>
-              <p className="text-base md:text-lg font-black text-purple-400">
+            <div className="bg-slate-100 dark:bg-slate-800/60 border border-slate-300 dark:border-slate-700/40 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-purple-300 dark:hover:border-purple-500/50 hover:bg-slate-200 dark:hover:bg-slate-800/80 transition-all duration-300 group cursor-default">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-tight">PnL</p>
+              <p className="text-base md:text-lg font-black text-purple-500 dark:text-purple-400 group-hover:scale-105 transition-transform">
                 +0%
               </p>
             </div>
@@ -90,8 +90,8 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
 
-            <Link href="/analytics" className="p-2 md:p-3 rounded-lg bg-slate-800/50 hover:bg-slate-700 border border-slate-700/50 hover:border-yellow-500/30 transition-all hover:shadow-lg hover:shadow-yellow-500/20">
-              <BarChart3 className="w-5 h-5 text-slate-400 hover:text-yellow-400 transition-colors" />
+            <Link href="/analytics" className="p-2 md:p-3 rounded-lg bg-slate-200 dark:bg-slate-800/60 hover:bg-slate-300 dark:hover:bg-slate-800/80 border border-slate-300 dark:border-slate-700/40 hover:border-yellow-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/20 group">
+              <BarChart3 className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-yellow-400 dark:group-hover:text-yellow-300 transition-colors duration-300" />
             </Link>
           </div>
         </div>

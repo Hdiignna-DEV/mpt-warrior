@@ -7,12 +7,15 @@ import Footer from "@/components/Footer";
 import PanicButton from "@/components/PanicButton";
 import TradingViewCalendar from "@/components/TradingViewCalendar";
 import { ThemeProviderWrapper } from "@/components/ThemeProvider";
+import { ThemeScript } from "@/components/ThemeScript";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "MPT Warrior Hub - Trading Excellence",
   description: "Mindset Plan Trader Warrior Hub - Complete Trading System",
+  colorScheme: 'dark light',
+  themeColor: '#0f172a',
 };
 
 export default function RootLayout({
@@ -23,14 +26,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <head>
+        <ThemeScript />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
-        <meta name="theme-color" content="#0f172a" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/mpt-logo.png" />
       </head>
-      <body className={`${inter.className} bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-100 overflow-x-hidden flex flex-col min-h-screen transition-colors duration-300`}>
+      <body className={`${inter.className} bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-100 overflow-x-hidden flex flex-col min-h-screen transition-colors duration-300`} suppressHydrationWarning>
         <ThemeProviderWrapper>
           {/* Header */}
           <Header />

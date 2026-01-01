@@ -9,7 +9,16 @@ interface ThemeProviderWrapperProps {
 
 export function ThemeProviderWrapper({ children }: ThemeProviderWrapperProps) {
   return (
-    <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem storageKey="mpt-theme">
+    <ThemeProvider 
+      attribute="class" 
+      defaultTheme="dark" 
+      enableSystem={true}
+      enableColorScheme={false}
+      storageKey="mpt-theme"
+      forcedTheme={undefined}
+      disableTransitionOnChange={false}
+      themes={['light', 'dark']}
+    >
       {children}
     </ThemeProvider>
   );
