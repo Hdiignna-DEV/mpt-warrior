@@ -30,7 +30,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/mpt-logo.png" />
       </head>
-      <body className={`${inter.className} bg-slate-950 text-slate-100 overflow-x-hidden dark flex flex-col min-h-screen`}>
+      <body className={`${inter.className} bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-100 overflow-x-hidden flex flex-col min-h-screen transition-colors duration-300`}>
         <ThemeProviderWrapper>
           {/* Header */}
           <Header />
@@ -40,7 +40,7 @@ export default function RootLayout({
             <Sidebar />
 
             {/* Main Content with Footer */}
-            <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-slate-950 w-full">
+            <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-white dark:bg-slate-950 w-full transition-colors duration-300">
               <div className="flex-1 pb-8">
                 {children}
               </div>

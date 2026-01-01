@@ -13,7 +13,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <h3 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 mb-3">
-              MPT WARRIOR
+              MPT COMMUNITY
             </h3>
             <p className="text-sm text-slate-400 mb-4">
               Hub Keunggulan Trading. Mentalitas, Rencana, Risk, Disiplin.
@@ -68,7 +68,7 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="flex flex-col md:flex-row items-center justify-between text-sm text-slate-500">
-          <p>© {currentYear} MPT Warrior. Semua hak dilindungi.</p>
+          <p>© {currentYear} MPT COMMUNITY. Semua hak dilindungi.</p>
           <p className="flex items-center gap-2 mt-4 md:mt-0">
             Dibuat dengan <Heart className="w-4 h-4 text-red-500" /> untuk trader
           </p>
