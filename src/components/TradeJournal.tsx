@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, Filter, X, Save, Image as ImageIcon } from 'lucide-react';
+import { saveJournalEntries, getJournalEntries } from '@/utils/storage-sync';
 
 interface JournalEntry {
   id: string;
@@ -55,19 +56,15 @@ export default function TradeJournal({ onSave }: TradeJournalProps) {
 
   // Load entries from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('mpt_journal_entries');
-    if (saved) {
-      try {
-        setEntries(JSON.parse(saved));
-      } catch (error) {
-        console.error('Error loading journal entries:', error);
-      }
-    }
+    const loadedEntries = getJournalEntries();
+    setEntries(loadedEntries);
   }, []);
 
-  // Save entries to localStorage
+  // Save entries to localStorage AND sync to dashboard
   useEffect(() => {
-    localStorage.setItem('mpt_journal_entries', JSON.stringify(entries));
+    if (entries.length > 0 || localStorage.getItem('mpt_journal_entries')) {
+      saveJournalEntries(entries);
+    }
   }, [entries]);
 
   const calculatePips = (entry: number, exit: number, posisi: string) => {

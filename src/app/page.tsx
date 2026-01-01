@@ -3,16 +3,8 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { TrendingUp, Target, DollarSign, Award, RefreshCw, Edit2, X, Check, Zap, TrendingDown, Calendar, BookOpen, Calculator, Bot, BarChart3, Zap as ZapIcon } from 'lucide-react';
-
-interface Trade {
-  id: string;
-  pair: string;
-  posisi: 'BUY' | 'SELL';
-  hasil: 'WIN' | 'LOSS';
-  pip: number;
-  tanggal: string;
-  catatan: string;
-}
+import { getTrades, getInitialBalance, saveInitialBalance, onTradesUpdated } from '@/utils/storage-sync';
+import type { Trade } from '@/utils/storage-sync';
 
 export default function Dashboard() {
   const [trades, setTrades] = useState<Trade[]>([]);
@@ -21,33 +13,58 @@ export default function Dashboard() {
   const [isEditingBalance, setIsEditingBalance] = useState(false);
   const [tempBalance, setTempBalance] = useState<string>('10000');
 
-  // Load trades dari localStorage
+  // Load trades dan balance dari localStorage on mount
   useEffect(() => {
     setIsLoading(true);
-    const saved = localStorage.getItem('trades');
-    const savedBalance = localStorage.getItem('mpt_initial_balance');
     
-    if (saved) {
-      try {
-        const parsedTrades = JSON.parse(saved);
-        setTrades(Array.isArray(parsedTrades) ? parsedTrades : []);
-      } catch (error) {
-        console.error('Error parsing trades:', error);
-        setTrades([]);
-      }
-    }
-
-    if (savedBalance) {
-      try {
-        const balance = parseFloat(savedBalance);
-        setCustomBalance(balance);
-        setTempBalance(balance.toString());
-      } catch (error) {
-        console.error('Error parsing balance:', error);
-      }
-    }
+    // Load initial trades
+    const initialTrades = getTrades();
+    setTrades(initialTrades);
+    
+    // Load initial balance
+    const initialBalance = getInitialBalance();
+    setCustomBalance(initialBalance);
+    setTempBalance(initialBalance.toString());
 
     setIsLoading(false);
+  }, []);
+
+  // Subscribe to trades updates (real-time sync)
+  useEffect(() => {
+    const unsubscribe = onTradesUpdated((updatedTrades) => {
+      setTrades(updatedTrades);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Also listen to storage changes from other tabs
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'trades' && event.newValue) {
+        try {
+          const updatedTrades = JSON.parse(event.newValue);
+          setTrades(updatedTrades);
+        } catch (error) {
+          console.error('Error updating trades from storage:', error);
+        }
+      }
+      if (event.key === 'mpt_initial_balance' && event.newValue) {
+        try {
+          const balance = parseFloat(event.newValue);
+          setCustomBalance(balance);
+          setTempBalance(balance.toString());
+        } catch (error) {
+          console.error('Error updating balance from storage:', error);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   // Handle balance edit
@@ -60,7 +77,7 @@ export default function Dashboard() {
     }
 
     setCustomBalance(newBalance);
-    localStorage.setItem('mpt_initial_balance', newBalance.toString());
+    saveInitialBalance(newBalance);
     setIsEditingBalance(false);
   };
 
