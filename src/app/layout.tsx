@@ -13,6 +13,13 @@ export const metadata: Metadata = {
   description: "Mindset Plan Trader Warrior Hub - Complete Trading System",
 };
 
+<head>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="/mpt-logo.png" />
+</head>
+
 export default function RootLayout({
   children,
 }: {

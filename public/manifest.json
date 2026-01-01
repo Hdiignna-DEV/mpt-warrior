@@ -1,0 +1,62 @@
+{
+  "name": "MPT Warrior - Trading Hub",
+  "short_name": "MPT Warrior",
+  "description": "Mindset Plan Trader - Complete Trading Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#eab308",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshot-desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "categories": ["finance", "productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Trading Journal",
+      "short_name": "Journal",
+      "description": "Log your trades quickly",
+      "url": "/journal",
+      "icons": [{ "src": "/mpt-logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Risk Calculator",
+      "short_name": "Calculator",
+      "description": "Calculate position size",
+      "url": "/calculator",
+      "icons": [{ "src": "/mpt-logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "AI Mentor",
+      "short_name": "AI",
+      "description": "Get trading guidance",
+      "url": "/ai-mentor",
+      "icons": [{ "src": "/mpt-logo.png", "sizes": "96x96" }]
+    }
+  ]
+}
