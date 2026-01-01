@@ -1,0 +1,19 @@
+# .dockerignore file untuk optimize Docker build
+
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.next
+.env
+.env.*.local
+.vscode
+.idea
+.DS_Store
+dist
+build
+coverage
+.eslintrc
+.prettierrc
+jest.config.js

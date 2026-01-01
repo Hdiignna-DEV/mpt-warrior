@@ -8,15 +8,21 @@ import {
   Calculator, 
   Bot,
   Menu,
-  X
+  X,
+  BarChart3,
+  Trophy,
+  Calendar,
 } from 'lucide-react';
 import { useState } from 'react';
+import { ThemeToggle } from './ThemeToggle';
 
 const menuItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/journal', label: 'Trading Journal', icon: BookOpen },
   { href: '/calculator', label: 'Risk Calculator', icon: Calculator },
   { href: '/ai-mentor', label: 'AI Mentor', icon: Bot },
+  { href: '/achievements', label: 'Achievements', icon: Trophy },
 ];
 
 export default function Sidebar() {
@@ -96,10 +102,13 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="p-3 sm:p-4 border-t border-slate-700 flex-shrink-0">
+        {/* Theme Toggle & Footer */}
+        <div className="p-3 sm:p-4 border-t border-slate-700 flex-shrink-0 space-y-3">
+          <div className="flex justify-center">
+            <ThemeToggle />
+          </div>
           <p className="text-xs text-slate-500 text-center">
-            v4.0 (Tactical)
+            v5.0 (Enhanced)
           </p>
         </div>
       </aside>

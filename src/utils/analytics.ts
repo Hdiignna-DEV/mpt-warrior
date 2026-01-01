@@ -1,4 +1,200 @@
-// Simple Analytics Tracker (localStorage-based)
+'use client';
+
+interface Trade {
+  id: string;
+  pair: string;
+  posisi: 'BUY' | 'SELL';
+  hasil: 'WIN' | 'LOSS';
+  pip: number;
+  tanggal: string;
+  catatan: string;
+}
+
+interface Analytics {
+  totalTrades: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  totalPips: number;
+  averagePips: number;
+  profitFactor: number;
+  consecutiveWins: number;
+  consecutiveLosses: number;
+  largestWin: number;
+  largestLoss: number;
+  trades: Trade[];
+}
+
+export const calculateAnalytics = (trades: Trade[]): Analytics => {
+  if (trades.length === 0) {
+    return {
+      totalTrades: 0,
+      wins: 0,
+      losses: 0,
+      winRate: 0,
+      totalPips: 0,
+      averagePips: 0,
+      profitFactor: 0,
+      consecutiveWins: 0,
+      consecutiveLosses: 0,
+      largestWin: 0,
+      largestLoss: 0,
+      trades: [],
+    };
+  }
+
+  const totalTrades = trades.length;
+  const wins = trades.filter((t) => t.hasil === 'WIN').length;
+  const losses = trades.filter((t) => t.hasil === 'LOSS').length;
+  const winRate = (wins / totalTrades) * 100;
+
+  const winPips = trades
+    .filter((t) => t.hasil === 'WIN')
+    .reduce((acc, t) => acc + t.pip, 0);
+  const lossPips = trades
+    .filter((t) => t.hasil === 'LOSS')
+    .reduce((acc, t) => acc + Math.abs(t.pip), 0);
+
+  const totalPips = winPips - lossPips;
+  const averagePips = totalTrades > 0 ? totalPips / totalTrades : 0;
+
+  // Profit Factor = Gross Profit / Gross Loss
+  const profitFactor = lossPips > 0 ? winPips / lossPips : winPips > 0 ? Infinity : 0;
+
+  // Calculate consecutive wins/losses
+  let consecutiveWins = 0;
+  let consecutiveLosses = 0;
+  let maxConsecutiveWins = 0;
+  let maxConsecutiveLosses = 0;
+
+  for (let i = 0; i < trades.length; i++) {
+    if (trades[i].hasil === 'WIN') {
+      consecutiveWins++;
+      maxConsecutiveWins = Math.max(maxConsecutiveWins, consecutiveWins);
+      consecutiveLosses = 0;
+    } else {
+      consecutiveLosses++;
+      maxConsecutiveLosses = Math.max(maxConsecutiveLosses, consecutiveLosses);
+      consecutiveWins = 0;
+    }
+  }
+
+  // Find largest win and loss
+  const winTrades = trades.filter((t) => t.hasil === 'WIN');
+  const lossTrades = trades.filter((t) => t.hasil === 'LOSS');
+
+  const largestWin = winTrades.length > 0 ? Math.max(...winTrades.map((t) => t.pip)) : 0;
+  const largestLoss =
+    lossTrades.length > 0
+      ? Math.min(...lossTrades.map((t) => -Math.abs(t.pip)))
+      : 0;
+
+  return {
+    totalTrades,
+    wins,
+    losses,
+    winRate,
+    totalPips,
+    averagePips,
+    profitFactor,
+    consecutiveWins: maxConsecutiveWins,
+    consecutiveLosses: maxConsecutiveLosses,
+    largestWin,
+    largestLoss,
+    trades,
+  };
+};
+
+export const getMonthlyStats = (
+  trades: Trade[]
+): Record<string, Analytics> => {
+  const monthlyTrades: Record<string, Trade[]> = {};
+
+  trades.forEach((trade) => {
+    const date = new Date(trade.tanggal);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+    if (!monthlyTrades[monthKey]) {
+      monthlyTrades[monthKey] = [];
+    }
+    monthlyTrades[monthKey].push(trade);
+  });
+
+  const monthlyStats: Record<string, Analytics> = {};
+  for (const [month, monthTrades] of Object.entries(monthlyTrades)) {
+    monthlyStats[month] = calculateAnalytics(monthTrades);
+  }
+
+  return monthlyStats;
+};
+
+export const getPairStats = (
+  trades: Trade[]
+): Record<string, Analytics> => {
+  const pairTrades: Record<string, Trade[]> = {};
+
+  trades.forEach((trade) => {
+    if (!pairTrades[trade.pair]) {
+      pairTrades[trade.pair] = [];
+    }
+    pairTrades[trade.pair].push(trade);
+  });
+
+  const pairStats: Record<string, Analytics> = {};
+  for (const [pair, pTrades] of Object.entries(pairTrades)) {
+    pairStats[pair] = calculateAnalytics(pTrades);
+  }
+
+  return pairStats;
+};
+
+export const getEquityCurve = (
+  trades: Trade[],
+  initialBalance: number
+): Array<{ date: string; equity: number }> => {
+  let currentEquity = initialBalance;
+  const curve: Array<{ date: string; equity: number }> = [
+    { date: 'Start', equity: initialBalance },
+  ];
+
+  trades.forEach((trade) => {
+    const pipValue = 10; // Default value, dapat disesuaikan
+    const tradeProfit = trade.hasil === 'WIN' ? trade.pip * pipValue : -Math.abs(trade.pip * pipValue);
+    currentEquity += tradeProfit;
+
+    curve.push({
+      date: new Date(trade.tanggal).toLocaleDateString('id-ID'),
+      equity: currentEquity,
+    });
+  });
+
+  return curve;
+};
+
+export const getDrawdown = (trades: Trade[], initialBalance: number): { peak: number; drawdown: number; drawdownPercent: number } => {
+  let currentEquity = initialBalance;
+  let peak = initialBalance;
+  let maxDrawdown = 0;
+
+  trades.forEach((trade) => {
+    const pipValue = 10;
+    const tradeProfit = trade.hasil === 'WIN' ? trade.pip * pipValue : -Math.abs(trade.pip * pipValue);
+    currentEquity += tradeProfit;
+
+    if (currentEquity > peak) {
+      peak = currentEquity;
+    }
+
+    const drawdown = peak - currentEquity;
+    maxDrawdown = Math.max(maxDrawdown, drawdown);
+  });
+
+  return {
+    peak,
+    drawdown: maxDrawdown,
+    drawdownPercent: (maxDrawdown / initialBalance) * 100,
+  };
+};
 
 export const analytics = {
   // Track page view
@@ -38,8 +234,3 @@ export const analytics = {
     localStorage.setItem('mpt_sessions', JSON.stringify(sessions));
   },
 };
-
-// Usage:
-// analytics.trackPageView('Dashboard');
-// analytics.trackAction('trade_added', { pair: 'XAUUSD', result: 'WIN' });
-// analytics.trackAction('calculator_used', { balance: 10000, risk: 1 });
