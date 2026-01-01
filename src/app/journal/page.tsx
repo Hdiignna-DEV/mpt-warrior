@@ -12,14 +12,36 @@ interface Trade {
   catatan: string;
 }
 
+// List of popular trading pairs
+const POPULAR_PAIRS = [
+  'XAUUSD',
+  'EURUSD',
+  'GBPUSD',
+  'USDJPY',
+  'AUDUSD',
+  'USDCAD',
+  'NZDUSD',
+  'BTCUSD',
+  'ETHUSD',
+  'USDINR',
+  'USDCHF',
+  'EURGBP',
+  'EURJPY',
+  'GBPJPY',
+  'AUDJPY',
+  'NZDJPY',
+  'EURCHF',
+  'GBPCHF',
+];
+
 export default function JurnalTrading() {
   const [trades, setTrades] = useState<Trade[]>([]);
-  const [pair, setPair] = useState('');
+  const [pair, setPair] = useState('XAUUSD');
   const [posisi, setPosisi] = useState<'BUY' | 'SELL'>('BUY');
-  const [hasil, setHasil] = useState<'WIN' | 'LOSS'>('WIN');
   const [pip, setPip] = useState('');
   const [catatan, setCatatan] = useState('');
   const [showExportOptions, setShowExportOptions] = useState(false);
+  const [showPairDropdown, setShowPairDropdown] = useState(false);
 
   // Load dari localStorage
   useEffect(() => {
@@ -32,80 +54,71 @@ export default function JurnalTrading() {
     localStorage.setItem('trades', JSON.stringify(trades));
   }, [trades]);
 
+  // Auto-determine WIN/LOSS based on pips
+  const getHasil = (): 'WIN' | 'LOSS' => {
+    const pipValue = parseFloat(pip);
+    if (isNaN(pipValue)) return 'WIN'; // Default jika kosong
+    return pipValue > 0 ? 'WIN' : 'LOSS';
+  };
+
   const tambahTrade = () => {
     if (!pair || !pip) {
       alert('Isi Pair dan Pip terlebih dahulu!');
       return;
     }
 
+    const pipValue = parseFloat(pip);
+    if (isNaN(pipValue) || pipValue === 0) {
+      alert('Pip harus berupa angka bukan 0!');
+      return;
+    }
+
+    const hasil = getHasil();
+
     const tradeBaru: Trade = {
       id: Date.now().toString(),
       pair,
       posisi,
       hasil,
-      pip: parseFloat(pip),
+      pip: pipValue,
       tanggal: new Date().toISOString().split('T')[0],
       catatan,
     };
 
     setTrades([tradeBaru, ...trades]);
-    setPair('');
+    // Reset form
+    setPair('XAUUSD');
     setPip('');
     setCatatan('');
-    setHasil('WIN');
+    setPosisi('BUY');
   };
 
   const hapusTrade = (id: string) => {
     setTrades(trades.filter((t) => t.id !== id));
   };
 
-  // Calculate statistics
-  const totalTrade = trades.length;
-  const win = trades.filter((t) => t.hasil === 'WIN').length;
-  const loss = totalTrade - win;
-  const winRate = totalTrade > 0 ? Math.round((win / totalTrade) * 100) : 0;
-  const totalPips = trades.reduce((acc, t) => acc + t.pip, 0);
-  const estimatedBalance = 10000 + (totalPips * 10);
-
-  const calculateBestStreak = () => {
-    let currentStreak = 0;
-    let bestStreak = 0;
-    trades.forEach(trade => {
-      if (trade.hasil === 'WIN') {
-        currentStreak++;
-        bestStreak = Math.max(bestStreak, currentStreak);
-      } else {
-        currentStreak = 0;
-      }
-    });
-    return bestStreak;
-  };
-
-  const avgPipsPerWin = win > 0 
-    ? Math.round(trades.filter(t => t.hasil === 'WIN').reduce((sum, t) => sum + t.pip, 0) / win * 100) / 100
-    : 0;
-
-  const avgPipsPerLoss = loss > 0
-    ? Math.round(trades.filter(t => t.hasil === 'LOSS').reduce((sum, t) => sum + Math.abs(t.pip), 0) / loss * 100) / 100
-    : 0;
-
-  // Export to Enhanced CSV
+  // Export functions
   const exportToEnhancedCSV = () => {
     if (trades.length === 0) {
       alert('Tidak ada trade untuk di-export!');
       return;
     }
 
+    const totalTrade = trades.length;
+    const win = trades.filter((t) => t.hasil === 'WIN').length;
+    const loss = totalTrade - win;
+    const winRate = totalTrade > 0 ? Math.round((win / totalTrade) * 100) : 0;
+    const totalPips = trades.reduce((acc, t) => acc + t.pip, 0);
+    const customBalance = parseFloat(localStorage.getItem('mpt_initial_balance') || '10000');
+
     let csvContent = '';
 
-    // HEADER SECTION
     csvContent += '═══════════════════════════════════════════════════════════════\n';
     csvContent += 'MPT WARRIOR HUB - TRADING JOURNAL REPORT\n';
     csvContent += '═══════════════════════════════════════════════════════════════\n';
     csvContent += `Export Date:,${new Date().toLocaleString('id-ID')}\n`;
     csvContent += '\n';
 
-    // SUMMARY STATISTICS
     csvContent += '─────────────────────────────────────────────────────────────\n';
     csvContent += 'SUMMARY STATISTICS\n';
     csvContent += '─────────────────────────────────────────────────────────────\n';
@@ -114,28 +127,15 @@ export default function JurnalTrading() {
     csvContent += `Total LOSS:,${loss}\n`;
     csvContent += `Win Rate:,${winRate}%\n`;
     csvContent += `Total Pips:,${totalPips >= 0 ? '+' : ''}${totalPips}\n`;
-    csvContent += `Initial Balance:,$10,000\n`;
-    csvContent += `Estimated Balance:,$${estimatedBalance.toLocaleString('en-US')}\n`;
-    csvContent += `Profit/Loss:,$${((estimatedBalance - 10000) * 10).toLocaleString('en-US')}\n`;
+    csvContent += `Initial Balance:,$${customBalance.toLocaleString('en-US')}\n`;
+    csvContent += `Estimated Balance:,$${(customBalance + totalPips * 10).toLocaleString('en-US')}\n`;
     csvContent += '\n';
 
-    // ADVANCED METRICS
-    csvContent += '─────────────────────────────────────────────────────────────\n';
-    csvContent += 'ADVANCED METRICS\n';
-    csvContent += '─────────────────────────────────────────────────────────────\n';
-    csvContent += `Best Streak:,${calculateBestStreak()} Wins\n`;
-    csvContent += `Average Pips Per Win:,+${avgPipsPerWin}\n`;
-    csvContent += `Average Pips Per Loss:,-${avgPipsPerLoss}\n`;
-    csvContent += `Risk/Reward Ratio:,${(avgPipsPerWin / avgPipsPerLoss).toFixed(2)}\n`;
-    csvContent += '\n';
-
-    // TRADES DETAIL
     csvContent += '═══════════════════════════════════════════════════════════════\n';
     csvContent += 'DETAILED TRADES\n';
     csvContent += '═══════════════════════════════════════════════════════════════\n';
     csvContent += 'Pair,Position,Result,Pips,Date,Notes\n';
 
-    // Add each trade
     trades.forEach((trade) => {
       const pipsDisplay = trade.pip > 0 ? `+${trade.pip}` : `${trade.pip}`;
       const notes = trade.catatan ? `"${trade.catatan.replace(/"/g, '""')}"` : '';
@@ -148,7 +148,6 @@ export default function JurnalTrading() {
     csvContent += 'Remember: Discipline is your competitive advantage!\n';
     csvContent += '═══════════════════════════════════════════════════════════════\n';
 
-    // Create and download
     const BOM = '\uFEFF';
     const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -161,123 +160,18 @@ export default function JurnalTrading() {
     setShowExportOptions(false);
   };
 
-  // Export to Simple CSV (basic format)
-  const exportToSimpleCSV = () => {
-    if (trades.length === 0) {
-      alert('Tidak ada trade untuk di-export!');
-      return;
-    }
-
-    const headers = ['Pair', 'Posisi', 'Hasil', 'Pip', 'Tanggal', 'Catatan'];
-    const rows = trades.map(trade => [
-      trade.pair,
-      trade.posisi,
-      trade.hasil,
-      trade.pip,
-      trade.tanggal,
-      `"${trade.catatan.replace(/"/g, '""')}"`,
-    ]);
-
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.join(','))
-    ].join('\n');
-
-    const BOM = '\uFEFF';
-    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.download = `MPT-Journal-Simple_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-
-    setShowExportOptions(false);
-  };
-
-  // Export to Excel-style CSV
-  const exportToExcelCSV = () => {
-    if (trades.length === 0) {
-      alert('Tidak ada trade untuk di-export!');
-      return;
-    }
-
-    let csvContent = '';
-
-    // Title
-    csvContent += ',MPT WARRIOR HUB - TRADING JOURNAL,\n';
-    csvContent += ',,\n';
-
-    // Stats Section
-    csvContent += 'STATISTICS,\n';
-    csvContent += `Total Trades,${totalTrade}\n`;
-    csvContent += `WIN,${win}\n`;
-    csvContent += `LOSS,${loss}\n`;
-    csvContent += `Win Rate,${winRate}%\n`;
-    csvContent += `Total Pips,${totalPips}\n`;
-    csvContent += `Balance,$${estimatedBalance.toLocaleString('en-US')}\n`;
-    csvContent += ',,\n';
-
-    // Trades Table
-    csvContent += 'DETAILED TRADES\n';
-    csvContent += 'No.,Pair,Position,Result,Pips,Date,Notes\n';
-
-    trades.forEach((trade, index) => {
-      const pipsDisplay = trade.pip > 0 ? `+${trade.pip}` : `${trade.pip}`;
-      const notes = trade.catatan ? `"${trade.catatan.replace(/"/g, '""')}"` : '';
-      csvContent += `${index + 1},${trade.pair},${trade.posisi},${trade.hasil},${pipsDisplay},${trade.tanggal},${notes}\n`;
-    });
-
-    const BOM = '\uFEFF';
-    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.download = `MPT-Journal-Excel_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-
-    setShowExportOptions(false);
-  };
-
-  const exportToJSON = () => {
-    if (trades.length === 0) {
-      alert('Tidak ada trade untuk di-export!');
-      return;
-    }
-
-    const data = {
-      exportDate: new Date().toISOString(),
-      statistics: {
-        totalTrade,
-        win,
-        loss,
-        winRate,
-        totalPips,
-        estimatedBalance,
-        bestStreak: calculateBestStreak(),
-        avgPipsPerWin,
-        avgPipsPerLoss,
-      },
-      trades: trades,
-    };
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.download = `MPT-Journal_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-
-    setShowExportOptions(false);
-  };
-
   const shareToClipboard = async () => {
     if (trades.length === 0) {
       alert('Tidak ada trade untuk di-share!');
       return;
     }
+
+    const totalTrade = trades.length;
+    const win = trades.filter((t) => t.hasil === 'WIN').length;
+    const loss = totalTrade - win;
+    const winRate = totalTrade > 0 ? Math.round((win / totalTrade) * 100) : 0;
+    const totalPips = trades.reduce((acc, t) => acc + t.pip, 0);
+    const customBalance = parseFloat(localStorage.getItem('mpt_initial_balance') || '10000');
 
     const shareText = `📊 MPT WARRIOR TRADING STATS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -285,8 +179,7 @@ export default function JurnalTrading() {
 ✅ WIN: ${win} | ❌ LOSS: ${loss}
 🎯 Win Rate: ${winRate}%
 💰 Total Pips: ${totalPips >= 0 ? '+' : ''}${totalPips}
-💎 Balance: $${estimatedBalance.toLocaleString('en-US')}
-🏆 Best Streak: ${calculateBestStreak()} Wins
+💎 Balance: $${(customBalance + totalPips * 10).toLocaleString('en-US')}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🔗 https://mpt-warrior.vercel.app`;
 
@@ -294,10 +187,19 @@ export default function JurnalTrading() {
       await navigator.clipboard.writeText(shareText);
       alert('📋 Stats berhasil dicopy! Siap untuk di-share.');
       setShowExportOptions(false);
-    } catch {
+    } catch (err) {
       alert('Gagal copy ke clipboard');
     }
   };
+
+  const totalTrade = trades.length;
+  const win = trades.filter((t) => t.hasil === 'WIN').length;
+  const loss = totalTrade - win;
+  const winRate = totalTrade > 0 ? Math.round((win / totalTrade) * 100) : 0;
+  const totalPips = trades.reduce((acc, t) => acc + t.pip, 0);
+
+  // Get current hasil status
+  const currentHasil = getHasil();
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 pt-24 md:pt-8">
@@ -314,7 +216,6 @@ export default function JurnalTrading() {
             </div>
           </div>
 
-          {/* Export Button */}
           <div className="relative">
             <button
               onClick={() => setShowExportOptions(!showExportOptions)}
@@ -324,47 +225,14 @@ export default function JurnalTrading() {
               <span className="hidden md:inline">Export</span>
             </button>
 
-            {/* Export Menu - ENHANCED */}
             {showExportOptions && (
               <div className="absolute top-full right-0 mt-2 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 w-56">
-                <div className="p-3 border-b border-slate-700 text-sm font-bold text-slate-300">
-                  📊 CSV Formats
-                </div>
-
                 <button
                   onClick={exportToEnhancedCSV}
                   className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 text-sm flex flex-col gap-1"
                 >
                   <span className="font-bold text-green-400">📈 Enhanced CSV</span>
                   <span className="text-xs text-slate-400">Dengan statistics & summary</span>
-                </button>
-
-                <button
-                  onClick={exportToExcelCSV}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 text-sm flex flex-col gap-1"
-                >
-                  <span className="font-bold text-blue-400">📊 Excel Format</span>
-                  <span className="text-xs text-slate-400">Optimal untuk Excel/Sheets</span>
-                </button>
-
-                <button
-                  onClick={exportToSimpleCSV}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 text-sm flex flex-col gap-1"
-                >
-                  <span className="font-bold text-yellow-400">📋 Simple CSV</span>
-                  <span className="text-xs text-slate-400">Plain text format</span>
-                </button>
-
-                <div className="p-3 border-b border-slate-700 text-sm font-bold text-slate-300">
-                  🎯 Other Formats
-                </div>
-
-                <button
-                  onClick={exportToJSON}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 text-sm flex flex-col gap-1"
-                >
-                  <span className="font-bold text-purple-400">📁 Export to JSON</span>
-                  <span className="text-xs text-slate-400">Backup & data transfer</span>
                 </button>
 
                 <button
@@ -409,24 +277,48 @@ export default function JurnalTrading() {
         </div>
       </div>
 
-      {/* Form Input */}
+      {/* Form Input - IMPROVED */}
       <div className="bg-slate-900/60 rounded-2xl border border-slate-800/50 p-5 md:p-8 backdrop-blur-sm mb-8">
         <h2 className="text-lg md:text-xl font-bold text-white mb-6 flex items-center gap-2">
           <Plus size={24} className="text-blue-400" /> Input Trade Baru
         </h2>
 
         <div className="space-y-4 md:space-y-5">
+          {/* Pair Dropdown */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">Pair</label>
-            <input
-              type="text"
-              placeholder="Contoh: XAUUSD, EURUSD"
-              value={pair}
-              onChange={(e) => setPair(e.target.value.toUpperCase())}
-              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
-            />
+            <div className="relative">
+              <button
+                onClick={() => setShowPairDropdown(!showPairDropdown)}
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white text-left hover:border-blue-500 focus:border-blue-500 focus:outline-none flex items-center justify-between"
+              >
+                <span className="font-bold">{pair}</span>
+                <span className="text-slate-400">▼</span>
+              </button>
+
+              {/* Dropdown Menu */}
+              {showPairDropdown && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
+                  {POPULAR_PAIRS.map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => {
+                        setPair(p);
+                        setShowPairDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-800/50 last:border-b-0 ${
+                        pair === p ? 'bg-blue-500/30 text-blue-400 font-bold' : 'text-white'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
+          {/* Posisi */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">Posisi</label>
             <div className="grid grid-cols-2 gap-3">
@@ -453,43 +345,43 @@ export default function JurnalTrading() {
             </div>
           </div>
 
+          {/* Pip - Auto Determine Result */}
           <div>
-            <label className="block text-sm font-semibold text-slate-300 mb-2">Hasil</label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setHasil('WIN')}
-                className={`py-3 rounded-lg font-bold transition-all ${
-                  hasil === 'WIN'
-                    ? 'bg-green-500 text-white'
-                    : 'bg-slate-800/50 text-slate-300 border border-slate-700'
-                }`}
-              >
-                ✅ WIN
-              </button>
-              <button
-                onClick={() => setHasil('LOSS')}
-                className={`py-3 rounded-lg font-bold transition-all ${
-                  hasil === 'LOSS'
-                    ? 'bg-red-500 text-white'
-                    : 'bg-slate-800/50 text-slate-300 border border-slate-700'
-                }`}
-              >
-                ❌ LOSS
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-300 mb-2">Pip</label>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">
+              Pip (Hasil auto-detect)
+            </label>
             <input
               type="number"
-              placeholder="Contoh: 35, -20"
+              placeholder="Contoh: 35 (WIN) atau -20 (LOSS)"
               value={pip}
               onChange={(e) => setPip(e.target.value)}
               className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
             />
+            
+            {/* Auto Result Display */}
+            {pip && (
+              <div className="mt-3 flex gap-3">
+                <div className="flex-1">
+                  <p className="text-xs text-slate-400 mb-2">Pip Input:</p>
+                  <div className={`px-3 py-2 rounded-lg font-bold text-center ${
+                    parseFloat(pip) > 0 ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
+                  }`}>
+                    {parseFloat(pip) > 0 ? '+' : ''}{pip}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-slate-400 mb-2">Hasil (Auto):</p>
+                  <div className={`px-3 py-2 rounded-lg font-bold text-center ${
+                    currentHasil === 'WIN' ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
+                  }`}>
+                    {currentHasil === 'WIN' ? '✅ WIN' : '❌ LOSS'}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
+          {/* Catatan */}
           <div>
             <label className="block text-sm font-semibold text-slate-300 mb-2">Catatan (Opsional)</label>
             <textarea
@@ -501,6 +393,7 @@ export default function JurnalTrading() {
             />
           </div>
 
+          {/* Submit Button */}
           <button
             onClick={tambahTrade}
             className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
