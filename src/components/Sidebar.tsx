@@ -34,7 +34,7 @@ export default function Sidebar() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="sm:hidden fixed top-3 left-3 z-50 p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-yellow-500 transition-colors"
+        className="sm:hidden fixed top-3 left-3 z-60 p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-yellow-500 transition-colors"
         aria-label="Toggle menu"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -51,7 +51,7 @@ export default function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed sm:static inset-y-0 left-0 z-40
+          fixed sm:static inset-y-0 left-0 z-60
           w-64 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-r border-slate-700/50
           flex flex-col transition-transform duration-300
           ${isOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}
