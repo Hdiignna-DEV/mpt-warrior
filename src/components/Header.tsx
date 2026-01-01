@@ -4,6 +4,7 @@ import { Zap, TrendingUp, Target, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ThemeToggle } from './ThemeToggle';
+import { getTrades, getInitialBalance, onTradesUpdated } from '@/utils/storage-sync';
 
 export default function Header() {
   const [stats, setStats] = useState({
@@ -13,24 +14,42 @@ export default function Header() {
     weeklyPnL: 0
   });
 
+  // Load initial data
   useEffect(() => {
-    const saved = localStorage.getItem('mpt_trades');
-    if (saved) {
-      const trades = JSON.parse(saved);
-      const wins = trades.filter((t: any) => t.result === 'win').length;
-      const total = trades.length;
-      const winRate = total > 0 ? ((wins / total) * 100).toFixed(0) : '0';
+    const trades = getTrades();
+    const balance = getInitialBalance();
+    
+    const wins = trades.filter((t) => t.hasil === 'WIN').length;
+    const total = trades.length;
+    const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+    const totalPips = trades.reduce((sum, t) => sum + t.pip, 0);
 
-      const balanceData = localStorage.getItem('mpt_balance');
-      const balance = balanceData ? parseFloat(balanceData) : 10000;
+    setStats({
+      totalTrades: total,
+      winRate: winRate,
+      balance: balance + (totalPips * 10),
+      weeklyPnL: 0
+    });
+  }, []);
+
+  // Subscribe to real-time updates
+  useEffect(() => {
+    const unsubscribe = onTradesUpdated((trades) => {
+      const balance = getInitialBalance();
+      const wins = trades.filter((t) => t.hasil === 'WIN').length;
+      const total = trades.length;
+      const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+      const totalPips = trades.reduce((sum, t) => sum + t.pip, 0);
 
       setStats({
         totalTrades: total,
-        winRate: parseInt(winRate as string),
-        balance: balance,
+        winRate: winRate,
+        balance: balance + (totalPips * 10),
         weeklyPnL: 0
       });
-    }
+    });
+
+    return unsubscribe;
   }, []);
 
   return (
