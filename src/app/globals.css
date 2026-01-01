@@ -1,8 +1,9 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -25,42 +26,73 @@ html, body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Mobile viewport optimization */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
+  html, body {
+    font-size: 14px;
+  }
+
   body {
     padding: 0;
     margin: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
   main {
-    padding-top: 0;
+    padding: 0;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    padding-top: 60px;
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 
-  /* Fix for input focus on mobile */
   input, textarea, select {
-    font-size: 16px; /* Prevent zoom on focus */
+    font-size: 16px;
     border-radius: 8px;
   }
 
-  /* Ensure buttons are at least 44px for accessibility */
   button {
     min-height: 44px;
     min-width: 44px;
+  }
+
+  /* Optimize spacing on mobile */
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  p {
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
 }
 
 /* Smooth transitions */
 * {
-  @apply transition-colors duration-200;
+  transition: color 0.2s;
 }
 
 /* Prevent text selection on interactive elements */
 button, [role="button"] {
-  @apply select-none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Custom animations */
@@ -95,6 +127,17 @@ button, [role="button"] {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-slide-up {
   animation: slideInUp 0.3s ease-out;
 }
@@ -103,27 +146,61 @@ button, [role="button"] {
   animation: slideInDown 0.3s ease-out;
 }
 
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
 /* Focus styles for accessibility */
 button:focus, a:focus, input:focus {
-  @apply outline-none ring-2 ring-yellow-500 ring-offset-2 ring-offset-slate-950;
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(234, 179, 8) !important;
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  button, [role="button"], a {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.75rem !important;
+  }
+}
+
+/* Safe area support for notched devices */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Improved text readability on mobile */
+@media (max-width: 640px) {
+  body {
+    text-rendering: geometricPrecision;
+  }
+  
+  p {
+    word-break: break-word;
+  }
+}
 }
 
 /* Typography fixes for mobile */
 h1 {
-  @apply break-words;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 h2 {
-  @apply break-words;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 p {
-  @apply break-words;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 /* Fix for overflow on mobile cards */
 .card {
-  @apply overflow-hidden;
+  overflow: hidden;
 }
 
 /* Mobile-safe spacing for bottom sheets */

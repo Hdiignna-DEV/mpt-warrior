@@ -122,23 +122,23 @@ export default function KalkulatorRisiko() {
   const isOptimal = risikoValue === 1;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 pt-24 md:pt-8">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-3 sm:p-4 md:p-8 pt-20 sm:pt-24 md:pt-8">
       {/* Header */}
-      <div className="mb-8 md:mb-10">
-        <div className="flex items-center gap-3 md:gap-4 mb-4">
-          <div className="p-2 md:p-3 bg-gradient-to-br from-purple-500/40 to-pink-500/40 rounded-lg border border-purple-500/30">
-            <Calculator className="text-purple-400" size={24} />
+      <div className="mb-6 md:mb-10">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-4">
+          <div className="p-2 md:p-3 bg-gradient-to-br from-purple-500/40 to-pink-500/40 rounded-lg border border-purple-500/30 flex-shrink-0">
+            <Calculator className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6 md:w-6 md:h-6" />
           </div>
-          <div>
-            <h1 className="text-2xl md:text-4xl font-black text-white">Kalkulator Risiko Pro</h1>
-            <p className="text-slate-400 text-sm md:text-base">Smart Risk Calculator dengan Auto-Adjust Nilai Per Pip</p>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl md:text-4xl font-black text-white truncate">Kalkulator Risiko</h1>
+            <p className="text-slate-400 text-xs sm:text-sm md:text-base truncate">Auto-Adjust Nilai Per Pip</p>
           </div>
         </div>
         <div className="h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-slate-700 rounded-full"></div>
       </div>
 
       {/* Quick Tips */}
-      <div className={`bg-gradient-to-r p-4 mb-8 rounded-lg border flex gap-3 ${
+      <div className={`bg-gradient-to-r p-3 sm:p-4 mb-6 md:mb-8 rounded-lg border flex gap-2 sm:gap-3 text-sm sm:text-base ${
         isOptimal 
           ? 'from-green-500/10 to-emerald-500/10 border-green-500/30' 
           : isDangerZone 
@@ -147,53 +147,53 @@ export default function KalkulatorRisiko() {
       }`}>
         <AlertTriangle className={`flex-shrink-0 mt-0.5 ${
           isOptimal ? 'text-green-500' : isDangerZone ? 'text-red-500' : 'text-yellow-500'
-        }`} size={20} />
-        <div>
-          <p className={`font-bold text-base ${
+        }`} size={18} />
+        <div className="min-w-0">
+          <p className={`font-bold ${
             isOptimal ? 'text-green-400' : isDangerZone ? 'text-red-400' : 'text-yellow-400'
           }`}>
-            {isOptimal ? '✅ OPTIMAL RISK' : isDangerZone ? '⚠️ DANGER ZONE' : '⚡ STANDARD MODE'}
+            {isOptimal ? '✅ OPTIMAL' : isDangerZone ? '⚠️ DANGER' : '⚡ STANDARD'}
           </p>
-          <p className={`text-sm mt-1 ${
+          <p className={`text-xs sm:text-sm mt-1 ${
             isOptimal ? 'text-green-200' : isDangerZone ? 'text-red-100' : 'text-yellow-100'
           }`}>
             {isOptimal 
-              ? '1% adalah risiko ideal sesuai aturan MPT. Pertahankan ini!' 
+              ? '1% adalah risiko ideal MPT!' 
               : isDangerZone 
-              ? `Risiko ${risikoValue}% terlalu tinggi! Kurangi ke maksimal 2%.`
-              : `Risiko ${risikoValue}% masih dalam zona aman. Bagus!`}
+              ? `${risikoValue}% terlalu tinggi!`
+              : `${risikoValue}% aman!`}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Form Section */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 md:space-y-6">
           {/* Main Input */}
-          <div className="bg-slate-900/60 rounded-2xl border border-slate-800/50 p-5 md:p-8 backdrop-blur-sm">
-            <h2 className="text-lg md:text-xl font-bold text-white mb-6">📊 Konfigurasi Trade</h2>
+          <div className="bg-slate-900/60 rounded-xl sm:rounded-2xl border border-slate-800/50 p-4 sm:p-6 md:p-8 backdrop-blur-sm">
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-white mb-4 md:mb-6">📊 Konfigurasi Trade</h2>
 
-            <div className="space-y-5">
+            <div className="space-y-4 md:space-y-5">
               {/* Saldo */}
               <div>
-                <label className="block text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-                  <DollarSign size={16} /> Saldo Akun (USD)
+                <label className="block text-xs sm:text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
+                  <DollarSign size={16} /> Saldo Akun
                 </label>
                 <input
                   type="number"
                   value={saldo}
                   onChange={(e) => setSaldo(e.target.value)}
                   placeholder="10000"
-                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none"
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none text-sm sm:text-base"
                 />
                 {saldo && (
-                  <div className="mt-3 p-3 bg-slate-800/40 rounded-lg border border-slate-700/50">
-                    <p className="text-xs text-slate-400 mb-1">📈 Kategori Akun:</p>
-                    <p className="text-sm font-bold text-white">
+                  <div className="mt-2 sm:mt-3 p-2 sm:p-3 bg-slate-800/40 rounded-lg border border-slate-700/50 text-xs sm:text-sm">
+                    <p className="text-slate-400 mb-1">📈 Kategori:</p>
+                    <p className="font-bold text-white">
                       {kategoriSaldo.icon} {kategoriSaldo.name}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">
-                      💡 Nilai Per Pip otomatis: <span className="font-bold text-yellow-400">{nilaiPipAuto}</span> USD
+                    <p className="text-slate-400 mt-1">
+                      💡 Nilai Per Pip: <span className="font-bold text-yellow-400">{nilaiPipAuto}</span> USD
                     </p>
                   </div>
                 )}

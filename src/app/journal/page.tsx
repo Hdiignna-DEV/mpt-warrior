@@ -202,44 +202,44 @@ export default function JurnalTrading() {
   const currentHasil = getHasil();
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 pt-24 md:pt-8">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-3 sm:p-4 md:p-8 pt-20 sm:pt-24 md:pt-8">
       {/* Header */}
-      <div className="mb-8 md:mb-10">
-        <div className="flex items-center justify-between gap-3 md:gap-4 mb-4">
-          <div className="flex items-center gap-3 md:gap-4 flex-1">
-            <div className="p-2 md:p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
-              <BookOpen className="text-blue-400" size={24} />
+      <div className="mb-6 md:mb-10">
+        <div className="flex items-center justify-between gap-2 sm:gap-3 md:gap-4 mb-4">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
+            <div className="p-2 md:p-3 bg-blue-500/20 rounded-lg border border-blue-500/30 flex-shrink-0">
+              <BookOpen className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6 md:w-6 md:h-6" />
             </div>
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-4xl font-black text-white">Jurnal Trading</h1>
-              <p className="text-slate-400 text-sm md:text-base">Catat setiap trade Anda untuk tracking progress.</p>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-2xl md:text-4xl font-black text-white truncate">Jurnal Trading</h1>
+              <p className="text-slate-400 text-xs sm:text-sm md:text-base truncate">Catat setiap trade Anda.</p>
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             <button
               onClick={() => setShowExportOptions(!showExportOptions)}
-              className="p-2 md:p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2 font-bold text-sm md:text-base"
+              className="p-2 md:p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-1 sm:gap-2 font-bold text-xs sm:text-sm md:text-base"
             >
-              <Download size={20} />
-              <span className="hidden md:inline">Export</span>
+              <Download size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline">Export</span>
             </button>
 
             {showExportOptions && (
-              <div className="absolute top-full right-0 mt-2 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 w-56">
+              <div className="absolute top-full right-0 mt-2 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 w-52 sm:w-56 text-sm">
                 <button
                   onClick={exportToEnhancedCSV}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 text-sm flex flex-col gap-1"
+                  className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 flex flex-col gap-1"
                 >
-                  <span className="font-bold text-green-400">📈 Enhanced CSV</span>
-                  <span className="text-xs text-slate-400">Dengan statistics & summary</span>
+                  <span className="font-bold text-green-400 text-xs sm:text-sm">📈 Enhanced CSV</span>
+                  <span className="text-xs text-slate-400">Dengan statistics</span>
                 </button>
 
                 <button
                   onClick={shareToClipboard}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors text-sm flex flex-col gap-1"
+                  className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-slate-800 transition-colors flex flex-col gap-1"
                 >
-                  <span className="font-bold text-red-400 flex items-center gap-2">
+                  <span className="font-bold text-red-400 flex items-center gap-2 text-xs sm:text-sm">
                     <Share2 size={16} /> Share Stats
                   </span>
                   <span className="text-xs text-slate-400">Copy to clipboard</span>

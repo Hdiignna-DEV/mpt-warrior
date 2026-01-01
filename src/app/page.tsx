@@ -162,12 +162,12 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 pt-24 md:pt-8">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-3 sm:p-4 md:p-8 pt-20 sm:pt-24 md:pt-8">
       {/* Header dengan Logo */}
-      <div className="mb-8 md:mb-10">
-        <div className="flex items-center justify-between gap-4 md:gap-6 mb-4">
-          <div className="flex items-center gap-4 flex-1">
-            <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
+      <div className="mb-6 md:mb-10">
+        <div className="flex items-center justify-between gap-3 md:gap-6 mb-4">
+          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+            <div className="relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 flex-shrink-0">
               <Image
                 src="/mpt-logo.png"
                 alt="MPT Logo"
@@ -176,13 +176,13 @@ export default function Dashboard() {
               />
             </div>
             
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-4xl font-black text-white">Command Center</h1>
-              <p className="text-slate-400 text-sm md:text-base">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl md:text-4xl font-black text-white truncate">Command Center</h1>
+              <p className="text-slate-400 text-xs sm:text-sm md:text-base truncate">
                 {isLoading 
                   ? 'Loading your data...' 
                   : totalTrades > 0 
-                    ? `${totalTrades} trades logged • Win Rate ${winRate}%`
+                    ? `${totalTrades} trades • ${winRate}%`
                     : 'Start logging trades!'}
               </p>
             </div>
@@ -201,24 +201,24 @@ export default function Dashboard() {
               }, 300);
             }}
             disabled={isLoading}
-            className="p-2 md:p-3 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-900 rounded-lg transition-colors"
+            className="p-2 sm:p-2.5 md:p-3 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-900 rounded-lg transition-colors flex-shrink-0"
             title="Refresh data"
           >
-            <RefreshCw size={20} className={`text-yellow-500 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw size={18} className={`text-yellow-500 sm:w-5 sm:h-5 md:w-5 md:h-5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
-        <div className="h-1 bg-gradient-to-r from-yellow-500 via-slate-700 to-transparent rounded-full"></div>
+        <div className="h-1 bg-gradient-to-r from-yellow-500 via-slate-700 to-transparent rounded-full mt-4"></div>
       </div>
 
       {/* Custom Balance Section */}
-      <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-2xl p-6 md:p-8 mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-slate-400 text-sm mb-2 flex items-center gap-2">
-              💰 Initial Balance (Modal Awal)
+      <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 mb-6 md:mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-6">
+          <div className="flex-1 min-w-0">
+            <p className="text-slate-400 text-xs sm:text-sm mb-2 flex items-center gap-2">
+              💰 Initial Balance
             </p>
             {!isEditingBalance ? (
-              <h2 className="text-3xl md:text-4xl font-black text-white">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white break-words">
                 ${customBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
               </h2>
             ) : (
@@ -228,7 +228,7 @@ export default function Dashboard() {
                   type="number"
                   value={tempBalance}
                   onChange={(e) => setTempBalance(e.target.value)}
-                  className="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none w-48"
+                  className="bg-slate-800/50 border border-slate-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none flex-1 min-w-0 text-sm sm:text-base"
                   placeholder="Enter balance"
                   autoFocus
                 />
@@ -243,38 +243,38 @@ export default function Dashboard() {
                 setIsEditingBalance(true);
                 setTempBalance(customBalance.toString());
               }}
-              className="p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors flex items-center gap-2"
+              className="p-2 sm:p-2.5 md:p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors flex items-center gap-2 flex-shrink-0 text-sm sm:text-base"
               title="Edit initial balance"
             >
-              <Edit2 size={20} />
-              <span className="hidden md:inline text-sm font-bold">Edit</span>
+              <Edit2 size={18} className="md:w-5 md:h-5" />
+              <span className="hidden sm:inline font-bold">Edit</span>
             </button>
-          ) : (
+            ) : (
             <div className="flex gap-2">
               <button
                 onClick={handleSaveBalance}
-                className="p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center gap-2"
+                className="p-2 sm:p-2.5 md:p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center gap-2 flex-shrink-0 text-sm sm:text-base"
               >
-                <Check size={20} />
-                <span className="hidden md:inline text-sm font-bold">Save</span>
+                <Check size={18} className="md:w-5 md:h-5" />
+                <span className="hidden sm:inline font-bold">Save</span>
               </button>
               <button
                 onClick={handleCancelEdit}
-                className="p-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2"
+                className="p-2 sm:p-2.5 md:p-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex-shrink-0"
               >
-                <X size={20} />
+                <X size={18} className="md:w-5 md:h-5" />
               </button>
             </div>
           )}
         </div>
 
-        <p className="text-xs md:text-sm text-slate-400 mt-4">
-          📝 Sesuaikan dengan modal awal Anda. Semua kalkulasi akan berbasis angka ini.
+        <p className="text-xs sm:text-sm text-slate-400 mt-3">
+          📝 Sesuaikan dengan modal awal Anda.
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 md:mb-12">
         {isLoading ? (
           <>
             {[1, 2, 3, 4].map((i) => (

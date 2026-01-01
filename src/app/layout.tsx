@@ -27,16 +27,16 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
         <meta name="theme-color" content="#0f172a" />
       </head>
       <body className={`${inter.className} bg-slate-950 text-slate-100 overflow-x-hidden`}>
-        <div className="flex h-screen md:h-auto overflow-hidden md:overflow-auto">
+        <div className="flex flex-col lg:flex-row h-screen lg:h-screen overflow-hidden">
           {/* Sidebar */}
           <Sidebar />
 
           {/* Main Content */}
-          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-950">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-950 w-full">
             {children}
           </main>
         </div>
