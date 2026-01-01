@@ -71,7 +71,6 @@ export function ToastContainer({ toasts, removeToast }: ToastContainerProps) {
       {toasts.map((toast) => (
         <div key={toast.id} className="pointer-events-auto">
           <Toast
-            id={toast.id}
             type={toast.type}
             message={toast.message}
             onClose={() => removeToast(toast.id)}
