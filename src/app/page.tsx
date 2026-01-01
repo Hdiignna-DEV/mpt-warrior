@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { TrendingUp, Target, DollarSign, Award, RefreshCw } from 'lucide-react';
+import Image from 'next/image';
+import { TrendingUp, Target, DollarSign, Award, RefreshCw, Edit2, X, Check } from 'lucide-react';
 
 interface Trade {
   id: string;
@@ -15,11 +16,16 @@ interface Trade {
 export default function Dashboard() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [customBalance, setCustomBalance] = useState<number>(10000);
+  const [isEditingBalance, setIsEditingBalance] = useState(false);
+  const [tempBalance, setTempBalance] = useState<string>('10000');
 
   // Load trades dari localStorage
   useEffect(() => {
     setIsLoading(true);
     const saved = localStorage.getItem('trades');
+    const savedBalance = localStorage.getItem('mpt_initial_balance');
+    
     if (saved) {
       try {
         const parsedTrades = JSON.parse(saved);
@@ -29,8 +35,38 @@ export default function Dashboard() {
         setTrades([]);
       }
     }
+
+    if (savedBalance) {
+      try {
+        const balance = parseFloat(savedBalance);
+        setCustomBalance(balance);
+        setTempBalance(balance.toString());
+      } catch (error) {
+        console.error('Error parsing balance:', error);
+      }
+    }
+
     setIsLoading(false);
   }, []);
+
+  // Handle balance edit
+  const handleSaveBalance = () => {
+    const newBalance = parseFloat(tempBalance);
+    
+    if (isNaN(newBalance) || newBalance <= 0) {
+      alert('Saldo harus berupa angka positif!');
+      return;
+    }
+
+    setCustomBalance(newBalance);
+    localStorage.setItem('mpt_initial_balance', newBalance.toString());
+    setIsEditingBalance(false);
+  };
+
+  const handleCancelEdit = () => {
+    setTempBalance(customBalance.toString());
+    setIsEditingBalance(false);
+  };
 
   // Calculate real statistics
   const totalTrades = trades.length;
@@ -58,16 +94,17 @@ export default function Dashboard() {
   // Calculate total pips
   const totalPips = trades.reduce((sum, trade) => sum + trade.pip, 0);
   
-  // Estimate balance (starting $10000 + $10 per pip)
-  const estimatedBalance = 10000 + (totalPips * 10);
+  // Calculate balance based on custom initial balance
+  const currentBalance = customBalance + (totalPips * 10);
+  const profitLoss = currentBalance - customBalance;
 
   // Calculate additional metrics
   const avgPipsPerWin = winTrades > 0 
-    ? Math.round(trades.filter(t => t.hasil === 'WIN').reduce((sum, t) => sum + t.pip, 0) / winTrades)
+    ? Math.round(trades.filter(t => t.hasil === 'WIN').reduce((sum, t) => sum + t.pip, 0) / winTrades * 100) / 100
     : 0;
 
   const avgPipsPerLoss = lossTrades > 0
-    ? Math.round(trades.filter(t => t.hasil === 'LOSS').reduce((sum, t) => sum + Math.abs(t.pip), 0) / lossTrades)
+    ? Math.round(trades.filter(t => t.hasil === 'LOSS').reduce((sum, t) => sum + Math.abs(t.pip), 0) / lossTrades * 100) / 100
     : 0;
 
   const stats = [
@@ -84,7 +121,7 @@ export default function Dashboard() {
     {
       label: 'Total Trades',
       value: totalTrades.toString(),
-      subtext: `${(totalTrades * 2).toFixed(0)} trades/month avg`,
+      subtext: `${totalTrades > 0 ? (totalTrades * 2).toFixed(0) : 0} trades/month avg`,
       icon: Target,
       color: 'from-blue-500/20 to-cyan-500/10',
       iconBg: 'bg-blue-500/30',
@@ -92,14 +129,14 @@ export default function Dashboard() {
       borderColor: 'border-blue-500/30',
     },
     {
-      label: 'Estimated Balance',
-      value: `$${estimatedBalance.toLocaleString()}`,
-      subtext: `+$${(totalPips * 10).toLocaleString()} from trades`,
+      label: 'Current Balance',
+      value: `$${currentBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
+      subtext: profitLoss >= 0 ? `+$${profitLoss.toLocaleString('en-US', { maximumFractionDigits: 0 })}` : `-$${Math.abs(profitLoss).toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
       icon: DollarSign,
-      color: 'from-yellow-500/20 to-amber-500/10',
-      iconBg: 'bg-yellow-500/30',
-      iconColor: 'text-yellow-400',
-      borderColor: 'border-yellow-500/30',
+      color: profitLoss >= 0 ? 'from-yellow-500/20 to-amber-500/10' : 'from-red-500/20 to-orange-500/10',
+      iconBg: profitLoss >= 0 ? 'bg-yellow-500/30' : 'bg-red-500/30',
+      iconColor: profitLoss >= 0 ? 'text-yellow-400' : 'text-red-400',
+      borderColor: profitLoss >= 0 ? 'border-yellow-500/30' : 'border-red-500/30',
     },
     {
       label: 'Best Streak',
@@ -131,10 +168,11 @@ export default function Dashboard() {
         <div className="flex items-center justify-between gap-4 md:gap-6 mb-4">
           <div className="flex items-center gap-4 flex-1">
             <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
-              <img 
-                src="/mpt-logo.png" 
-                alt="MPT Logo" 
-                className="w-full h-full object-contain drop-shadow-lg"
+              <Image
+                src="/mpt-logo.png"
+                alt="MPT Logo"
+                fill
+                className="object-contain drop-shadow-lg"
               />
             </div>
             
@@ -170,6 +208,69 @@ export default function Dashboard() {
           </button>
         </div>
         <div className="h-1 bg-gradient-to-r from-yellow-500 via-slate-700 to-transparent rounded-full"></div>
+      </div>
+
+      {/* Custom Balance Section */}
+      <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-2xl p-6 md:p-8 mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-slate-400 text-sm mb-2 flex items-center gap-2">
+              💰 Initial Balance (Modal Awal)
+            </p>
+            {!isEditingBalance ? (
+              <h2 className="text-3xl md:text-4xl font-black text-white">
+                ${customBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+              </h2>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-400">$</span>
+                <input
+                  type="number"
+                  value={tempBalance}
+                  onChange={(e) => setTempBalance(e.target.value)}
+                  className="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none w-48"
+                  placeholder="Enter balance"
+                  autoFocus
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Edit Balance Button */}
+          {!isEditingBalance ? (
+            <button
+              onClick={() => {
+                setIsEditingBalance(true);
+                setTempBalance(customBalance.toString());
+              }}
+              className="p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors flex items-center gap-2"
+              title="Edit initial balance"
+            >
+              <Edit2 size={20} />
+              <span className="hidden md:inline text-sm font-bold">Edit</span>
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveBalance}
+                className="p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center gap-2"
+              >
+                <Check size={20} />
+                <span className="hidden md:inline text-sm font-bold">Save</span>
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className="p-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors flex items-center gap-2"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          )}
+        </div>
+
+        <p className="text-xs md:text-sm text-slate-400 mt-4">
+          📝 Sesuaikan dengan modal awal Anda. Semua kalkulasi akan berbasis angka ini.
+        </p>
       </div>
 
       {/* Stats Grid */}
@@ -218,16 +319,25 @@ export default function Dashboard() {
             <p className={`text-2xl font-black ${totalPips >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               {totalPips >= 0 ? '+' : ''}{totalPips}
             </p>
+            <p className="text-xs text-slate-500 mt-1">
+              ≈ ${(totalPips * 10).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            </p>
           </div>
           
           <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
             <p className="text-slate-400 text-xs font-semibold uppercase mb-2">Avg Win</p>
             <p className="text-2xl font-black text-green-400">+{avgPipsPerWin} pips</p>
+            <p className="text-xs text-slate-500 mt-1">
+              ≈ ${(avgPipsPerWin * 10).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            </p>
           </div>
 
           <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
             <p className="text-slate-400 text-xs font-semibold uppercase mb-2">Avg Loss</p>
             <p className="text-2xl font-black text-red-400">-{avgPipsPerLoss} pips</p>
+            <p className="text-xs text-slate-500 mt-1">
+              ≈ ${(avgPipsPerLoss * 10).toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            </p>
           </div>
         </div>
       )}

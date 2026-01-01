@@ -21,7 +21,7 @@ interface ToastProps {
   duration?: number;
 }
 
-function Toast({ id, type, message, onClose, duration = 3000 }: ToastProps) {
+function Toast({ type, message, onClose, duration = 3000 }: Omit<ToastProps, 'id'>) {
   useEffect(() => {
     const timer = setTimeout(onClose, duration);
     return () => clearTimeout(timer);

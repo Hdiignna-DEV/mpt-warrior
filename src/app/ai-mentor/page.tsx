@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { Bot, Send, Paperclip, X, Sparkles, Zap, Brain, TrendingUp, Shield, Target } from 'lucide-react';
 
 // Risk Calculator Table Component
-function RiskCalculatorTable({ data }: { data: any }) {
+function RiskCalculatorTable({ data }: { data: string }) {
   // Try to parse structured data from AI response
   const parseRiskData = (text: string) => {
     const balanceMatch = text.match(/Balance[:\s]+\$?([\d,]+)/i);
@@ -99,7 +99,7 @@ export default function AIMentor() {
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = async (e: any, overrideInput?: string) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null, overrideInput?: string) => {
     if (e) e.preventDefault();
     const textToSend = overrideInput || input;
     if ((!textToSend.trim() && !selectedImage) || isLoading) return;
@@ -127,7 +127,7 @@ export default function AIMentor() {
       const aiMessage = data.choices[0].message;
       
       setMessages((prev) => [...prev, aiMessage]);
-    } catch (error) {
+    } catch {
       setMessages((prev) => [...prev, { 
         role: 'assistant', 
         content: '⚠️ Gagal koneksi ke AI. Cek API Key atau koneksi internet.' 
@@ -168,17 +168,17 @@ export default function AIMentor() {
                 ? 'bg-yellow-600 text-white' 
                 : 'bg-slate-900 border border-slate-800'
             } p-4 rounded-2xl`}>
-              {/* Cek apakah ada risk calculation */}
+            {/* Cek apakah ada risk calculation */}
               {m.role === 'assistant' && m.content.includes('LOT SIZE') && m.content.includes('Balance') ? (
                 <>
                   <RiskCalculatorTable data={m.content} />
                   <ReactMarkdown 
                     components={{ 
-                      strong: ({node, ...props}) => <span className="font-bold text-yellow-400" {...props} />,
-                      code: ({node, ...props}) => <code className="bg-slate-800 px-2 py-1 rounded text-xs" {...props} />,
-                      table: ({node, ...props}) => <div className="hidden" {...props} />,
-                      thead: ({node, ...props}) => <div className="hidden" {...props} />,
-                      tbody: ({node, ...props}) => <div className="hidden" {...props} />,
+                      strong: ({...props}) => <span className="font-bold text-yellow-400" {...props} />,
+                      code: ({...props}) => <code className="bg-slate-800 px-2 py-1 rounded text-xs" {...props} />,
+                      table: ({...props}) => <div className="hidden" {...props} />,
+                      thead: ({...props}) => <div className="hidden" {...props} />,
+                      tbody: ({...props}) => <div className="hidden" {...props} />,
                     }}
                   >
                     {m.content.split('Balance')[0] + m.content.split('LOT SIZE')[1]?.split('\n').slice(1).join('\n')}
@@ -187,8 +187,8 @@ export default function AIMentor() {
               ) : (
                 <ReactMarkdown 
                   components={{ 
-                    strong: ({node, ...props}) => <span className="font-bold text-yellow-400" {...props} />,
-                    code: ({node, ...props}) => <code className="bg-slate-800 px-2 py-1 rounded text-xs" {...props} />
+                    strong: ({...props}) => <span className="font-bold text-yellow-400" {...props} />,
+                    code: ({...props}) => <code className="bg-slate-800 px-2 py-1 rounded text-xs" {...props} />
                   }}
                 >
                   {m.content}
@@ -232,10 +232,13 @@ export default function AIMentor() {
         {/* Image Preview */}
         {imagePreview && (
           <div className="mb-3 relative w-fit">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               src={imagePreview} 
-              alt="Preview" 
+              alt="Chat image preview" 
               className="h-20 rounded-lg border-2 border-yellow-500"
+              width={80}
+              height={80}
             />
             <button
               onClick={() => {

@@ -10,7 +10,7 @@ export const analytics = {
   },
 
   // Track action
-  trackAction: (action: string, metadata?: any) => {
+  trackAction: (action: string, metadata?: Record<string, unknown>) => {
     const actions = JSON.parse(localStorage.getItem('mpt_analytics_actions') || '[]');
     actions.push({
       action,

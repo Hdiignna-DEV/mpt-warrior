@@ -12,7 +12,7 @@ RULES:
 3. Jawab ringkas (maksimal 3 paragraf).
 `;
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<Response> {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return NextResponse.json({ error: 'API Key hilang' }, { status: 500 });
@@ -22,10 +22,10 @@ export async function POST(req: Request) {
     // 🔥 PERBAIKAN DISINI: Balik ke "gemini-flash-latest" (Jalur Aman & Gratis)
     const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" }); 
 
-    const { messages, image } = await req.json(); 
+    const { messages, image } = await req.json() as { messages: Array<{ role: string; content: string }>, image?: string };
     const lastMessage = messages[messages.length - 1].content;
 
-    const conversationHistory = messages.slice(0, -1).map((m: any) => 
+    const conversationHistory = messages.slice(0, -1).map((m) => 
       `${m.role === 'user' ? 'User' : 'MPT Bot'}: ${m.content}`
     ).join('\n');
 
@@ -64,8 +64,9 @@ export async function POST(req: Request) {
         choices: [{ message: { role: 'assistant', content: text } }] 
     });
     
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error("Error Backend:", error);
-    return NextResponse.json({ error: `Gagal: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ error: `Gagal: ${errorMessage}` }, { status: 500 });
   }
 }

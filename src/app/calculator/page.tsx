@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Calculator, DollarSign, Percent, TrendingDown, AlertTriangle, Info, Zap } from 'lucide-react';
 
 interface HasilKalkulator {
@@ -16,7 +16,6 @@ export default function KalkulatorRisiko() {
   const [stopLossPips, setStopLossPips] = useState<string>('50');
   const [takeProfitPips, setTakeProfitPips] = useState<string>('100');
   const [error, setError] = useState<string>('');
-  const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<HasilKalkulator[]>([]);
 
   // Auto-calculate Nilai Per Pip based on saldo
@@ -49,37 +48,50 @@ export default function KalkulatorRisiko() {
     }
   }, [saldo]);
 
+  const getCalculationError = useCallback((): string => {
+    const saldoNum = parseFloat(saldo);
+    const risikoNum = parseFloat(risikoPersen);
+    const slPipsNum = parseFloat(stopLossPips);
+    const nilaiPipNum = nilaiPipAuto;
+
+    if (!saldo || !risikoPersen || !stopLossPips) {
+      return '';
+    }
+
+    if (isNaN(saldoNum) || isNaN(risikoNum) || isNaN(slPipsNum) || isNaN(nilaiPipNum)) {
+      return 'Masukkan angka yang valid!';
+    }
+
+    if (saldoNum <= 0) {
+      return 'Saldo harus lebih dari 0!';
+    }
+
+    if (risikoNum <= 0 || risikoNum > 5) {
+      return 'Risiko harus antara 0-5%!';
+    }
+
+    if (slPipsNum <= 0) {
+      return 'Stop Loss harus lebih dari 0 pips!';
+    }
+
+    return '';
+  }, [saldo, risikoPersen, stopLossPips, nilaiPipAuto]);
+
+  useEffect(() => {
+    setError(getCalculationError());
+  }, [getCalculationError]);
+
   const hasil = useMemo(() => {
-    setError('');
-    
+    const errorMsg = getCalculationError();
+    if (errorMsg) return null;
+
     const saldoNum = parseFloat(saldo);
     const risikoNum = parseFloat(risikoPersen);
     const slPipsNum = parseFloat(stopLossPips);
     const tpPipsNum = parseFloat(takeProfitPips);
     const nilaiPipNum = nilaiPipAuto;
 
-    // Validasi input
     if (!saldo || !risikoPersen || !stopLossPips) {
-      return null;
-    }
-
-    if (isNaN(saldoNum) || isNaN(risikoNum) || isNaN(slPipsNum) || isNaN(nilaiPipNum)) {
-      setError('Masukkan angka yang valid!');
-      return null;
-    }
-
-    if (saldoNum <= 0) {
-      setError('Saldo harus lebih dari 0!');
-      return null;
-    }
-
-    if (risikoNum <= 0 || risikoNum > 5) {
-      setError('Risiko harus antara 0-5%!');
-      return null;
-    }
-
-    if (slPipsNum <= 0) {
-      setError('Stop Loss harus lebih dari 0 pips!');
       return null;
     }
 
@@ -97,7 +109,7 @@ export default function KalkulatorRisiko() {
       profitTarget: Math.round(profitTarget * 100) / 100,
       riskRewardRatio: Math.round(riskRewardRatio * 100) / 100,
     };
-  }, [saldo, risikoPersen, stopLossPips, takeProfitPips, nilaiPipAuto]);
+  }, [getCalculationError, saldo, risikoPersen, stopLossPips, takeProfitPips, nilaiPipAuto]);
 
   const hitungDanSimpan = () => {
     if (hasil) {

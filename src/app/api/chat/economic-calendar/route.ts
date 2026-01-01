@@ -94,8 +94,9 @@ export async function GET() {
       count: todayEvents.length,
     });
 
-  } catch (error: any) {
-    console.error('ForexFactory scrape error:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('ForexFactory scrape error:', errorMessage);
     
     // Return dummy data as fallback
     return NextResponse.json({

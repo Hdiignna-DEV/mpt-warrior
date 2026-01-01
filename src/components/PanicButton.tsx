@@ -6,7 +6,6 @@ import { AlertTriangle, X, Shield } from 'lucide-react';
 export default function PanicButton() {
   const [showModal, setShowModal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(900); // 15 minutes in seconds
-  const [isMinimized, setIsMinimized] = useState(false);
 
   useEffect(() => {
     if (showModal && timeLeft > 0) {
@@ -141,7 +140,7 @@ export default function PanicButton() {
               {/* Quote */}
               <div className="bg-gradient-to-r from-slate-800 to-slate-700 border-l-4 border-yellow-500 p-6 rounded-r-xl">
                 <p className="text-slate-300 italic text-lg leading-relaxed">
-                  "Trader yang kalah adalah yang tidak bisa stop saat emosi. Warrior yang menang adalah yang tahu kapan harus mundur dan reset."
+                  &quot;Trader yang kalah adalah yang tidak bisa stop saat emosi. Warrior yang menang adalah yang tahu kapan harus mundur dan reset.&quot;
                 </p>
                 <p className="text-yellow-500 font-bold mt-3">— MPT Philosophy</p>
               </div>
