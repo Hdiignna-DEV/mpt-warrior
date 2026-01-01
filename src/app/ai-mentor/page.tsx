@@ -363,51 +363,89 @@ export default function AIMentor() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-4 flex flex-col pb-24 md:pb-36 pb-safe">
+          <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-5 flex flex-col pb-24 md:pb-36 pb-safe">
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-                <div className={`max-w-[90%] md:max-w-[85%] ${
-                  m.role === 'user' 
-                    ? 'bg-yellow-600 text-white' 
-                    : 'bg-slate-900 border border-slate-800'
-                } p-3 md:p-4 rounded-xl md:rounded-2xl`}>
-                {/* Cek apakah ada risk calculation */}
-                  {m.role === 'assistant' && m.content.includes('LOT SIZE') && m.content.includes('Balance') ? (
-                    <>
-                      <RiskCalculatorTable data={m.content} />
-                      <ReactMarkdown 
-                        components={{ 
-                          strong: ({...props}) => <span className="font-bold text-yellow-400" {...props} />,
-                          code: ({...props}) => <code className="bg-slate-800 px-2 py-1 rounded text-xs" {...props} />,
-                          table: ({...props}) => <div className="hidden" {...props} />,
-                          thead: ({...props}) => <div className="hidden" {...props} />,
-                          tbody: ({...props}) => <div className="hidden" {...props} />,
-                        }}
-                      >
-                        {m.content.split('Balance')[0] + m.content.split('LOT SIZE')[1]?.split('\n').slice(1).join('\n')}
-                      </ReactMarkdown>
-                    </>
-                  ) : (
+                {m.role === 'assistant' && (
+                  <div className="flex gap-2 md:gap-3 max-w-[90%] md:max-w-[85%]">
+                    <div className="flex-shrink-0 pt-1">
+                      <div className="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Bot className="text-white w-4 h-4 md:w-5 md:h-5" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      {/* Cek apakah ada risk calculation */}
+                      {m.content.includes('LOT SIZE') && m.content.includes('Balance') ? (
+                        <>
+                          <RiskCalculatorTable data={m.content} />
+                          <div className="bg-slate-800/40 border border-slate-700/50 p-3 md:p-4 rounded-lg md:rounded-xl text-slate-100">
+                            <ReactMarkdown 
+                              components={{ 
+                                strong: ({...props}) => <span className="font-bold text-yellow-400" {...props} />,
+                                em: ({...props}) => <em className="text-slate-300 italic" {...props} />,
+                                code: ({...props}) => <code className="bg-slate-700/50 px-1.5 py-0.5 rounded text-xs font-mono text-yellow-300" {...props} />,
+                                p: ({...props}) => <p className="text-sm md:text-base leading-relaxed mb-2 last:mb-0" {...props} />,
+                                ul: ({...props}) => <ul className="list-disc list-inside text-sm md:text-base space-y-1 mb-2" {...props} />,
+                                li: ({...props}) => <li className="text-sm md:text-base" {...props} />,
+                                h3: ({...props}) => <h3 className="font-bold text-yellow-400 text-base mt-2 mb-1" {...props} />,
+                                blockquote: ({...props}) => <blockquote className="border-l-4 border-yellow-500 pl-3 italic text-slate-300" {...props} />,
+                                table: ({...props}) => <div className="hidden" {...props} />,
+                                thead: ({...props}) => <div className="hidden" {...props} />,
+                                tbody: ({...props}) => <div className="hidden" {...props} />,
+                              }}
+                            >
+                              {m.content.split('Balance')[0] + m.content.split('LOT SIZE')[1]?.split('\n').slice(1).join('\n')}
+                            </ReactMarkdown>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="bg-slate-800/40 border border-slate-700/50 p-3 md:p-4 rounded-lg md:rounded-xl text-slate-100">
+                          <ReactMarkdown 
+                            components={{ 
+                              strong: ({...props}) => <span className="font-bold text-yellow-400" {...props} />,
+                              em: ({...props}) => <em className="text-slate-300 italic" {...props} />,
+                              code: ({...props}) => <code className="bg-slate-700/50 px-1.5 py-0.5 rounded text-xs font-mono text-yellow-300" {...props} />,
+                              p: ({...props}) => <p className="text-sm md:text-base leading-relaxed mb-2 last:mb-0" {...props} />,
+                              ul: ({...props}) => <ul className="list-disc list-inside text-sm md:text-base space-y-1 mb-2" {...props} />,
+                              li: ({...props}) => <li className="text-sm md:text-base" {...props} />,
+                              h3: ({...props}) => <h3 className="font-bold text-yellow-400 text-base mt-2 mb-1" {...props} />,
+                              blockquote: ({...props}) => <blockquote className="border-l-4 border-yellow-500 pl-3 italic text-slate-300" {...props} />,
+                            }}
+                          >
+                            {m.content}
+                          </ReactMarkdown>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {m.role === 'user' && (
+                  <div className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-white p-3 md:p-4 rounded-lg md:rounded-xl max-w-[90%] md:max-w-[85%] shadow-lg">
                     <ReactMarkdown 
                       components={{ 
-                        strong: ({...props}) => <span className="font-bold text-yellow-400" {...props} />,
-                        code: ({...props}) => <code className="bg-slate-800 px-2 py-1 rounded text-xs md:text-sm break-words" {...props} />,
-                        p: ({...props}) => <p className="text-sm md:text-base leading-relaxed" {...props} />,
+                        p: ({...props}) => <p className="text-sm md:text-base" {...props} />,
                       }}
                     >
                       {m.content}
                     </ReactMarkdown>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             ))}
             {isLoading && (
-              <div className="flex justify-start animate-fade-in">
-                <div className="bg-slate-900 border border-slate-800 rounded-xl md:rounded-2xl p-3 md:p-4">
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <div className="animate-spin">⚙️</div>
-                    <span className="text-xs md:text-sm italic">Sedang analisa...</span>
+              <div className="flex justify-start animate-fade-in gap-2">
+                <div className="flex-shrink-0 pt-1">
+                  <div className="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <Bot className="text-white w-4 h-4 md:w-5 md:h-5 animate-pulse" />
                   </div>
+                </div>
+                <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg md:rounded-xl p-3 md:p-4 flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                  </div>
+                  <span className="text-xs md:text-sm text-slate-400 italic">Sedang analisa...</span>
                 </div>
               </div>
             )}
@@ -457,7 +495,7 @@ export default function AIMentor() {
             )}
 
             {/* Input Form */}
-            <form onSubmit={handleSubmit} className="flex gap-2 md:gap-3 p-3 md:p-4">
+            <form onSubmit={handleSubmit} className="flex gap-2 md:gap-3 p-3 md:p-4 bg-slate-950">
               <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -469,14 +507,14 @@ export default function AIMentor() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 md:p-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 rounded-lg md:rounded-xl transition-colors flex-shrink-0"
+                className="p-2.5 md:p-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 hover:border-purple-500 rounded-lg md:rounded-lg transition-all flex-shrink-0"
                 title="Upload Chart"
               >
-                <Paperclip size={18} className="text-slate-400" />
+                <Paperclip size={18} className="text-slate-400 hover:text-purple-400" />
               </button>
 
               <input
-                className="flex-1 min-w-0 p-2 md:p-3 bg-slate-950 border border-slate-700 rounded-lg md:rounded-xl text-white text-sm placeholder-slate-500 focus:border-yellow-500 focus:outline-none transition-colors"
+                className="flex-1 min-w-0 px-3 py-2 md:px-4 md:py-3 bg-slate-800 border border-slate-700 rounded-lg md:rounded-lg text-white text-sm placeholder-slate-500 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 focus:outline-none transition-all"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Tanya atau upload chart..."
@@ -485,8 +523,8 @@ export default function AIMentor() {
 
               <button
                 type="submit"
-                disabled={isLoading}
-                className="p-2 md:p-3 bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-slate-900 font-bold rounded-lg md:rounded-xl transition-colors flex-shrink-0"
+                disabled={isLoading || !input.trim()}
+                className="px-3 md:px-4 py-2.5 md:py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 active:from-yellow-700 active:to-yellow-800 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-slate-900 font-bold rounded-lg md:rounded-lg transition-all flex-shrink-0 flex items-center justify-center shadow-lg hover:shadow-yellow-500/20"
               >
                 <Send size={18} />
               </button>
