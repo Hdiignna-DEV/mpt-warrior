@@ -225,43 +225,64 @@ export default function Dashboard() {
             {/* Log Trade */}
             <Link
               href="/journal"
-              className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/40 rounded-xl p-4 md:p-5 hover:border-blue-500/60 hover:shadow-xl hover:shadow-blue-500/20 hover:scale-105 transition-all duration-300 group cursor-pointer backdrop-blur-sm"
+              className="group relative h-32 overflow-hidden bg-gradient-to-br from-blue-600/30 via-blue-500/15 to-slate-900/40 border-2 border-blue-500/50 rounded-xl p-5 md:p-6 hover:border-blue-400/80 transition-all duration-300 cursor-pointer backdrop-blur-md hover:-translate-y-2 hover:shadow-2xl hover:shadow-blue-500/40 active:translate-y-0"
             >
-              <div className="flex items-start justify-between mb-3">
-                <h3 className="font-bold text-white group-hover:text-blue-300 transition-colors">Catat Transaksi</h3>
-                <div className="p-2 bg-blue-500/30 rounded-lg group-hover:bg-blue-500/40 group-hover:scale-110 transition-all duration-300">
-                  <BookOpen className="w-5 h-5 text-blue-400" />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/20 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 bg-gradient-to-b from-blue-500/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10 flex items-start justify-between h-full">
+                <div className="flex flex-col justify-between">
+                  <h3 className="font-bold text-white group-hover:text-blue-100 transition-all duration-300 text-base md:text-lg">Catat Transaksi</h3>
+                  <p className="text-xs md:text-sm text-slate-400 group-hover:text-slate-300 transition-colors">Pencatat dengan real-time sync</p>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="p-3 bg-blue-500/25 rounded-lg group-hover:bg-blue-500/50 transition-all duration-300 group-hover:scale-125 group-hover:rotate-12 origin-center">
+                    <BookOpen className="w-6 h-6 text-blue-300 group-hover:text-blue-100" />
+                  </div>
                 </div>
               </div>
-              <p className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">Catat transaksi dan pantau performa</p>
+              <div className="absolute inset-0 border border-blue-400/0 group-hover:border-blue-400/60 rounded-xl transition-all duration-300 pointer-events-none"></div>
             </Link>
 
             {/* Risk Calculator */}
             <Link
               href="/calculator"
-              className="bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/40 rounded-xl p-4 md:p-5 hover:border-red-500/60 hover:shadow-xl hover:shadow-red-500/20 hover:scale-105 transition-all duration-300 group cursor-pointer backdrop-blur-sm"
+              className="group relative h-32 overflow-hidden bg-gradient-to-br from-red-600/30 via-red-500/15 to-slate-900/40 border-2 border-red-500/50 rounded-xl p-5 md:p-6 hover:border-red-400/80 transition-all duration-300 cursor-pointer backdrop-blur-md hover:-translate-y-2 hover:shadow-2xl hover:shadow-red-500/40 active:translate-y-0"
             >
-              <div className="flex items-start justify-between mb-3">
-                <h3 className="font-bold text-white group-hover:text-red-300 transition-colors">Kalkulasi Risk</h3>
-                <div className="p-2 bg-red-500/30 rounded-lg group-hover:bg-red-500/40 group-hover:scale-110 transition-all duration-300">
-                  <Calculator className="w-5 h-5 text-red-400" />
+              <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/20 to-red-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 bg-gradient-to-b from-red-500/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10 flex items-start justify-between h-full">
+                <div className="flex flex-col justify-between">
+                  <h3 className="font-bold text-white group-hover:text-red-100 transition-all duration-300 text-base md:text-lg">Kalkulasi Risk</h3>
+                  <p className="text-xs md:text-sm text-slate-400 group-hover:text-slate-300 transition-colors">Ukuran posisi & money management</p>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="p-3 bg-red-500/25 rounded-lg group-hover:bg-red-500/50 transition-all duration-300 group-hover:scale-125 group-hover:-rotate-12 origin-center">
+                    <Calculator className="w-6 h-6 text-red-300 group-hover:text-red-100" />
+                  </div>
                 </div>
               </div>
-              <p className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">Hitung ukuran posisi & risk management</p>
+              <div className="absolute inset-0 border border-red-400/0 group-hover:border-red-400/60 rounded-xl transition-all duration-300 pointer-events-none"></div>
             </Link>
 
             {/* AI Mentor */}
             <Link
               href="/ai-mentor"
-              className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/40 rounded-xl p-4 md:p-5 hover:border-purple-500/60 hover:shadow-xl hover:shadow-purple-500/20 hover:scale-105 transition-all duration-300 group cursor-pointer backdrop-blur-sm"
+              className="group relative h-32 overflow-hidden bg-gradient-to-br from-purple-600/30 via-purple-500/15 to-slate-900/40 border-2 border-purple-500/50 rounded-xl p-5 md:p-6 hover:border-purple-400/80 transition-all duration-300 cursor-pointer backdrop-blur-md hover:-translate-y-2 hover:shadow-2xl hover:shadow-purple-500/40 active:translate-y-0"
             >
-              <div className="flex items-start justify-between mb-3">
-                <h3 className="font-bold text-white group-hover:text-purple-300 transition-colors">Mentor AI</h3>
-                <div className="p-2 bg-purple-500/30 rounded-lg group-hover:bg-purple-500/40 group-hover:scale-110 transition-all duration-300">
-                  <Bot className="w-5 h-5 text-purple-400" />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/20 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 bg-gradient-to-b from-purple-500/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative z-10 flex items-start justify-between h-full">
+                <div className="flex flex-col justify-between">
+                  <h3 className="font-bold text-white group-hover:text-purple-100 transition-all duration-300 text-base md:text-lg">Mentor AI</h3>
+                  <p className="text-xs md:text-sm text-slate-400 group-hover:text-slate-300 transition-colors">Konsultasi trading dengan AI Gemini</p>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="p-3 bg-purple-500/25 rounded-lg group-hover:bg-purple-500/50 transition-all duration-300 group-hover:scale-125 group-hover:rotate-12 origin-center">
+                    <Bot className="w-6 h-6 text-purple-300 group-hover:text-purple-100" />
+                  </div>
                 </div>
               </div>
-              <p className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">Dapatkan saran trading dari AI Gemini</p>
+              <div className="absolute inset-0 border border-purple-400/0 group-hover:border-purple-400/60 rounded-xl transition-all duration-300 pointer-events-none"></div>
             </Link>
           </div>
         </div>
@@ -269,51 +290,67 @@ export default function Dashboard() {
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Total Trades Card */}
-          <div className="bg-gradient-to-br from-blue-500/15 via-slate-800/50 to-blue-600/10 border border-blue-500/30 rounded-xl p-5 md:p-6 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 group backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-slate-400 font-semibold text-sm uppercase tracking-wide">Total Trades</h3>
-              <div className="p-2.5 bg-gradient-to-br from-blue-500/30 to-blue-500/10 rounded-lg group-hover:bg-blue-500/40 transition-all duration-300 group-hover:scale-110">
-                <TrendingUp className="w-5 h-5 text-blue-400" />
+          <div className="group relative overflow-hidden bg-gradient-to-br from-blue-500/15 via-slate-800/50 to-blue-600/10 border border-blue-500/30 rounded-xl p-5 md:p-6 hover:border-blue-500/50 transition-all duration-300 backdrop-blur-sm cursor-default">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-slate-400 font-semibold text-sm uppercase tracking-wide">Total Trades</h3>
+                <div className="p-2.5 bg-gradient-to-br from-blue-500/30 to-blue-500/10 rounded-lg group-hover:bg-blue-500/40 group-hover:shadow-lg group-hover:shadow-blue-500/20 transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
+                  <TrendingUp className="w-5 h-5 text-blue-400" />
+                </div>
               </div>
+              <p className="text-4xl md:text-5xl font-black text-blue-300 group-hover:text-blue-200 transition-all duration-300 group-hover:scale-110 group-hover:translate-y-1 origin-left">{totalTrades}</p>
+              <p className="text-xs text-blue-400/70 mt-2 font-medium">Sesi trading sepanjang masa</p>
             </div>
-            <p className="text-4xl md:text-5xl font-black text-blue-300 group-hover:text-blue-200 transition-colors">{totalTrades}</p>
-            <p className="text-xs text-blue-400/70 mt-2 font-medium">Sesi trading sepanjang masa</p>
+            <div className="absolute inset-0 border border-blue-500/0 group-hover:border-blue-500/30 rounded-xl transition-all duration-300 pointer-events-none"></div>
           </div>
 
           {/* Win Rate Card */}
-          <div className="bg-gradient-to-br from-green-500/15 via-slate-800/50 to-green-600/10 border border-green-500/30 rounded-xl p-5 md:p-6 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300 group backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-slate-400 font-semibold text-sm uppercase tracking-wide">Tingkat Menang</h3>
-              <div className="p-2.5 bg-gradient-to-br from-green-500/30 to-green-500/10 rounded-lg group-hover:bg-green-500/40 transition-all duration-300 group-hover:scale-110">
-                <Award className="w-5 h-5 text-green-400" />
+          <div className="group relative overflow-hidden bg-gradient-to-br from-green-500/15 via-slate-800/50 to-green-600/10 border border-green-500/30 rounded-xl p-5 md:p-6 hover:border-green-500/50 transition-all duration-300 backdrop-blur-sm cursor-default">
+            <div className="absolute inset-0 bg-gradient-to-r from-green-500/0 via-green-500/10 to-green-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-slate-400 font-semibold text-sm uppercase tracking-wide">Tingkat Menang</h3>
+                <div className="p-2.5 bg-gradient-to-br from-green-500/30 to-green-500/10 rounded-lg group-hover:bg-green-500/40 group-hover:shadow-lg group-hover:shadow-green-500/20 transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
+                  <Award className="w-5 h-5 text-green-400" />
+                </div>
               </div>
+              <p className="text-4xl md:text-5xl font-black text-green-300 group-hover:text-green-200 transition-all duration-300 group-hover:scale-110 group-hover:translate-y-1 origin-left">{winRate}%</p>
+              <p className="text-xs text-green-400/70 mt-2 font-medium">{winTrades} menang / {lossTrades} kalah</p>
             </div>
-            <p className="text-4xl md:text-5xl font-black text-green-300 group-hover:text-green-200 transition-colors">{winRate}%</p>
-            <p className="text-xs text-green-400/70 mt-2 font-medium">{winTrades} menang / {lossTrades} kalah</p>
+            <div className="absolute inset-0 border border-green-500/0 group-hover:border-green-500/30 rounded-xl transition-all duration-300 pointer-events-none"></div>
           </div>
 
           {/* Current Balance Card */}
-          <div className="bg-gradient-to-br from-purple-500/15 via-slate-800/50 to-purple-600/10 border border-purple-500/30 rounded-xl p-5 md:p-6 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300 group backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-slate-400 font-semibold text-sm uppercase tracking-wide">Saldo</h3>
-              <div className="p-2.5 bg-gradient-to-br from-purple-500/30 to-purple-500/10 rounded-lg group-hover:bg-purple-500/40 transition-all duration-300 group-hover:scale-110">
-                <DollarSign className="w-5 h-5 text-purple-400" />
+          <div className="group relative overflow-hidden bg-gradient-to-br from-purple-500/15 via-slate-800/50 to-purple-600/10 border border-purple-500/30 rounded-xl p-5 md:p-6 hover:border-purple-500/50 transition-all duration-300 backdrop-blur-sm cursor-default">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-slate-400 font-semibold text-sm uppercase tracking-wide">Saldo</h3>
+                <div className="p-2.5 bg-gradient-to-br from-purple-500/30 to-purple-500/10 rounded-lg group-hover:bg-purple-500/40 group-hover:shadow-lg group-hover:shadow-purple-500/20 transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
+                  <DollarSign className="w-5 h-5 text-purple-400" />
+                </div>
               </div>
+              <p className="text-4xl md:text-5xl font-black text-purple-300 group-hover:text-purple-200 transition-all duration-300 group-hover:scale-110 group-hover:translate-y-1 origin-left">${(customBalance / 1000).toFixed(1)}k</p>
+              <p className="text-xs text-purple-400/70 mt-2 font-medium">Ekuitas akun saat ini</p>
             </div>
-            <p className="text-4xl md:text-5xl font-black text-purple-300 group-hover:text-purple-200 transition-colors">${(customBalance / 1000).toFixed(1)}k</p>
-            <p className="text-xs text-purple-400/70 mt-2 font-medium">Ekuitas akun saat ini</p>
+            <div className="absolute inset-0 border border-purple-500/0 group-hover:border-purple-500/30 rounded-xl transition-all duration-300 pointer-events-none"></div>
           </div>
 
           {/* Risk per Trade Card */}
-          <div className="bg-gradient-to-br from-orange-500/15 via-slate-800/50 to-orange-600/10 border border-orange-500/30 rounded-xl p-5 md:p-6 hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/20 transition-all duration-300 group backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-slate-400 font-semibold text-sm uppercase tracking-wide">Risk/Trade</h3>
-              <div className="p-2.5 bg-gradient-to-br from-orange-500/30 to-orange-500/10 rounded-lg group-hover:bg-orange-500/40 transition-all duration-300 group-hover:scale-110">
-                <Target className="w-5 h-5 text-orange-400" />
+          <div className="group relative overflow-hidden bg-gradient-to-br from-orange-500/15 via-slate-800/50 to-orange-600/10 border border-orange-500/30 rounded-xl p-5 md:p-6 hover:border-orange-500/50 transition-all duration-300 backdrop-blur-sm cursor-default">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/10 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-slate-400 font-semibold text-sm uppercase tracking-wide">Risk/Trade</h3>
+                <div className="p-2.5 bg-gradient-to-br from-orange-500/30 to-orange-500/10 rounded-lg group-hover:bg-orange-500/40 group-hover:shadow-lg group-hover:shadow-orange-500/20 transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1">
+                  <Target className="w-5 h-5 text-orange-400" />
+                </div>
               </div>
+              <p className="text-4xl md:text-5xl font-black text-orange-300 group-hover:text-orange-200 transition-all duration-300 group-hover:scale-110 group-hover:translate-y-1 origin-left">1%</p>
+              <p className="text-xs text-orange-400/70 mt-2 font-medium">Ukuran posisi standar</p>
             </div>
-            <p className="text-4xl md:text-5xl font-black text-orange-300 group-hover:text-orange-200 transition-colors">1%</p>
-            <p className="text-xs text-orange-400/70 mt-2 font-medium">Ukuran posisi standar</p>
+            <div className="absolute inset-0 border border-orange-500/0 group-hover:border-orange-500/30 rounded-xl transition-all duration-300 pointer-events-none"></div>
           </div>
         </div>
 
@@ -372,57 +409,70 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Trades Section */}
-        <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden hover:border-slate-700/80 transition-all duration-300 shadow-lg backdrop-blur-sm">
-          <div className="px-5 md:px-6 py-4 md:py-5 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-slate-850/50 backdrop-blur-sm">
-            <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-              <TrendingUp className="w-6 h-6 text-yellow-400" />
+        <div className="bg-gradient-to-br from-slate-800/50 via-slate-800/30 to-slate-850/40 border border-slate-700/60 rounded-xl overflow-hidden hover:border-slate-600/60 transition-all duration-300 shadow-xl backdrop-blur-sm hover:shadow-2xl hover:shadow-slate-900/20">
+          <div className="px-5 md:px-6 py-5 md:py-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/70 to-slate-750/30 backdrop-blur-md">
+            <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-3">
+              <div className="p-2 bg-yellow-500/20 rounded-lg">
+                <TrendingUp className="w-6 h-6 text-yellow-400" />
+              </div>
               Transaksi Terbaru
             </h2>
-            <p className="text-sm text-slate-400 mt-1">Pantau 4 transaksi terakhir Anda</p>
+            <p className="text-sm text-slate-400 mt-2">Pantau 4 transaksi terakhir dengan detail lengkap</p>
           </div>
           
           {recentTrades.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-slate-800/50 border-b border-slate-700/50">
+                <thead className="bg-gradient-to-r from-slate-800/70 to-slate-800/40 border-b border-slate-700/50 sticky top-0">
                   <tr>
-                    <th className="px-4 md:px-6 py-3 text-left text-slate-400 font-bold uppercase text-xs tracking-wide">Pair</th>
-                    <th className="px-4 md:px-6 py-3 text-left text-slate-400 font-bold uppercase text-xs tracking-wide">Posisi</th>
-                    <th className="px-4 md:px-6 py-3 text-left text-slate-400 font-bold uppercase text-xs tracking-wide">Hasil</th>
-                    <th className="px-4 md:px-6 py-3 text-left text-slate-400 font-bold uppercase text-xs tracking-wide hidden md:table-cell">Pip</th>
-                    <th className="px-4 md:px-6 py-3 text-left text-slate-400 font-bold uppercase text-xs tracking-wide">Tanggal</th>
+                    <th className="px-4 md:px-6 py-4 text-left text-slate-300 font-bold uppercase text-xs tracking-widest">Pair</th>
+                    <th className="px-4 md:px-6 py-4 text-left text-slate-300 font-bold uppercase text-xs tracking-widest">Posisi</th>
+                    <th className="px-4 md:px-6 py-4 text-left text-slate-300 font-bold uppercase text-xs tracking-widest">Hasil</th>
+                    <th className="px-4 md:px-6 py-4 text-left text-slate-300 font-bold uppercase text-xs tracking-widest hidden md:table-cell">Pip</th>
+                    <th className="px-4 md:px-6 py-4 text-left text-slate-300 font-bold uppercase text-xs tracking-widest">Tanggal</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-700/30">
                   {recentTrades.map((trade, index) => (
-                    <tr key={trade.id} className="hover:bg-slate-700/30 transition-all duration-200 animate-in fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                      <td className="px-4 md:px-6 py-3 md:py-4 font-bold text-white">{trade.pair}</td>
-                      <td className="px-4 md:px-6 py-3 md:py-4">
-                        <span className={`px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1 ${
+                    <tr 
+                      key={trade.id} 
+                      className="group hover:bg-gradient-to-r hover:from-slate-700/40 hover:to-slate-700/20 transition-all duration-300 border-slate-700/20 hover:border-slate-600/40 animate-in fade-in"
+                      style={{ animationDelay: `${index * 75}ms` }}
+                    >
+                      <td className="px-4 md:px-6 py-4 md:py-5 font-bold text-white group-hover:text-slate-100 transition-colors">
+                        <span className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 group-hover:scale-150 transition-transform"></span>
+                          {trade.pair}
+                        </span>
+                      </td>
+                      <td className="px-4 md:px-6 py-4 md:py-5">
+                        <span className={`px-3 py-2 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg origin-left ${
                           trade.posisi === 'BUY' 
-                            ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                            : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                            ? 'bg-gradient-to-r from-green-500/30 to-green-400/10 text-green-300 border border-green-500/40 group-hover:from-green-500/50 group-hover:to-green-400/30' 
+                            : 'bg-gradient-to-r from-red-500/30 to-red-400/10 text-red-300 border border-red-500/40 group-hover:from-red-500/50 group-hover:to-red-400/30'
                         }`}>
-                          {trade.posisi === 'BUY' ? '📈' : '📉'} {trade.posisi}
+                          {trade.posisi === 'BUY' ? '📈' : '📉'} 
+                          <span className="font-bold">{trade.posisi}</span>
                         </span>
                       </td>
-                      <td className="px-4 md:px-6 py-3 md:py-4">
-                        <span className={`px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1 ${
+                      <td className="px-4 md:px-6 py-4 md:py-5">
+                        <span className={`px-3 py-2 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg origin-left ${
                           trade.hasil === 'WIN' 
-                            ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
-                            : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                            ? 'bg-gradient-to-r from-green-500/30 to-green-400/10 text-green-300 border border-green-500/40 group-hover:from-green-500/50 group-hover:to-green-400/30' 
+                            : 'bg-gradient-to-r from-red-500/30 to-red-400/10 text-red-300 border border-red-500/40 group-hover:from-red-500/50 group-hover:to-red-400/30'
                         }`}>
-                          {trade.hasil === 'WIN' ? '✓' : '✗'} {trade.hasil}
+                          {trade.hasil === 'WIN' ? '✓' : '✗'} 
+                          <span className="font-bold">{trade.hasil}</span>
                         </span>
                       </td>
-                      <td className="px-4 md:px-6 py-3 md:py-4 hidden md:table-cell text-slate-400 font-mono font-bold">
-                        <span className={trade.pip > 0 ? 'text-green-400' : 'text-red-400'}>
+                      <td className="px-4 md:px-6 py-4 md:py-5 hidden md:table-cell font-mono font-bold transition-colors">
+                        <span className={`transition-all duration-300 group-hover:scale-125 group-hover:font-black inline-block origin-left ${trade.pip > 0 ? 'text-green-400 group-hover:text-green-300' : 'text-red-400 group-hover:text-red-300'}`}>
                           {trade.pip > 0 ? '+' : ''}{trade.pip}
                         </span>
                       </td>
-                      <td className="px-4 md:px-6 py-3 md:py-4 text-slate-400 text-xs md:text-sm flex items-center gap-1.5">
-                        <Calendar className="w-4 h-4 text-slate-500" />
-                        {trade.tanggal}
+                      <td className="px-4 md:px-6 py-4 md:py-5 text-slate-400 group-hover:text-slate-300 text-xs md:text-sm flex items-center gap-2 transition-colors">
+                        <Calendar className="w-4 h-4 text-slate-500 group-hover:text-slate-400 transition-colors" />
+                        <span className="group-hover:font-semibold transition-all">{trade.tanggal}</span>
                       </td>
                     </tr>
                   ))}
@@ -431,11 +481,14 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="px-6 py-16 text-center">
-              <div className="mb-4">
-                <BookOpen className="w-12 h-12 text-slate-600 mx-auto opacity-50" />
+              <div className="mb-6 flex justify-center">
+                <div className="p-4 bg-slate-700/30 rounded-full">
+                  <BookOpen className="w-12 h-12 text-slate-500" />
+                </div>
               </div>
-              <p className="text-slate-400 mb-4 text-lg">Belum ada transaksi. Mulai petualangan trading Anda!</p>
-              <Link href="/journal" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-slate-900 font-bold rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/30 active:scale-95">
+              <p className="text-slate-400 mb-6 text-lg font-semibold">Belum ada transaksi</p>
+              <p className="text-slate-500 mb-6 text-sm">Mulai catat transaksi pertama Anda sekarang untuk melihat statistik dan progress trading</p>
+              <Link href="/journal" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-slate-900 font-bold rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/30 hover:-translate-y-1 active:scale-95">
                 <BookOpen size={18} />
                 Catat Transaksi Pertama
               </Link>
