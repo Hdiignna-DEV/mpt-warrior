@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "env": {},
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
+}
