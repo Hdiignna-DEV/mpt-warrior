@@ -3,6 +3,7 @@
 import { Zap, TrendingUp, Target, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { ThemeToggle } from './ThemeToggle';
 
 export default function Header() {
   const [stats, setStats] = useState({
@@ -85,10 +86,14 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Analytics Button */}
-          <Link href="/analytics" className="p-2 md:p-3 rounded-lg bg-slate-800/50 hover:bg-slate-700 border border-slate-700/50 hover:border-yellow-500/30 transition-all hover:shadow-lg hover:shadow-yellow-500/20">
-            <BarChart3 className="w-5 h-5 text-slate-400 hover:text-yellow-400 transition-colors" />
-          </Link>
+          {/* Right Controls */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+
+            <Link href="/analytics" className="p-2 md:p-3 rounded-lg bg-slate-800/50 hover:bg-slate-700 border border-slate-700/50 hover:border-yellow-500/30 transition-all hover:shadow-lg hover:shadow-yellow-500/20">
+              <BarChart3 className="w-5 h-5 text-slate-400 hover:text-yellow-400 transition-colors" />
+            </Link>
+          </div>
         </div>
 
         {/* Divider */}

@@ -107,7 +107,7 @@ export default function Sidebar() {
           <div className="flex justify-center">
             <ThemeToggle />
           </div>
-          <p className="text-xs text-slate-500 text-center font-medium\">
+          <p className="text-xs text-slate-500 text-center font-medium">
             v5.0 (Enhanced)
           </p>
         </div>
