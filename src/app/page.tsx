@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { TrendingUp, Target, DollarSign, Award, RefreshCw, Edit2, X, Check } from 'lucide-react';
+import { TrendingUp, Target, DollarSign, Award, RefreshCw, Edit2, X, Check, Zap, TrendingDown, Calendar } from 'lucide-react';
 
 interface Trade {
   id: string;
@@ -162,92 +162,207 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-3 sm:p-4 md:p-8 pt-20 sm:pt-24 md:pt-8">
-      {/* Header dengan Logo */}
-      <div className="mb-6 md:mb-10">
-        <div className="flex items-center justify-between gap-3 md:gap-6 mb-4">
-          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-            <div className="relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 flex-shrink-0">
-              <Image
-                src="/mpt-logo.png"
-                alt="MPT Logo"
-                fill
-                className="object-contain drop-shadow-lg"
-              />
+    <div className="w-full bg-slate-950">
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6 md:space-y-8">
+        
+        {/* Hero Section */}
+        <div className="bg-gradient-to-r from-slate-800 to-slate-900 border border-yellow-500/20 rounded-2xl p-6 md:p-8 shadow-lg">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-black text-white mb-2">Welcome Back, Warrior! 🚀</h1>
+              <p className="text-slate-400 text-lg">Track your progress, improve your craft, dominate the market.</p>
             </div>
-            
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl sm:text-2xl md:text-4xl font-black text-white truncate">Command Center</h1>
-              <p className="text-slate-400 text-xs sm:text-sm md:text-base truncate">
-                {isLoading 
-                  ? 'Loading your data...' 
-                  : totalTrades > 0 
-                    ? `${totalTrades} trades • ${winRate}%`
-                    : 'Start logging trades!'}
-              </p>
+            <button
+              onClick={() => {
+                setIsLoading(true);
+                setTimeout(() => {
+                  const saved = localStorage.getItem('trades');
+                  if (saved) {
+                    setTrades(JSON.parse(saved));
+                  }
+                  setIsLoading(false);
+                }, 300);
+              }}
+              disabled={isLoading}
+              className="px-4 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 disabled:from-slate-600 disabled:to-slate-600 text-white font-bold rounded-lg transition-all flex items-center gap-2 flex-shrink-0"
+            >
+              <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Quick Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Total Trades Card */}
+          <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/30 rounded-xl p-5 md:p-6 hover:border-blue-500/50 transition-all group">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-slate-400 font-semibold text-sm">Total Trades</h3>
+              <div className="p-2 bg-blue-500/20 rounded-lg group-hover:bg-blue-500/30 transition-colors">
+                <TrendingUp className="w-5 h-5 text-blue-400" />
+              </div>
             </div>
+            <p className="text-3xl md:text-4xl font-black text-blue-300">{totalTrades}</p>
+            <p className="text-xs text-blue-400/70 mt-2">Trading sessions</p>
           </div>
 
-          {/* Refresh Button */}
-          <button
-            onClick={() => {
-              setIsLoading(true);
-              setTimeout(() => {
-                const saved = localStorage.getItem('trades');
-                if (saved) {
-                  setTrades(JSON.parse(saved));
-                }
-                setIsLoading(false);
-              }, 300);
-            }}
-            disabled={isLoading}
-            className="p-2 sm:p-2.5 md:p-3 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-900 rounded-lg transition-colors flex-shrink-0"
-            title="Refresh data"
-          >
-            <RefreshCw size={18} className={`text-yellow-500 sm:w-5 sm:h-5 md:w-5 md:h-5 ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-        <div className="h-1 bg-gradient-to-r from-yellow-500 via-slate-700 to-transparent rounded-full mt-4"></div>
-      </div>
+          {/* Win Rate Card */}
+          <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/30 rounded-xl p-5 md:p-6 hover:border-green-500/50 transition-all group">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-slate-400 font-semibold text-sm">Win Rate</h3>
+              <div className="p-2 bg-green-500/20 rounded-lg group-hover:bg-green-500/30 transition-colors">
+                <Award className="w-5 h-5 text-green-400" />
+              </div>
+            </div>
+            <p className="text-3xl md:text-4xl font-black text-green-300">{winRate}%</p>
+            <p className="text-xs text-green-400/70 mt-2">Winning rate</p>
+          </div>
 
-      {/* Custom Balance Section */}
-      <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 mb-6 md:mb-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-6">
-          <div className="flex-1 min-w-0">
-            <p className="text-slate-400 text-xs sm:text-sm mb-2 flex items-center gap-2">
-              💰 Initial Balance
-            </p>
+          {/* Current Balance Card */}
+          <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/30 rounded-xl p-5 md:p-6 hover:border-purple-500/50 transition-all group">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-slate-400 font-semibold text-sm">Balance</h3>
+              <div className="p-2 bg-purple-500/20 rounded-lg group-hover:bg-purple-500/30 transition-colors">
+                <DollarSign className="w-5 h-5 text-purple-400" />
+              </div>
+            </div>
+            <p className="text-3xl md:text-4xl font-black text-purple-300">${(customBalance / 1000).toFixed(1)}k</p>
+            <p className="text-xs text-purple-400/70 mt-2">Account equity</p>
+          </div>
+
+          {/* Risk per Trade Card */}
+          <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/10 border border-orange-500/30 rounded-xl p-5 md:p-6 hover:border-orange-500/50 transition-all group">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-slate-400 font-semibold text-sm">Risk/Trade</h3>
+              <div className="p-2 bg-orange-500/20 rounded-lg group-hover:bg-orange-500/30 transition-colors">
+                <Target className="w-5 h-5 text-orange-400" />
+              </div>
+            </div>
+            <p className="text-3xl md:text-4xl font-black text-orange-300">1%</p>
+            <p className="text-xs text-orange-400/70 mt-2">Position size</p>
+          </div>
+        </div>
+
+        {/* Balance Editor Section */}
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-5 md:p-6">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex-1 min-w-[200px]">
+              <p className="text-slate-400 text-sm font-semibold mb-2">💰 Initial Balance</p>
+              <p className="text-2xl md:text-3xl font-black text-white">${customBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}</p>
+            </div>
             {!isEditingBalance ? (
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white break-words">
-                ${customBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-              </h2>
+              <button
+                onClick={() => {
+                  setIsEditingBalance(true);
+                  setTempBalance(customBalance.toString());
+                }}
+                className="px-4 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold rounded-lg transition-all flex items-center gap-2"
+              >
+                <Edit2 size={16} />
+                Edit Balance
+              </button>
             ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-400">$</span>
+              <div className="flex gap-2 items-center">
                 <input
                   type="number"
                   value={tempBalance}
                   onChange={(e) => setTempBalance(e.target.value)}
-                  className="bg-slate-800/50 border border-slate-700 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white placeholder-slate-500 focus:border-purple-500 focus:outline-none flex-1 min-w-0 text-sm sm:text-base"
-                  placeholder="Enter balance"
+                  className="bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2.5 text-white placeholder-slate-500 focus:border-yellow-500 focus:outline-none w-40"
+                  placeholder="Enter amount"
                   autoFocus
                 />
+                <button
+                  onClick={() => {
+                    const newBalance = parseFloat(tempBalance);
+                    if (!isNaN(newBalance) && newBalance > 0) {
+                      setCustomBalance(newBalance);
+                      localStorage.setItem('mpt_initial_balance', newBalance.toString());
+                      setIsEditingBalance(false);
+                    }
+                  }}
+                  className="p-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
+                >
+                  <Check size={18} />
+                </button>
+                <button
+                  onClick={() => setIsEditingBalance(false)}
+                  className="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+                >
+                  <X size={18} />
+                </button>
               </div>
             )}
           </div>
+        </div>
 
-          {/* Edit Balance Button */}
-          {!isEditingBalance ? (
-            <button
-              onClick={() => {
-                setIsEditingBalance(true);
-                setTempBalance(customBalance.toString());
-              }}
-              className="p-2 sm:p-2.5 md:p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors flex items-center gap-2 flex-shrink-0 text-sm sm:text-base"
-              title="Edit initial balance"
-            >
-              <Edit2 size={18} className="md:w-5 md:h-5" />
-              <span className="hidden sm:inline font-bold">Edit</span>
+        {/* Recent Trades Section */}
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl overflow-hidden">
+          <div className="px-5 md:px-6 py-4 border-b border-slate-700/50 bg-gradient-to-r from-slate-800 to-slate-850">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-yellow-400" />
+              Recent Trades
+            </h2>
+          </div>
+          
+          {recentTrades.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-800/50 border-b border-slate-700/50">
+                  <tr>
+                    <th className="px-4 md:px-6 py-3 text-left text-slate-400 font-semibold">Pair</th>
+                    <th className="px-4 md:px-6 py-3 text-left text-slate-400 font-semibold">Position</th>
+                    <th className="px-4 md:px-6 py-3 text-left text-slate-400 font-semibold">Result</th>
+                    <th className="px-4 md:px-6 py-3 text-left text-slate-400 font-semibold hidden md:table-cell">Pips</th>
+                    <th className="px-4 md:px-6 py-3 text-left text-slate-400 font-semibold">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentTrades.map((trade) => (
+                    <tr key={trade.id} className="border-b border-slate-700/30 hover:bg-slate-700/20 transition-colors">
+                      <td className="px-4 md:px-6 py-3 font-bold text-white">{trade.pair}</td>
+                      <td className="px-4 md:px-6 py-3">
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${
+                          trade.posisi === 'BUY' 
+                            ? 'bg-green-500/20 text-green-400' 
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {trade.posisi}
+                        </span>
+                      </td>
+                      <td className="px-4 md:px-6 py-3">
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${
+                          trade.hasil === 'WIN' 
+                            ? 'bg-green-500/20 text-green-400' 
+                            : 'bg-red-500/20 text-red-400'
+                        }`}>
+                          {trade.hasil}
+                        </span>
+                      </td>
+                      <td className="px-4 md:px-6 py-3 hidden md:table-cell text-slate-400 font-mono">
+                        {trade.pip > 0 ? '+' : ''}{trade.pip}
+                      </td>
+                      <td className="px-4 md:px-6 py-3 text-slate-400 text-xs flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {trade.tanggal}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="px-6 py-12 text-center">
+              <p className="text-slate-400 mb-3">No trades yet. Start your trading journey!</p>
+              <button className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-bold rounded-lg transition-colors">
+                Log Your First Trade
+              </button>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </div>
             </button>
             ) : (
             <div className="flex gap-2">

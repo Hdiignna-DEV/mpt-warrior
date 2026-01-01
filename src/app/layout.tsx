@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import PanicButton from "@/components/PanicButton";
 import TradingViewCalendar from "@/components/TradingViewCalendar";
 import { ThemeProviderWrapper } from "@/components/ThemeProvider";
@@ -28,9 +30,12 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/mpt-logo.png" />
       </head>
-      <body className={`${inter.className} bg-slate-950 text-slate-100 overflow-x-hidden dark`}>
+      <body className={`${inter.className} bg-slate-950 text-slate-100 overflow-x-hidden dark flex flex-col min-h-screen`}>
         <ThemeProviderWrapper>
-          <div className="flex flex-col lg:flex-row h-screen lg:h-screen overflow-hidden">
+          {/* Header */}
+          <Header />
+
+          <div className="flex flex-1 overflow-hidden">
             {/* Sidebar */}
             <Sidebar />
 
@@ -39,6 +44,9 @@ export default function RootLayout({
               {children}
             </main>
           </div>
+
+          {/* Footer */}
+          <Footer />
 
           {/* Global Floating Components */}
           <PanicButton />
