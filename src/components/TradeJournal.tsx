@@ -1,503 +1,460 @@
 'use client';
+import { useState, useEffect } from 'react';
+import { BookOpen, Plus, Trash2, Download, Share2 } from 'lucide-react';
+import { getTrades, saveTrades, onTradesUpdated } from '@/utils/storage-sync';
+import type { Trade } from '@/utils/storage-sync';
 
-import { useState, useRef, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, Filter, X, Save, Image as ImageIcon } from 'lucide-react';
-import { saveJournalEntries, getJournalEntries } from '@/utils/storage-sync';
+// List of popular trading pairs
+const POPULAR_PAIRS = [
+  'XAUUSD',
+  'EURUSD',
+  'GBPUSD',
+  'USDJPY',
+  'AUDUSD',
+  'USDCAD',
+  'NZDUSD',
+  'BTCUSD',
+  'ETHUSD',
+  'USDINR',
+  'USDCHF',
+  'EURGBP',
+  'EURJPY',
+  'GBPJPY',
+  'AUDJPY',
+  'NZDJPY',
+  'EURCHF',
+  'GBPCHF',
+];
 
-interface JournalEntry {
-  id: string;
-  date: string;
-  pair: string;
-  trade: {
-    entry: number;
-    exit: number;
-    stopLoss: number;
-    takeProfit: number;
-    pips: number;
-    result: 'WIN' | 'LOSS';
-  };
-  emotionalState: 'calm' | 'confident' | 'nervous' | 'frustrated' | 'excited';
-  notes: string;
-  screenShot?: string;
-  tags: string[];
-  lessonLearned?: string;
-}
+export default function JurnalTrading() {
+  const [trades, setTrades] = useState<Trade[]>([]);
+  const [pair, setPair] = useState('XAUUSD');
+  const [posisi, setPosisi] = useState<'BUY' | 'SELL'>('BUY');
+  const [pip, setPip] = useState('');
+  const [catatan, setCatatan] = useState('');
+  const [showExportOptions, setShowExportOptions] = useState(false);
+  const [showPairDropdown, setShowPairDropdown] = useState(false);
 
-interface TradeJournalProps {
-  onSave?: (entry: JournalEntry) => void;
-}
-
-export default function TradeJournal({ onSave }: TradeJournalProps) {
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'WIN' | 'LOSS'>('all');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [formData, setFormData] = useState<JournalEntry>({
-    id: '',
-    date: new Date().toISOString().split('T')[0],
-    pair: '',
-    trade: {
-      entry: 0,
-      exit: 0,
-      stopLoss: 0,
-      takeProfit: 0,
-      pips: 0,
-      result: 'WIN',
-    },
-    emotionalState: 'calm',
-    notes: '',
-    tags: [],
-    lessonLearned: '',
-  });
-
-  // Load entries from localStorage
+  // Load dari localStorage
   useEffect(() => {
-    const loadedEntries = getJournalEntries();
-    setEntries(loadedEntries);
+    const saved = getTrades();
+    setTrades(saved);
   }, []);
 
-  // Save entries to localStorage AND sync to dashboard
+  // Subscribe to trades updates
   useEffect(() => {
-    if (entries.length > 0 || localStorage.getItem('mpt_journal_entries')) {
-      saveJournalEntries(entries);
-    }
-  }, [entries]);
-
-  const calculatePips = (entry: number, exit: number, posisi: string) => {
-    if (posisi === 'BUY') return (exit - entry) * 10000;
-    return (entry - exit) * 10000;
-  };
-
-  const handleAddEntry = () => {
-    setFormData({
-      id: Date.now().toString(),
-      date: new Date().toISOString().split('T')[0],
-      pair: '',
-      trade: {
-        entry: 0,
-        exit: 0,
-        stopLoss: 0,
-        takeProfit: 0,
-        pips: 0,
-        result: 'WIN',
-      },
-      emotionalState: 'calm',
-      notes: '',
-      tags: [],
-      lessonLearned: '',
+    const unsubscribe = onTradesUpdated((updatedTrades) => {
+      setTrades(updatedTrades);
     });
-    setEditingId(null);
-    setIsOpen(true);
+    return unsubscribe;
+  }, []);
+
+  // Save ke localStorage
+  useEffect(() => {
+    if (trades.length > 0) {
+      saveTrades(trades);
+    }
+  }, [trades]);
+
+  // Auto-determine WIN/LOSS based on pips
+  const getHasil = (): 'WIN' | 'LOSS' => {
+    const pipValue = parseFloat(pip);
+    if (isNaN(pipValue)) return 'WIN';
+    return pipValue > 0 ? 'WIN' : 'LOSS';
   };
 
-  const handleSaveEntry = () => {
-    if (!formData.pair || formData.trade.entry === 0) {
-      alert('Please fill in pair and entry price');
+  const tambahTrade = () => {
+    if (!pair || !pip) {
+      alert('Isi Pair dan Pip terlebih dahulu!');
       return;
     }
 
-    const pips = calculatePips(formData.trade.entry, formData.trade.exit, 'BUY');
+    const pipValue = parseFloat(pip);
+    if (isNaN(pipValue) || pipValue === 0) {
+      alert('Pip harus berupa angka bukan 0!');
+      return;
+    }
 
-    const entry: JournalEntry = {
-      ...formData,
-      trade: {
-        ...formData.trade,
-        pips,
-      },
-      id: editingId || Date.now().toString(),
+    const hasil = getHasil();
+
+    const tradeBaru: Trade = {
+      id: Date.now().toString(),
+      pair,
+      posisi,
+      hasil,
+      pip: pipValue,
+      tanggal: new Date().toISOString().split('T')[0],
+      catatan,
     };
 
-    if (editingId) {
-      setEntries(entries.map((e) => (e.id === editingId ? entry : e)));
-      setEditingId(null);
-    } else {
-      setEntries([entry, ...entries]);
+    setTrades([tradeBaru, ...trades]);
+    setPair('XAUUSD');
+    setPip('');
+    setCatatan('');
+    setPosisi('BUY');
+  };
+
+  const hapusTrade = (id: string) => {
+    setTrades(trades.filter((t) => t.id !== id));
+  };
+
+  // Export functions
+  const exportToEnhancedCSV = () => {
+    if (trades.length === 0) {
+      alert('Tidak ada trade untuk di-export!');
+      return;
     }
 
-    onSave?.(entry);
-    setIsOpen(false);
-    setFormData({
-      id: '',
-      date: new Date().toISOString().split('T')[0],
-      pair: '',
-      trade: {
-        entry: 0,
-        exit: 0,
-        stopLoss: 0,
-        takeProfit: 0,
-        pips: 0,
-        result: 'WIN',
-      },
-      emotionalState: 'calm',
-      notes: '',
-      tags: [],
-      lessonLearned: '',
+    const totalTrade = trades.length;
+    const win = trades.filter((t) => t.hasil === 'WIN').length;
+    const loss = totalTrade - win;
+    const winRate = totalTrade > 0 ? Math.round((win / totalTrade) * 100) : 0;
+    const totalPips = trades.reduce((acc, t) => acc + t.pip, 0);
+    const customBalance = parseFloat(localStorage.getItem('mpt_initial_balance') || '10000');
+
+    let csvContent = '';
+
+    csvContent += '═══════════════════════════════════════════════════════════════\n';
+    csvContent += 'MPT WARRIOR HUB - TRADING JOURNAL REPORT\n';
+    csvContent += '═══════════════════════════════════════════════════════════════\n';
+    csvContent += `Export Date:,${new Date().toLocaleString('id-ID')}\n`;
+    csvContent += '\n';
+
+    csvContent += '─────────────────────────────────────────────────────────────\n';
+    csvContent += 'SUMMARY STATISTICS\n';
+    csvContent += '─────────────────────────────────────────────────────────────\n';
+    csvContent += `Total Trades:,${totalTrade}\n`;
+    csvContent += `Total WIN:,${win}\n`;
+    csvContent += `Total LOSS:,${loss}\n`;
+    csvContent += `Win Rate:,${winRate}%\n`;
+    csvContent += `Total Pips:,${totalPips >= 0 ? '+' : ''}${totalPips}\n`;
+    csvContent += `Initial Balance:,$${customBalance.toLocaleString('en-US')}\n`;
+    csvContent += `Estimated Balance:,$${(customBalance + totalPips * 10).toLocaleString('en-US')}\n`;
+    csvContent += '\n';
+
+    csvContent += '═══════════════════════════════════════════════════════════════\n';
+    csvContent += 'DETAILED TRADES\n';
+    csvContent += '═══════════════════════════════════════════════════════════════\n';
+    csvContent += 'Pair,Position,Result,Pips,Date,Notes\n';
+
+    trades.forEach((trade) => {
+      const pipsDisplay = trade.pip > 0 ? `+${trade.pip}` : `${trade.pip}`;
+      const notes = trade.catatan ? `"${trade.catatan.replace(/"/g, '""')}"` : '';
+      csvContent += `${trade.pair},${trade.posisi},${trade.hasil},${pipsDisplay},${trade.tanggal},${notes}\n`;
     });
+
+    csvContent += '\n';
+    csvContent += '═══════════════════════════════════════════════════════════════\n';
+    csvContent += 'MPT PHILOSOPHY: MINDSET → PLAN → TRADER\n';
+    csvContent += 'Remember: Discipline is your competitive advantage!\n';
+    csvContent += '═══════════════════════════════════════════════════════════════\n';
+
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = `MPT-Journal_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    setShowExportOptions(false);
   };
 
-  const handleDeleteEntry = (id: string) => {
-    if (confirm('Are you sure you want to delete this entry?')) {
-      setEntries(entries.filter((e) => e.id !== id));
+  const shareToClipboard = async () => {
+    if (trades.length === 0) {
+      alert('Tidak ada trade untuk di-share!');
+      return;
+    }
+
+    const totalTrade = trades.length;
+    const win = trades.filter((t) => t.hasil === 'WIN').length;
+    const loss = totalTrade - win;
+    const winRate = totalTrade > 0 ? Math.round((win / totalTrade) * 100) : 0;
+    const totalPips = trades.reduce((acc, t) => acc + t.pip, 0);
+    const customBalance = parseFloat(localStorage.getItem('mpt_initial_balance') || '10000');
+
+    const shareText = `📊 MPT WARRIOR TRADING STATS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📈 Total Trades: ${totalTrade}
+✅ WIN: ${win} | ❌ LOSS: ${loss}
+🎯 Win Rate: ${winRate}%
+💰 Total Pips: ${totalPips >= 0 ? '+' : ''}${totalPips}
+💎 Balance: $${(customBalance + totalPips * 10).toLocaleString('en-US')}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔗 https://mpt-warrior.vercel.app`;
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      alert('📋 Stats berhasil dicopy! Siap untuk di-share.');
+      setShowExportOptions(false);
+    } catch (err) {
+      alert('Gagal copy ke clipboard');
     }
   };
 
-  const handleEditEntry = (entry: JournalEntry) => {
-    setFormData(entry);
-    setEditingId(entry.id);
-    setIsOpen(true);
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData({
-          ...formData,
-          screenShot: reader.result as string,
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const filteredEntries = entries.filter((entry) => {
-    const matchesSearch =
-      entry.pair.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.notes.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterType === 'all' || entry.trade.result === filterType;
-    const matchesTags =
-      selectedTags.length === 0 ||
-      selectedTags.some((tag) => entry.tags.includes(tag));
-
-    return matchesSearch && matchesFilter && matchesTags;
-  });
-
-  const allTags = [...new Set(entries.flatMap((e) => e.tags))];
-
-  const emotionalStateColors: Record<JournalEntry['emotionalState'], string> = {
-    calm: 'bg-blue-500/20 text-blue-400 border-blue-500',
-    confident: 'bg-green-500/20 text-green-400 border-green-500',
-    nervous: 'bg-yellow-500/20 text-yellow-400 border-yellow-500',
-    frustrated: 'bg-red-500/20 text-red-400 border-red-500',
-    excited: 'bg-purple-500/20 text-purple-400 border-purple-500',
-  };
-
-  const emotionalStateEmoji: Record<JournalEntry['emotionalState'], string> = {
-    calm: '😌',
-    confident: '💪',
-    nervous: '😰',
-    frustrated: '😤',
-    excited: '🤩',
-  };
+  const totalTrade = trades.length;
+  const win = trades.filter((t) => t.hasil === 'WIN').length;
+  const loss = totalTrade - win;
+  const winRate = totalTrade > 0 ? Math.round((win / totalTrade) * 100) : 0;
+  const totalPips = trades.reduce((acc, t) => acc + t.pip, 0);
+  const currentHasil = getHasil();
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 pt-24 md:pt-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h2 className="text-2xl font-bold text-yellow-400">📖 Trading Journal</h2>
-        <button
-          onClick={handleAddEntry}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors"
-        >
-          <Plus size={20} />
-          New Entry
-        </button>
-      </div>
-
-      {/* Search & Filter */}
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search entries by pair or notes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-yellow-500"
-            />
-          </div>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
-            className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-yellow-500"
-          >
-            <option value="all">All Results</option>
-            <option value="WIN">Wins Only</option>
-            <option value="LOSS">Losses Only</option>
-          </select>
-        </div>
-
-        {/* Tag Filter */}
-        {allTags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {allTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() =>
-                  setSelectedTags(
-                    selectedTags.includes(tag)
-                      ? selectedTags.filter((t) => t !== tag)
-                      : [...selectedTags, tag]
-                  )
-                }
-                className={`px-3 py-1 rounded-full text-sm border transition-all ${
-                  selectedTags.includes(tag)
-                    ? 'bg-yellow-500/30 border-yellow-500 text-yellow-400'
-                    : 'bg-slate-700/50 border-slate-600 text-slate-400'
-                }`}
-              >
-                #{tag}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Modal Form */}
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-800 rounded-xl border-2 border-yellow-500 w-full max-w-2xl max-h-96 overflow-y-auto">
-            <div className="sticky top-0 bg-slate-800 border-b border-slate-700 p-4 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-yellow-400">
-                {editingId ? '✏️ Edit Entry' : '📝 New Journal Entry'}
-              </h3>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-1 hover:bg-slate-700 rounded-lg transition-colors"
-              >
-                <X size={24} />
-              </button>
+      <div className="mb-8 md:mb-10">
+        <div className="flex items-center justify-between gap-3 md:gap-4 mb-4">
+          <div className="flex items-center gap-3 md:gap-4 flex-1">
+            <div className="p-2 md:p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
+              <BookOpen className="text-blue-400" size={24} />
             </div>
-
-            <div className="p-6 space-y-4">
-              {/* Date & Pair */}
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-yellow-500"
-                />
-                <input
-                  type="text"
-                  placeholder="Pair (e.g. EURUSD)"
-                  value={formData.pair}
-                  onChange={(e) => setFormData({ ...formData, pair: e.target.value.toUpperCase() })}
-                  className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-yellow-500"
-                />
-              </div>
-
-              {/* Trade Details */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-slate-400">Entry Price</label>
-                  <input
-                    type="number"
-                    step="0.0001"
-                    value={formData.trade.entry}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        trade: { ...formData.trade, entry: parseFloat(e.target.value) },
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-yellow-500"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-slate-400">Exit Price</label>
-                  <input
-                    type="number"
-                    step="0.0001"
-                    value={formData.trade.exit}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        trade: { ...formData.trade, exit: parseFloat(e.target.value) },
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-yellow-500"
-                  />
-                </div>
-              </div>
-
-              {/* Result & Emotional State */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-slate-400">Result</label>
-                  <select
-                    value={formData.trade.result}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        trade: { ...formData.trade, result: e.target.value as 'WIN' | 'LOSS' },
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-yellow-500"
-                  >
-                    <option value="WIN">✅ Win</option>
-                    <option value="LOSS">❌ Loss</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-sm text-slate-400">Mood</label>
-                  <select
-                    value={formData.emotionalState}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        emotionalState: e.target.value as any,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-yellow-500"
-                  >
-                    <option value="calm">😌 Calm</option>
-                    <option value="confident">💪 Confident</option>
-                    <option value="nervous">😰 Nervous</option>
-                    <option value="frustrated">😤 Frustrated</option>
-                    <option value="excited">🤩 Excited</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="text-sm text-slate-400">Notes</label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder="What happened during this trade? Any insights?"
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-yellow-500 h-24 resize-none"
-                />
-              </div>
-
-              {/* Lesson Learned */}
-              <div>
-                <label className="text-sm text-slate-400">Lesson Learned</label>
-                <textarea
-                  value={formData.lessonLearned}
-                  onChange={(e) => setFormData({ ...formData, lessonLearned: e.target.value })}
-                  placeholder="What did you learn from this trade?"
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-yellow-500 h-20 resize-none"
-                />
-              </div>
-
-              {/* Screenshot */}
-              <div>
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-dashed border-slate-500 rounded-lg text-slate-300 transition-colors flex items-center justify-center gap-2"
-                >
-                  <ImageIcon size={20} />
-                  {formData.screenShot ? 'Screenshot Added' : 'Add Screenshot'}
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </div>
-
-              {/* Save Button */}
-              <button
-                onClick={handleSaveEntry}
-                className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
-              >
-                <Save size={20} />
-                Save Entry
-              </button>
+            <div className="flex-1">
+              <h1 className="text-2xl md:text-4xl font-black text-white">Jurnal Trading</h1>
+              <p className="text-slate-400 text-sm md:text-base">Catat setiap trade Anda untuk tracking progress.</p>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Entries List */}
-      <div className="space-y-3">
-        {filteredEntries.length === 0 ? (
-          <div className="text-center py-8 text-slate-400">
-            <p>No journal entries yet. Start documenting your trades! 📝</p>
-          </div>
-        ) : (
-          filteredEntries.map((entry) => (
-            <div
-              key={entry.id}
-              className="bg-slate-800/50 border-2 border-slate-700 hover:border-yellow-500 rounded-xl p-4 transition-all"
+          <div className="relative">
+            <button
+              onClick={() => setShowExportOptions(!showExportOptions)}
+              className="p-2 md:p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2 font-bold text-sm md:text-base"
             >
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-bold text-yellow-400">{entry.pair}</h3>
-                    <span
-                      className={`px-2 py-1 rounded-full text-sm font-semibold border ${
-                        entry.trade.result === 'WIN'
-                          ? 'bg-green-500/20 text-green-400 border-green-500'
-                          : 'bg-red-500/20 text-red-400 border-red-500'
+              <Download size={20} />
+              <span className="hidden md:inline">Export</span>
+            </button>
+
+            {showExportOptions && (
+              <div className="absolute top-full right-0 mt-2 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 w-56">
+                <button
+                  onClick={exportToEnhancedCSV}
+                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 text-sm flex flex-col gap-1"
+                >
+                  <span className="font-bold text-green-400">📈 Enhanced CSV</span>
+                  <span className="text-xs text-slate-400">Dengan statistics & summary</span>
+                </button>
+
+                <button
+                  onClick={shareToClipboard}
+                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors text-sm flex flex-col gap-1"
+                >
+                  <span className="font-bold text-red-400 flex items-center gap-2">
+                    <Share2 size={16} /> Share Stats
+                  </span>
+                  <span className="text-xs text-slate-400">Copy to clipboard</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="h-1 bg-gradient-to-r from-blue-500 via-slate-700 to-transparent rounded-full"></div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-8">
+        <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-800/50">
+          <p className="text-slate-400 text-xs md:text-sm mb-1">Total</p>
+          <p className="text-2xl md:text-3xl font-black text-white">{totalTrade}</p>
+        </div>
+        <div className="bg-slate-900/60 rounded-xl p-4 border border-green-500/30">
+          <p className="text-slate-400 text-xs md:text-sm mb-1">WIN</p>
+          <p className="text-2xl md:text-3xl font-black text-green-400">{win}</p>
+        </div>
+        <div className="bg-slate-900/60 rounded-xl p-4 border border-red-500/30">
+          <p className="text-slate-400 text-xs md:text-sm mb-1">LOSS</p>
+          <p className="text-2xl md:text-3xl font-black text-red-400">{loss}</p>
+        </div>
+        <div className="bg-slate-900/60 rounded-xl p-4 border border-yellow-500/30">
+          <p className="text-slate-400 text-xs md:text-sm mb-1">Win Rate</p>
+          <p className="text-2xl md:text-3xl font-black text-yellow-400">{winRate}%</p>
+        </div>
+        <div className={`bg-slate-900/60 rounded-xl p-4 border ${totalPips >= 0 ? 'border-green-500/30' : 'border-red-500/30'}`}>
+          <p className="text-slate-400 text-xs md:text-sm mb-1">Total Pips</p>
+          <p className={`text-2xl md:text-3xl font-black ${totalPips >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+            {totalPips >= 0 ? '+' : ''}{totalPips}
+          </p>
+        </div>
+      </div>
+
+      {/* Form Input */}
+      <div className="bg-slate-900/60 rounded-2xl border border-slate-800/50 p-5 md:p-8 backdrop-blur-sm mb-8">
+        <h2 className="text-lg md:text-xl font-bold text-white mb-6 flex items-center gap-2">
+          <Plus size={24} className="text-blue-400" /> Input Trade Baru
+        </h2>
+
+        <div className="space-y-4 md:space-y-5">
+          {/* Pair Dropdown */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">Pair</label>
+            <div className="relative">
+              <button
+                onClick={() => setShowPairDropdown(!showPairDropdown)}
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white text-left hover:border-blue-500 focus:border-blue-500 focus:outline-none flex items-center justify-between"
+              >
+                <span className="font-bold">{pair}</span>
+                <span className="text-slate-400">▼</span>
+              </button>
+
+              {showPairDropdown && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
+                  {POPULAR_PAIRS.map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => {
+                        setPair(p);
+                        setShowPairDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-800/50 last:border-b-0 ${
+                        pair === p ? 'bg-blue-500/30 text-blue-400 font-bold' : 'text-white'
                       }`}
                     >
-                      {entry.trade.result === 'WIN' ? '✅ WIN' : '❌ LOSS'}
-                    </span>
-                    <span
-                      className={`px-2 py-1 rounded-full text-sm border ${emotionalStateColors[entry.emotionalState]}`}
-                    >
-                      {emotionalStateEmoji[entry.emotionalState]} {entry.emotionalState}
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-slate-400 mb-2">📅 {new Date(entry.date).toLocaleDateString('id-ID')}</p>
-
-                  {entry.notes && (
-                    <p className="text-sm text-slate-300 mb-2">
-                      <strong>Notes:</strong> {entry.notes}
-                    </p>
-                  )}
-
-                  {entry.lessonLearned && (
-                    <p className="text-sm text-cyan-400 mb-2">
-                      <strong>💡 Lesson:</strong> {entry.lessonLearned}
-                    </p>
-                  )}
-
-                  {entry.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {entry.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded-full"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                      {p}
+                    </button>
+                  ))}
                 </div>
+              )}
+            </div>
+          </div>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEditEntry(entry)}
-                    className="p-2 bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500 rounded-lg transition-colors"
-                    title="Edit entry"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteEntry(entry.id)}
-                    className="p-2 bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-500 rounded-lg transition-colors"
-                    title="Delete entry"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+          {/* Posisi */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">Posisi</label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setPosisi('BUY')}
+                className={`py-3 rounded-lg font-bold transition-all ${
+                  posisi === 'BUY'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-slate-800/50 text-slate-300 border border-slate-700'
+                }`}
+              >
+                🟢 BUY
+              </button>
+              <button
+                onClick={() => setPosisi('SELL')}
+                className={`py-3 rounded-lg font-bold transition-all ${
+                  posisi === 'SELL'
+                    ? 'bg-red-500 text-white'
+                    : 'bg-slate-800/50 text-slate-300 border border-slate-700'
+                }`}
+              >
+                🔴 SELL
+              </button>
+            </div>
+          </div>
+
+          {/* Pip */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">
+              Pip (Hasil auto-detect)
+            </label>
+            <input
+              type="number"
+              placeholder="Contoh: 35 (WIN) atau -20 (LOSS)"
+              value={pip}
+              onChange={(e) => setPip(e.target.value)}
+              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+            />
+            
+            {pip && (
+              <div className="mt-3 flex gap-3">
+                <div className="flex-1">
+                  <p className="text-xs text-slate-400 mb-2">Pip Input:</p>
+                  <div className={`px-3 py-2 rounded-lg font-bold text-center ${
+                    parseFloat(pip) > 0 ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
+                  }`}>
+                    {parseFloat(pip) > 0 ? '+' : ''}{pip}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-xs text-slate-400 mb-2">Hasil (Auto):</p>
+                  <div className={`px-3 py-2 rounded-lg font-bold text-center ${
+                    currentHasil === 'WIN' ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
+                  }`}>
+                    {currentHasil === 'WIN' ? '✅ WIN' : '❌ LOSS'}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            )}
+          </div>
+
+          {/* Catatan */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">Catatan (Opsional)</label>
+            <textarea
+              placeholder="Tulis catatan trade Anda di sini..."
+              value={catatan}
+              onChange={(e) => setCatatan(e.target.value)}
+              rows={3}
+              className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            onClick={tambahTrade}
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+          >
+            <Plus size={20} /> Tambah Trade
+          </button>
+        </div>
+      </div>
+
+      {/* Trade List */}
+      <div className="bg-slate-900/60 rounded-2xl border border-slate-800/50 p-5 md:p-8 backdrop-blur-sm">
+        <h2 className="text-lg md:text-xl font-bold text-white mb-6">📊 Riwayat Trade</h2>
+
+        {trades.length === 0 ? (
+          <div className="text-center py-12">
+            <BookOpen size={48} className="mx-auto text-slate-600 mb-4" />
+            <p className="text-slate-400 text-lg">Belum ada trade. Mulai input trade Anda!</p>
+          </div>
+        ) : (
+          <div className="space-y-3 md:space-y-4">
+            {trades.map((trade) => (
+              <div
+                key={trade.id}
+                className="bg-slate-800/50 rounded-lg p-4 md:p-5 border border-slate-700/50 hover:border-slate-600 transition-all"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <p className="text-lg md:text-xl font-black text-white">{trade.pair}</p>
+                    <p className="text-xs md:text-sm text-slate-400">{trade.tanggal}</p>
+                  </div>
+                  <button
+                    onClick={() => hapusTrade(trade.id)}
+                    className="text-red-400 hover:text-red-300 transition-colors ml-2"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    trade.posisi === 'BUY' ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
+                  }`}>
+                    {trade.posisi}
+                  </span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    trade.hasil === 'WIN' ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
+                  }`}>
+                    {trade.hasil}
+                  </span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    trade.pip > 0 ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {trade.pip > 0 ? '+' : ''}{trade.pip} pips
+                  </span>
+                </div>
+
+                {trade.catatan && (
+                  <p className="text-sm text-slate-300 bg-slate-900/40 rounded p-2">
+                    💭 {trade.catatan}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
