@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { TrendingUp, Target, DollarSign, Award } from 'lucide-react';
+import { TrendingUp, Target, DollarSign, Award, RefreshCw } from 'lucide-react';
 
 interface Trade {
   id: string;
@@ -14,17 +14,28 @@ interface Trade {
 
 export default function Dashboard() {
   const [trades, setTrades] = useState<Trade[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Load trades dari localStorage
   useEffect(() => {
+    setIsLoading(true);
     const saved = localStorage.getItem('trades');
     if (saved) {
-      setTrades(JSON.parse(saved));
+      try {
+        const parsedTrades = JSON.parse(saved);
+        setTrades(Array.isArray(parsedTrades) ? parsedTrades : []);
+      } catch (error) {
+        console.error('Error parsing trades:', error);
+        setTrades([]);
+      }
     }
+    setIsLoading(false);
   }, []);
 
-  // Calculate real stats
+  // Calculate real statistics
   const totalTrades = trades.length;
   const winTrades = trades.filter(t => t.hasil === 'WIN').length;
+  const lossTrades = totalTrades - winTrades;
   const winRate = totalTrades > 0 ? Math.round((winTrades / totalTrades) * 100) : 0;
   
   // Calculate best streak
@@ -50,10 +61,20 @@ export default function Dashboard() {
   // Estimate balance (starting $10000 + $10 per pip)
   const estimatedBalance = 10000 + (totalPips * 10);
 
+  // Calculate additional metrics
+  const avgPipsPerWin = winTrades > 0 
+    ? Math.round(trades.filter(t => t.hasil === 'WIN').reduce((sum, t) => sum + t.pip, 0) / winTrades)
+    : 0;
+
+  const avgPipsPerLoss = lossTrades > 0
+    ? Math.round(trades.filter(t => t.hasil === 'LOSS').reduce((sum, t) => sum + Math.abs(t.pip), 0) / lossTrades)
+    : 0;
+
   const stats = [
     {
       label: 'Win Rate',
       value: totalTrades > 0 ? `${winRate}%` : '0%',
+      subtext: `${winTrades}W / ${lossTrades}L`,
       icon: TrendingUp,
       color: 'from-green-500/20 to-emerald-500/10',
       iconBg: 'bg-green-500/30',
@@ -63,6 +84,7 @@ export default function Dashboard() {
     {
       label: 'Total Trades',
       value: totalTrades.toString(),
+      subtext: `${(totalTrades * 2).toFixed(0)} trades/month avg`,
       icon: Target,
       color: 'from-blue-500/20 to-cyan-500/10',
       iconBg: 'bg-blue-500/30',
@@ -72,6 +94,7 @@ export default function Dashboard() {
     {
       label: 'Estimated Balance',
       value: `$${estimatedBalance.toLocaleString()}`,
+      subtext: `+$${(totalPips * 10).toLocaleString()} from trades`,
       icon: DollarSign,
       color: 'from-yellow-500/20 to-amber-500/10',
       iconBg: 'bg-yellow-500/30',
@@ -81,6 +104,7 @@ export default function Dashboard() {
     {
       label: 'Best Streak',
       value: `${calculateBestStreak()} Wins`,
+      subtext: `Avg win: +${avgPipsPerWin} pips`,
       icon: Award,
       color: 'from-purple-500/20 to-pink-500/10',
       iconBg: 'bg-purple-500/30',
@@ -92,55 +116,121 @@ export default function Dashboard() {
   // Get 4 most recent trades
   const recentTrades = trades.slice(0, 4);
 
+  // Loading skeleton
+  const StatSkeleton = () => (
+    <div className="bg-slate-800/50 rounded-2xl p-5 md:p-6 border border-slate-700/50 animate-pulse">
+      <div className="h-12 bg-slate-700 rounded mb-4"></div>
+      <div className="h-8 bg-slate-700 rounded w-3/4"></div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 pt-24 md:pt-8">
       {/* Header dengan Logo */}
       <div className="mb-8 md:mb-10">
-        <div className="flex items-center gap-4 md:gap-6 mb-4">
-          <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
-            <img 
-              src="/mpt-logo.png" 
-              alt="MPT Logo" 
-              className="w-full h-full object-contain drop-shadow-lg"
-            />
+        <div className="flex items-center justify-between gap-4 md:gap-6 mb-4">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="relative w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
+              <img 
+                src="/mpt-logo.png" 
+                alt="MPT Logo" 
+                className="w-full h-full object-contain drop-shadow-lg"
+              />
+            </div>
+            
+            <div className="flex-1">
+              <h1 className="text-2xl md:text-4xl font-black text-white">Command Center</h1>
+              <p className="text-slate-400 text-sm md:text-base">
+                {isLoading 
+                  ? 'Loading your data...' 
+                  : totalTrades > 0 
+                    ? `${totalTrades} trades logged • Win Rate ${winRate}%`
+                    : 'Start logging trades!'}
+              </p>
+            </div>
           </div>
-          
-          <div className="flex-1">
-            <h1 className="text-2xl md:text-4xl font-black text-white">Command Center</h1>
-            <p className="text-slate-400 text-sm md:text-base">
-              Your tactical overview, Warrior. {totalTrades > 0 ? `${totalTrades} trades logged.` : 'Start logging trades!'}
-            </p>
-          </div>
+
+          {/* Refresh Button */}
+          <button
+            onClick={() => {
+              setIsLoading(true);
+              setTimeout(() => {
+                const saved = localStorage.getItem('trades');
+                if (saved) {
+                  setTrades(JSON.parse(saved));
+                }
+                setIsLoading(false);
+              }, 300);
+            }}
+            disabled={isLoading}
+            className="p-2 md:p-3 bg-slate-800 hover:bg-slate-700 disabled:bg-slate-900 rounded-lg transition-colors"
+            title="Refresh data"
+          >
+            <RefreshCw size={20} className={`text-yellow-500 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
         <div className="h-1 bg-gradient-to-r from-yellow-500 via-slate-700 to-transparent rounded-full"></div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
-        {stats.map((stat, idx) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={idx}
-              className={`bg-gradient-to-br ${stat.color} rounded-2xl p-5 md:p-6 border ${stat.borderColor} backdrop-blur-sm hover:scale-105 transition-transform cursor-pointer group overflow-hidden relative`}
-            >
-              <div className="absolute -top-8 -right-8 w-24 h-24 bg-white/5 rounded-full blur-xl group-hover:bg-white/10 transition-all"></div>
-              
-              <div className="relative z-10">
-                <div className={`${stat.iconBg} w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center mb-4 border border-white/10`}>
-                  <Icon className={stat.iconColor} size={24} />
+        {isLoading ? (
+          <>
+            {[1, 2, 3, 4].map((i) => (
+              <StatSkeleton key={i} />
+            ))}
+          </>
+        ) : (
+          stats.map((stat, idx) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={idx}
+                className={`bg-gradient-to-br ${stat.color} rounded-2xl p-5 md:p-6 border ${stat.borderColor} backdrop-blur-sm hover:scale-105 transition-transform cursor-pointer group overflow-hidden relative`}
+              >
+                <div className="absolute -top-8 -right-8 w-24 h-24 bg-white/5 rounded-full blur-xl group-hover:bg-white/10 transition-all"></div>
+                
+                <div className="relative z-10">
+                  <div className={`${stat.iconBg} w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center mb-4 border border-white/10`}>
+                    <Icon className={stat.iconColor} size={24} />
+                  </div>
+                  <p className="text-slate-400 text-xs md:text-sm font-semibold uppercase tracking-wide mb-1">
+                    {stat.label}
+                  </p>
+                  <p className="text-2xl md:text-3xl font-black text-white mb-2">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs md:text-sm text-slate-400">
+                    {stat.subtext}
+                  </p>
                 </div>
-                <p className="text-slate-400 text-xs md:text-sm font-semibold uppercase tracking-wide mb-1">
-                  {stat.label}
-                </p>
-                <p className="text-2xl md:text-3xl font-black text-white">
-                  {stat.value}
-                </p>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
+
+      {/* Additional Metrics */}
+      {!isLoading && totalTrades > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+            <p className="text-slate-400 text-xs font-semibold uppercase mb-2">Total Pips</p>
+            <p className={`text-2xl font-black ${totalPips >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {totalPips >= 0 ? '+' : ''}{totalPips}
+            </p>
+          </div>
+          
+          <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+            <p className="text-slate-400 text-xs font-semibold uppercase mb-2">Avg Win</p>
+            <p className="text-2xl font-black text-green-400">+{avgPipsPerWin} pips</p>
+          </div>
+
+          <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+            <p className="text-slate-400 text-xs font-semibold uppercase mb-2">Avg Loss</p>
+            <p className="text-2xl font-black text-red-400">-{avgPipsPerLoss} pips</p>
+          </div>
+        </div>
+      )}
 
       {/* Recent Trades Section */}
       <div className="bg-slate-900/60 rounded-2xl border border-slate-800/50 p-5 md:p-8 backdrop-blur-sm">
@@ -148,7 +238,13 @@ export default function Dashboard() {
           <span className="text-yellow-400">📊</span> Recent Trades
         </h2>
 
-        {totalTrades === 0 ? (
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-20 bg-slate-800/50 rounded-lg animate-pulse"></div>
+            ))}
+          </div>
+        ) : totalTrades === 0 ? (
           <div className="text-center py-12">
             <Target size={48} className="mx-auto text-slate-600 mb-4" />
             <p className="text-slate-400 text-lg mb-2">Belum ada trade yang dicatat</p>

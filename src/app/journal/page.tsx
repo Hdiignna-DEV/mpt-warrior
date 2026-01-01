@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { BookOpen, Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { BookOpen, Plus, Trash2, Download, Share2 } from 'lucide-react';
 
 interface Trade {
   id: string;
@@ -19,6 +19,7 @@ export default function JurnalTrading() {
   const [hasil, setHasil] = useState<'WIN' | 'LOSS'>('WIN');
   const [pip, setPip] = useState('');
   const [catatan, setCatatan] = useState('');
+  const [showExportOptions, setShowExportOptions] = useState(false);
 
   // Load dari localStorage
   useEffect(() => {
@@ -58,6 +59,101 @@ export default function JurnalTrading() {
     setTrades(trades.filter((t) => t.id !== id));
   };
 
+  // Export functions
+  const exportToCSV = () => {
+    if (trades.length === 0) {
+      alert('Tidak ada trade untuk di-export!');
+      return;
+    }
+
+    // CSV Header
+    const headers = ['Pair', 'Posisi', 'Hasil', 'Pip', 'Tanggal', 'Catatan'];
+    
+    // CSV Data
+    const rows = trades.map(trade => [
+      trade.pair,
+      trade.posisi,
+      trade.hasil,
+      trade.pip,
+      trade.tanggal,
+      `"${trade.catatan.replace(/"/g, '""')}"` // Escape quotes
+    ]);
+
+    // Create CSV content
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+
+    // Add BOM untuk Excel compatibility dengan UTF-8
+    const BOM = '\uFEFF';
+    const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
+    
+    // Download
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = `mpt-trading-journal_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    setShowExportOptions(false);
+  };
+
+  const exportToJSON = () => {
+    if (trades.length === 0) {
+      alert('Tidak ada trade untuk di-export!');
+      return;
+    }
+
+    const data = {
+      exportDate: new Date().toISOString(),
+      totalTrades: trades.length,
+      trades: trades,
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = `mpt-trading-journal_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    setShowExportOptions(false);
+  };
+
+  const shareToClipboard = async () => {
+    if (trades.length === 0) {
+      alert('Tidak ada trade untuk di-share!');
+      return;
+    }
+
+    const totalTrade = trades.length;
+    const win = trades.filter((t) => t.hasil === 'WIN').length;
+    const loss = totalTrade - win;
+    const winRate = totalTrade > 0 ? Math.round((win / totalTrade) * 100) : 0;
+    const totalPips = trades.reduce((acc, t) => acc + t.pip, 0);
+
+    const shareText = `📊 MPT WARRIOR TRADING STATS
+━━━━━━━━━━━━━━━━━━
+📈 Total Trades: ${totalTrade}
+✅ WIN: ${win} | ❌ LOSS: ${loss}
+🎯 Win Rate: ${winRate}%
+💰 Total Pips: ${totalPips >= 0 ? '+' : ''}${totalPips}
+💎 Balance: $${(10000 + totalPips * 10).toLocaleString()}
+━━━━━━━━━━━━━━━━━━
+🔗 Track your trades: https://mpt-warrior.vercel.app/journal`;
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      alert('📋 Stats berhasil dicopy! Siap untuk di-share.');
+      setShowExportOptions(false);
+    } catch (err) {
+      alert('Gagal copy ke clipboard');
+    }
+  };
+
   const totalTrade = trades.length;
   const win = trades.filter((t) => t.hasil === 'WIN').length;
   const loss = totalTrade - win;
@@ -68,13 +164,50 @@ export default function JurnalTrading() {
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 pt-24 md:pt-8">
       {/* Header */}
       <div className="mb-8 md:mb-10">
-        <div className="flex items-center gap-3 md:gap-4 mb-4">
-          <div className="p-2 md:p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
-            <BookOpen className="text-blue-400" size={24} />
+        <div className="flex items-center justify-between gap-3 md:gap-4 mb-4">
+          <div className="flex items-center gap-3 md:gap-4 flex-1">
+            <div className="p-2 md:p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
+              <BookOpen className="text-blue-400" size={24} />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-2xl md:text-4xl font-black text-white">Jurnal Trading</h1>
+              <p className="text-slate-400 text-sm md:text-base">Catat setiap trade Anda untuk tracking progress.</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl md:text-4xl font-black text-white">Jurnal Trading</h1>
-            <p className="text-slate-400 text-sm md:text-base">Catat setiap trade Anda untuk tracking progress.</p>
+
+          {/* Export Button */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportOptions(!showExportOptions)}
+              className="p-2 md:p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2 font-bold text-sm md:text-base"
+            >
+              <Download size={20} />
+              <span className="hidden md:inline">Export</span>
+            </button>
+
+            {/* Export Menu */}
+            {showExportOptions && (
+              <div className="absolute top-full right-0 mt-2 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 w-48">
+                <button
+                  onClick={exportToCSV}
+                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 font-semibold text-sm"
+                >
+                  📊 Export to CSV
+                </button>
+                <button
+                  onClick={exportToJSON}
+                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 font-semibold text-sm"
+                >
+                  📁 Export to JSON
+                </button>
+                <button
+                  onClick={shareToClipboard}
+                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors font-semibold text-sm flex items-center gap-2"
+                >
+                  <Share2 size={16} /> Share Stats
+                </button>
+              </div>
+            )}
           </div>
         </div>
         <div className="h-1 bg-gradient-to-r from-blue-500 via-slate-700 to-transparent rounded-full"></div>
