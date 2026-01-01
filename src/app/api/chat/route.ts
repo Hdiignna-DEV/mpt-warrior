@@ -14,7 +14,8 @@ RULES:
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
+    // Use the public API key (available on server in Next.js)
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) return NextResponse.json({ error: 'API Key hilang' }, { status: 500 });
 
     const genAI = new GoogleGenerativeAI(apiKey);
