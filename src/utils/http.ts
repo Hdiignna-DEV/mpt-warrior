@@ -208,6 +208,6 @@ export async function fetchData<T>(url: string, init?: RequestInit): Promise<T> 
   }
 }
 
-export async function postData<T>(url: string, data?: any, init?: RequestInit): Promise<T> {
+export async function postData<T>(url: string, data?: any, init?: Partial<RequestConfig>): Promise<T> {
   return httpClient.post<T>(url, data, init);
 }
