@@ -17,12 +17,12 @@ import { useState } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 
 const menuItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/journal', label: 'Trading Journal', icon: BookOpen },
-  { href: '/calculator', label: 'Risk Calculator', icon: Calculator },
-  { href: '/ai-mentor', label: 'AI Mentor', icon: Bot },
-  { href: '/achievements', label: 'Achievements', icon: Trophy },
+  { href: '/', label: 'Dasbor', icon: LayoutDashboard },
+  { href: '/analytics', label: 'Analitik', icon: BarChart3 },
+  { href: '/journal', label: 'Jurnal Trading', icon: BookOpen },
+  { href: '/calculator', label: 'Kalkulasi Risk', icon: Calculator },
+  { href: '/ai-mentor', label: 'Mentor AI', icon: Bot },
+  { href: '/achievements', label: 'Pencapaian', icon: Trophy },
 ];
 
 export default function Sidebar() {
@@ -76,7 +76,7 @@ export default function Sidebar() {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 p-3 sm:p-4 space-y-1.5 overflow-y-auto\">
+        <nav className="flex-1 p-3 sm:p-4 space-y-1.5 overflow-y-auto">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;

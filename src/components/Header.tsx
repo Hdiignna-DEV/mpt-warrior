@@ -42,10 +42,10 @@ export default function Header() {
               <Zap className="text-white w-6 h-6" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
+              <h1 className="text-lg md:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
                 MPT WARRIOR
               </h1>
-              <p className="text-xs text-slate-500">Trading Excellence</p>
+              <p className="text-xs text-slate-500">Keunggulan Trading</p>
             </div>
           </Link>
 
@@ -54,7 +54,7 @@ export default function Header() {
             {/* Total Trades */}
             <div className="bg-slate-800/50 border border-slate-700/30 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-yellow-500/40 hover:bg-slate-800/70 transition-all">
               <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">Trades</p>
-              <p className="text-base md:text-xl font-black text-yellow-400 flex items-center gap-1">
+              <p className="text-base md:text-lg font-black text-yellow-400 flex items-center gap-0.5">
                 <TrendingUp className="w-3 h-3" />
                 {stats.totalTrades}
               </p>
@@ -62,16 +62,16 @@ export default function Header() {
 
             {/* Win Rate */}
             <div className="bg-slate-800/50 border border-slate-700/30 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-green-500/40 hover:bg-slate-800/70 transition-all">
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">W/R</p>
-              <p className="text-base md:text-xl font-black text-green-400">
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">Menang %</p>
+              <p className="text-base md:text-lg font-black text-green-400">
                 {stats.winRate}%
               </p>
             </div>
 
             {/* Balance */}
             <div className="bg-slate-800/50 border border-slate-700/30 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-blue-500/40 hover:bg-slate-800/70 transition-all">
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">Balance</p>
-              <p className="text-base md:text-xl font-black text-blue-400">
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">Saldo</p>
+              <p className="text-base md:text-lg font-black text-blue-400">
                 ${(stats.balance / 1000).toFixed(1)}k
               </p>
             </div>
@@ -79,7 +79,7 @@ export default function Header() {
             {/* Weekly PnL */}
             <div className="bg-slate-800/50 border border-slate-700/30 rounded-lg px-2 py-2 md:px-3 md:py-2.5 backdrop-blur-sm hover:border-purple-500/40 hover:bg-slate-800/70 transition-all">
               <p className="text-xs text-slate-400 font-bold uppercase tracking-tight">PnL</p>
-              <p className="text-base md:text-xl font-black text-purple-400">
+              <p className="text-base md:text-lg font-black text-purple-400">
                 +0%
               </p>
             </div>
