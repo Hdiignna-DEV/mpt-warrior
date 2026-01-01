@@ -39,14 +39,15 @@ export default function RootLayout({
             {/* Sidebar */}
             <Sidebar />
 
-            {/* Main Content */}
-            <main className="flex-1 overflow-y-auto overflow-x-hidden bg-slate-950 w-full">
-              {children}
+            {/* Main Content with Footer */}
+            <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-slate-950 w-full">
+              <div className="flex-1 pb-8">
+                {children}
+              </div>
+              {/* Footer */}
+              <Footer />
             </main>
           </div>
-
-          {/* Footer */}
-          <Footer />
 
           {/* Global Floating Components */}
           <PanicButton />

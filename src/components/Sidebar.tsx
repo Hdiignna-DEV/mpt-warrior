@@ -52,14 +52,14 @@ export default function Sidebar() {
       <aside
         className={`
           fixed sm:static inset-y-0 left-0 z-40
-          w-64 bg-slate-900 border-r border-slate-700
+          w-64 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-r border-slate-700/50
           flex flex-col transition-transform duration-300
           ${isOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'}
           h-screen sm:h-auto overflow-y-auto
         `}
       >
         {/* Logo/Header */}
-        <div className="p-4 sm:p-6 border-b border-slate-700 flex flex-col items-center flex-shrink-0">
+        <div className="p-4 sm:p-6 border-b border-slate-700/50 flex flex-col items-center flex-shrink-0 bg-gradient-to-r from-slate-900/50 to-slate-800/50 backdrop-blur-sm">
           <div className="w-24 sm:w-32 h-24 sm:h-32 mb-2 sm:mb-3 relative">
             <Image
               src="/mpt-logo.png"
@@ -69,14 +69,14 @@ export default function Sidebar() {
               priority
             />
           </div>
-          <h1 className="text-base sm:text-xl font-bold text-yellow-500 text-center">
+          <h1 className="text-base sm:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 text-center">
             MINDSET PLAN TRADER
           </h1>
-          <p className="text-xs text-slate-400 mt-1 text-center">Warrior Trading Hub</p>
+          <p className="text-xs text-slate-400 mt-1 text-center font-semibold">Warrior Trading Hub</p>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 p-3 sm:p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-3 sm:p-4 space-y-1.5 overflow-y-auto\">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -88,26 +88,26 @@ export default function Sidebar() {
                 onClick={() => setIsOpen(false)}
                 className={`
                   flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg
-                  transition-colors duration-200 text-sm sm:text-base
+                  transition-all duration-200 text-sm sm:text-base font-medium
                   ${isActive 
-                    ? 'bg-yellow-500 text-slate-900 font-bold' 
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-yellow-500'
+                    ? 'bg-gradient-to-r from-yellow-500 to-orange-600 text-slate-950 font-bold shadow-lg shadow-yellow-500/30' 
+                    : 'text-slate-300 hover:bg-slate-800/60 hover:text-yellow-400 border border-transparent hover:border-yellow-500/30'
                   }
                 `}
               >
                 <Icon size={20} className="flex-shrink-0" />
-                <span>{item.label}</span>
+                <span className="truncate">{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
         {/* Theme Toggle & Footer */}
-        <div className="p-3 sm:p-4 border-t border-slate-700 flex-shrink-0 space-y-3">
+        <div className="p-3 sm:p-4 border-t border-slate-700/50 flex-shrink-0 space-y-3 bg-gradient-to-t from-slate-950 to-slate-900/50 backdrop-blur-sm">
           <div className="flex justify-center">
             <ThemeToggle />
           </div>
-          <p className="text-xs text-slate-500 text-center">
+          <p className="text-xs text-slate-500 text-center font-medium\">
             v5.0 (Enhanced)
           </p>
         </div>

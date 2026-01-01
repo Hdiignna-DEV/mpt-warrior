@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { TrendingUp, Target, DollarSign, Award, RefreshCw, Edit2, X, Check, Zap, TrendingDown, Calendar } from 'lucide-react';
+import Link from 'next/link';
+import { TrendingUp, Target, DollarSign, Award, RefreshCw, Edit2, X, Check, Zap, TrendingDown, Calendar, BookOpen, Calculator, Bot, BarChart3, Zap as ZapIcon } from 'lucide-react';
 
 interface Trade {
   id: string;
@@ -190,6 +191,57 @@ export default function Dashboard() {
               <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
               <span className="hidden sm:inline">Refresh</span>
             </button>
+          </div>
+        </div>
+
+        {/* Quick Actions Section */}
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-4 flex items-center gap-2">
+            <ZapIcon className="text-yellow-400 w-6 h-6" />
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Log Trade */}
+            <Link
+              href="/journal"
+              className="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/40 rounded-xl p-4 md:p-5 hover:border-blue-500/60 hover:shadow-lg hover:shadow-blue-500/20 transition-all group cursor-pointer"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="font-bold text-white group-hover:text-blue-300 transition-colors">Log Trade</h3>
+                <div className="p-2 bg-blue-500/30 rounded-lg group-hover:bg-blue-500/40 transition-colors">
+                  <BookOpen className="w-5 h-5 text-blue-400" />
+                </div>
+              </div>
+              <p className="text-sm text-slate-400">Record your trades and track performance</p>
+            </Link>
+
+            {/* Risk Calculator */}
+            <Link
+              href="/calculator"
+              className="bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/40 rounded-xl p-4 md:p-5 hover:border-red-500/60 hover:shadow-lg hover:shadow-red-500/20 transition-all group cursor-pointer"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="font-bold text-white group-hover:text-red-300 transition-colors">Risk Calculator</h3>
+                <div className="p-2 bg-red-500/30 rounded-lg group-hover:bg-red-500/40 transition-colors">
+                  <Calculator className="w-5 h-5 text-red-400" />
+                </div>
+              </div>
+              <p className="text-sm text-slate-400">Calculate position size & risk</p>
+            </Link>
+
+            {/* AI Mentor */}
+            <Link
+              href="/ai-mentor"
+              className="bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/40 rounded-xl p-4 md:p-5 hover:border-purple-500/60 hover:shadow-lg hover:shadow-purple-500/20 transition-all group cursor-pointer"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="font-bold text-white group-hover:text-purple-300 transition-colors">AI Mentor</h3>
+                <div className="p-2 bg-purple-500/30 rounded-lg group-hover:bg-purple-500/40 transition-colors">
+                  <Bot className="w-5 h-5 text-purple-400" />
+                </div>
+              </div>
+              <p className="text-sm text-slate-400">Get trading advice from AI</p>
+            </Link>
           </div>
         </div>
 
