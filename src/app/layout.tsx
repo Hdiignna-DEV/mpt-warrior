@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import PanicButton from "@/components/PanicButton";
-import TradingViewCalendar from "@/components/TradingViewCalendar";
+import LayoutWrapper from "@/components/LayoutWrapper";
 import { ThemeProviderWrapper } from "@/components/ThemeProvider";
 import { ThemeScript } from "@/components/ThemeScript";
 import I18nProvider from "@/components/I18nProvider";
@@ -51,27 +47,10 @@ export default function RootLayout({
             richColors
             closeButton
           />
-
-          {/* Header */}
-          <Header />
-
-          <div className="flex flex-1 overflow-hidden">
-            {/* Sidebar */}
-            <Sidebar />
-
-            {/* Main Content with Footer */}
-            <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden w-full transition-all duration-300">
-              <div className="flex-1 pb-8">
-                {children}
-              </div>
-              {/* Footer */}
-              <Footer />
-            </main>
-          </div>
-
-          {/* Global Floating Components */}
-          <PanicButton />
-          <TradingViewCalendar />
+          <ThemeProviderWrapper>
+            {/* Conditional Layout: Landing vs Dashboard */}
+            <LayoutWrapper>{children}</LayoutWrapper>
+          </ThemeProviderWrapper>
         </I18nProvider>
       </body>
     </html>
