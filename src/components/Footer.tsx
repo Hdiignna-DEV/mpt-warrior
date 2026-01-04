@@ -49,6 +49,7 @@ export default function Footer() {
                   height={56}
                   className="object-contain filter drop-shadow-[0_0_8px_rgba(245,166,35,0.6)]"
                   priority
+                  unoptimized
                 />
               </div>
               <h3 className="font-black text-base md:text-lg text-amber-400 uppercase tracking-wider">
