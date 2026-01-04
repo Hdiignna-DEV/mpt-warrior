@@ -3,21 +3,27 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-// Public routes yang tidak perlu auth
-const PUBLIC_ROUTES = ['/', '/login', '/register', '/pending-approval'];
+// ==========================================
+// FULL GATEKEEPING SYSTEM
+// Landing page ONLY untuk publik
+// Semua fitur LOCKED untuk members
+// ==========================================
+
+// Public routes (Landing page + Auth pages only)
+const PUBLIC_ROUTES = ['/', '/login', '/register', '/pending-approval', '/access-denied'];
 
 // Admin-only routes
 const ADMIN_ROUTES = ['/admin-hq'];
 
-// Protected routes (perlu active status)
+// Protected routes - ALL FEATURES LOCKED (members only)
 const PROTECTED_ROUTES = [
-  '/dashboard',
-  '/ai-mentor',
-  '/journal',
-  '/calculator',
-  '/achievements',
-  '/analytics',
-  '/tutorial',
+  '/dashboard',         // Main dashboard
+  '/ai-mentor',         // AI Mentor (Gemini API - biaya)
+  '/journal',           // Trading Journal
+  '/calculator',        // Risk Calculator  
+  '/achievements',      // Achievements
+  '/analytics',         // Analytics Dashboard
+  '/tutorial',          // The MPT Way (PDF Module)
 ];
 
 // Middleware untuk auth dan security
@@ -48,29 +54,28 @@ export function middleware(request: NextRequest) {
   }
 
   // ============================================
-  // LAYER 2: Public Routes (skip auth check)
+  // LAYER 2: Public Routes (Landing + Auth only)
   // ============================================
   if (PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/_next') || pathname.startsWith('/api')) {
     return response;
   }
 
   // ============================================
-  // LAYER 3: Get User Token from Cookie/Header
+  // LAYER 3: GATEKEEPING - Get User Token
   // ============================================
   let user: any = null;
   
-  // Try to get token from cookie (client-side)
   const token = request.cookies.get('mpt_token')?.value;
   
-  if (token) {
-    try {
-      user = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-      // Invalid token, redirect to login
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-  } else {
-    // No token, redirect to login
+  if (!token) {
+    // No token = redirect to login
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  try {
+    user = jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    // Invalid token = redirect to login
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

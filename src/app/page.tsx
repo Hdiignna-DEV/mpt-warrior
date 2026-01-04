@@ -1,627 +1,253 @@
 'use client';
-import { useEffect, useState } from 'react';
+
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-import { 
-  TrendingUp, Target, DollarSign, Award, Edit2, X, Check, Zap, 
-  TrendingDown, Calendar, BookOpen, Calculator, Bot, BarChart3, 
-  Flame, Sparkles, ArrowUpRight, ArrowDownRight, Activity, 
-  Clock, CheckCircle2, XCircle, Trophy, Rocket, Shield, Sword, Brain, FileText, Lock
-} from 'lucide-react';
-import { getTrades, getInitialBalance, saveInitialBalance, onTradesUpdated } from '@/utils/storage-sync';
+import { Shield, Zap, Target, Brain, Lock, TrendingUp, Users, CheckCircle, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { BentoGrid } from '@/components/Dashboard/BentoGrid';
-import { toast } from '@/utils/toast';
-import type { Trade } from '@/utils/storage-sync';
+import MptLogo from '@/components/MptLogo';
 
-export default function Dashboard() {
-  const { t } = useTranslation();
-  const [trades, setTrades] = useState<Trade[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [customBalance, setCustomBalance] = useState<number>(10000);
-  const [isEditingBalance, setIsEditingBalance] = useState(false);
-  const [tempBalance, setTempBalance] = useState<string>('10000');
-  const [isDecrypting, setIsDecrypting] = useState(false);
-
-  // Load trades dan balance dari localStorage on mount
-  useEffect(() => {
-    setIsLoading(true);
-    
-    // Load initial trades
-    const initialTrades = getTrades();
-    setTrades(initialTrades);
-    
-    // Load initial balance
-    const initialBalance = getInitialBalance();
-    setCustomBalance(initialBalance);
-    setTempBalance(initialBalance.toString());
-
-    setIsLoading(false);
-  }, []);
-
-  // Subscribe to trades updates (real-time sync)
-  useEffect(() => {
-    const unsubscribe = onTradesUpdated((updatedTrades) => {
-      setTrades(updatedTrades);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  // Also listen to storage changes from other tabs
-  useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'trades' && event.newValue) {
-        try {
-          const updatedTrades = JSON.parse(event.newValue);
-          setTrades(updatedTrades);
-        } catch (error) {
-          console.error('Error updating trades from storage:', error);
-        }
-      }
-      if (event.key === 'mpt_initial_balance' && event.newValue) {
-        try {
-          const balance = parseFloat(event.newValue);
-          setCustomBalance(balance);
-          setTempBalance(balance.toString());
-        } catch (error) {
-          console.error('Error updating balance from storage:', error);
-        }
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
-  // Handle balance edit
-  const handleSaveBalance = () => {
-    const newBalance = parseFloat(tempBalance);
-    
-    if (isNaN(newBalance) || newBalance <= 0) {
-      toast.error('Invalid balance', 'Balance must be a positive number');
-      return;
-    }
-
-    setCustomBalance(newBalance);
-    saveInitialBalance(newBalance);
-    setIsEditingBalance(false);
-    toast.success('Balance updated!', `New balance: $${newBalance.toLocaleString()}`);
-  };
-
-  const handleCancelEdit = () => {
-    setTempBalance(customBalance.toString());
-    setIsEditingBalance(false);
-  };
-
-  // Handle doctrine access with decrypting animation
-  const handleAccessDoctrine = () => {
-    setIsDecrypting(true);
-    setTimeout(() => {
-      window.location.href = '/tutorial';
-    }, 800);
-  };
-
-  // Calculate statistics
-  const totalTrades = trades.length;
-  const winTrades = trades.filter(t => t.hasil === 'WIN').length;
-  const lossTrades = totalTrades - winTrades;
-  const winRate = totalTrades > 0 ? Math.round((winTrades / totalTrades) * 100) : 0;
-  
-  const calculateBestStreak = () => {
-    let currentStreak = 0;
-    let bestStreak = 0;
-    trades.forEach(trade => {
-      if (trade.hasil === 'WIN') {
-        currentStreak++;
-        bestStreak = Math.max(bestStreak, currentStreak);
-      } else {
-        currentStreak = 0;
-      }
-    });
-    return bestStreak;
-  };
-
-  const totalPips = trades.reduce((sum, trade) => sum + trade.pip, 0);
-  const currentBalance = customBalance + (totalPips * 10);
-  const profitLoss = currentBalance - customBalance;
-  const profitLossPercentage = customBalance > 0 ? ((profitLoss / customBalance) * 100).toFixed(2) : '0.00';
-
-  const avgPipsPerWin = winTrades > 0 
-    ? Math.round(trades.filter(t => t.hasil === 'WIN').reduce((sum, t) => sum + t.pip, 0) / winTrades * 100) / 100
-    : 0;
-
-  const recentTrades = trades.slice(0, 5);
-  const bestStreak = calculateBestStreak();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-gray-600 dark:text-zinc-400" suppressHydrationWarning>{t('dashboard.loading')}</p>
-        </div>
-      </div>
-    );
-  }
-
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-sky-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-sky-950/20">
-      {/* Aurora Background Effect */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-sky-500/20 dark:bg-sky-500/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500/20 dark:bg-orange-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-500/10 dark:bg-purple-500/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }} />
-      </div>
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        
-        {/* Hero Section - The Warrior Toggle Branding */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-8 md:p-12 shadow-2xl shadow-amber-500/30"
-        >
-          {/* Animated background pattern */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNiIgZmlsbD0iI2ZmZiIgZmlsbC1vcGFjaXR5PSIuMDUiLz48L2c+PC9zdmc+')] opacity-30" />
-          
-          <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="space-y-4 flex-1">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full">
-                <Sparkles className="w-4 h-4 text-white animate-pulse" />
-                <span className="text-sm font-semibold text-white tracking-wide" suppressHydrationWarning>{t('dashboard.commandCenter')}</span>
-              </div>
-              
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight drop-shadow-lg" suppressHydrationWarning>
-                {t('dashboard.hero.title')} 🎯
-              </h1>
-              
-              <p className="text-white/90 text-base md:text-lg max-w-2xl leading-relaxed" suppressHydrationWarning>
-                {t('dashboard.hero.subtitle')}
-              </p>
-
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Link href="/journal">
-                  <Button variant="glass" size="lg" leftIcon={<BookOpen className="w-5 h-5" />} suppressHydrationWarning>
-                    {t('dashboard.button.newTrade')}
-                  </Button>
-                </Link>
-                <Link href="/analytics">
-                  <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm" suppressHydrationWarning>
-                    {t('dashboard.button.viewAnalytics')}
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            {/* Balance Card - Floating Design */}
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-2xl min-w-[280px]"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-semibold text-gray-600 dark:text-zinc-400" suppressHydrationWarning>{t('dashboard.portfolioValue')}</span>
-                {!isEditingBalance && (
-                  <button
-                    onClick={() => setIsEditingBalance(true)}
-                    className="p-1.5 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-                  >
-                    <Edit2 className="w-4 h-4 text-gray-400" />
-                  </button>
-                )}
-              </div>
-
-              {isEditingBalance ? (
-                <div className="space-y-3">
-                  <input
-                    type="number"
-                    value={tempBalance}
-                    onChange={(e) => setTempBalance(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100"
-                    autoFocus
-                  />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={handleSaveBalance} className="flex-1">
-                      <Check className="w-4 h-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={handleCancelEdit} className="flex-1">
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="text-3xl font-black text-gray-900 dark:text-zinc-100 mb-2">
-                    ${currentBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
-                  </div>
-                  
-                  <div className={`flex items-center gap-2 text-sm font-semibold ${
-                    profitLoss >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
-                  }`}>
-                    {profitLoss >= 0 ? (
-                      <ArrowUpRight className="w-4 h-4" />
-                    ) : (
-                      <ArrowDownRight className="w-4 h-4" />
-                    )}
-                    <span>
-                      {profitLoss >= 0 ? '+' : ''} ${Math.abs(profitLoss).toLocaleString()} ({profitLoss >= 0 ? '+' : ''}{profitLossPercentage}%)
-                    </span>
-                  </div>
-                </>
-              )}
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* THE MPT WAY - OPERATIONAL DOCTRINE SECTION */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.5 }}
-          className="relative"
-        >
-          {/* Section Header */}
-          <div className="mb-6 flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      {/* HEADER */}
+      <header className="border-b border-amber-500/20 bg-slate-950/50 backdrop-blur-xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <MptLogo size={48} />
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <FileText className="w-5 h-5 text-amber-500" />
-                <h2 className="text-xs font-mono font-bold text-amber-500 uppercase tracking-[0.3em]">
-                  [ OPERATIONAL DOCTRINE ]
-                </h2>
-              </div>
-              <h3 className="text-2xl md:text-3xl font-black text-gray-900 dark:text-zinc-100">
-                Kuasai Medan Perang dengan The MPT Way
-              </h3>
+              <h1 className="text-xl font-black text-amber-400">MPT COMMUNITY</h1>
+              <p className="text-xs text-amber-500/70 font-mono">TRADING HUB</p>
             </div>
           </div>
-
-          {/* Featured Doctrine Card */}
-          <div className="relative group">
-            {/* Glow Effect */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 rounded-2xl opacity-75 group-hover:opacity-100 blur-sm group-hover:blur transition duration-300 animate-pulse" />
-            
-            {/* Main Card */}
-            <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 rounded-2xl p-6 md:p-8 border-2 border-amber-500/50 shadow-2xl">
-              <div className="flex flex-col lg:flex-row gap-6 md:gap-8">
-                
-                {/* Left: Icon & Badge */}
-                <div className="flex flex-col items-center lg:items-start space-y-4">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-amber-500/30 rounded-xl blur-xl" />
-                    <div className="relative w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
-                      <FileText className="w-10 h-10 md:w-12 md:h-12 text-white" />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/20 border border-amber-500/40 rounded-full">
-                    <Lock className="w-3 h-3 text-amber-400" />
-                    <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">
-                      Classified
-                    </span>
-                  </div>
-                </div>
-
-                {/* Right: Content */}
-                <div className="flex-1 space-y-6">
-                  {/* Title */}
-                  <div>
-                    <h4 className="text-2xl md:text-3xl font-black text-white mb-2">
-                      The MPT Way: Tactical Trading Protocol
-                    </h4>
-                    <p className="text-slate-400 text-sm md:text-base">
-                      Modul operasional lengkap untuk menguasai market dengan presisi dan disiplin. Akses sekarang untuk mempelajari strategi yang telah terbukti.
-                    </p>
-                  </div>
-
-                  {/* 3 Pillars */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Pillar 1: Strategy */}
-                    <div className="space-y-2 p-4 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg hover:border-amber-500/30 transition-all">
-                      <div className="flex items-center gap-2">
-                        <Sword className="w-5 h-5 text-amber-500" />
-                        <h5 className="font-bold text-white text-sm">The Strategy</h5>
-                      </div>
-                      <p className="text-xs text-slate-400 leading-relaxed">
-                        Teknik membaca struktur pasar dengan presisi tinggi
-                      </p>
-                    </div>
-
-                    {/* Pillar 2: Risk Management */}
-                    <div className="space-y-2 p-4 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg hover:border-amber-500/30 transition-all">
-                      <div className="flex items-center gap-2">
-                        <Shield className="w-5 h-5 text-amber-500" />
-                        <h5 className="font-bold text-white text-sm">Risk Management</h5>
-                      </div>
-                      <p className="text-xs text-slate-400 leading-relaxed">
-                        Protokol perlindungan modal dalam kondisi market apa pun
-                      </p>
-                    </div>
-
-                    {/* Pillar 3: Psychology */}
-                    <div className="space-y-2 p-4 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg hover:border-amber-500/30 transition-all">
-                      <div className="flex items-center gap-2">
-                        <Brain className="w-5 h-5 text-amber-500" />
-                        <h5 className="font-bold text-white text-sm">Warrior Psychology</h5>
-                      </div>
-                      <p className="text-xs text-slate-400 leading-relaxed">
-                        Mentalitas pejuang yang tenang dan tidak emosional
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Access Button */}
-                  <button
-                    onClick={handleAccessDoctrine}
-                    disabled={isDecrypting}
-                    className="w-full md:w-auto px-8 py-4 bg-amber-500 hover:bg-amber-400 disabled:bg-slate-700 text-slate-950 font-black uppercase tracking-[0.3em] text-sm rounded-lg transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:text-slate-500 disabled:shadow-none group"
-                  >
-                    {isDecrypting ? (
-                      <>
-                        <div className="flex gap-1">
-                          <div className="w-1 h-4 bg-slate-950 animate-pulse" style={{animationDelay: '0ms'}} />
-                          <div className="w-1 h-4 bg-slate-950 animate-pulse" style={{animationDelay: '100ms'}} />
-                          <div className="w-1 h-4 bg-slate-950 animate-pulse" style={{animationDelay: '200ms'}} />
-                        </div>
-                        <span>DECRYPTING...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                        <span>Access Doctrine</span>
-                      </>
-                    )}
-                  </button>
-
-                  {/* Footer Info */}
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-700/50">
-                    <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">
-                      Format: PDF // Access: Authorized
-                    </p>
-                    <p className="text-[10px] font-mono text-amber-500/60 uppercase">
-                      For Warrior Eyes Only
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="flex items-center gap-3">
+            <Link href="/login">
+              <Button variant="outline" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10">
+                Login
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button className="bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold">
+                Join Now
+              </Button>
+            </Link>
           </div>
-        </motion.div>
+        </div>
+      </header>
 
-        {/*         </span>
-                  </div>
-                </>
-              )}
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* Bento Grid Stats - NEW DESIGN */}
+      {/* HERO SECTION */}
+      <section className="max-w-7xl mx-auto px-6 py-20 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
+          transition={{ duration: 0.6 }}
         >
-          <BentoGrid 
-            stats={{
-              totalTrades,
-              winRate,
-              balance: currentBalance,
-              profitLoss,
-              bestStreak,
-              avgPipsPerWin,
-            }}
-          />
-        </motion.div>
-
-        {/* Quick Actions - NEW GRID DESIGN */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-        >
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
-            <Rocket className="w-6 h-6 text-sky-500" />
-            Quick Actions
-          </h2>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/5 mb-6">
+            <Lock size={16} className="text-amber-400" />
+            <span className="text-sm font-mono text-amber-400">EXCLUSIVE MEMBERSHIP</span>
+          </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Link href="/journal" className="group">
-              <Card variant="glass" interactive className="h-full">
-                <CardContent className="p-6 space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <BookOpen className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 dark:text-zinc-100">Trade Journal</h3>
-                  <p className="text-sm text-gray-600 dark:text-zinc-400">Log new trades</p>
-                </CardContent>
-              </Card>
-            </Link>
+          <h1 className="text-5xl md:text-7xl font-black text-white mb-6">
+            MINDSET PLAN TRADER
+          </h1>
+          <p className="text-xl md:text-2xl text-amber-400 font-bold mb-4">
+            "Focus on the Plan, Not the Panic."
+          </p>
+          <p className="text-lg text-slate-400 max-w-3xl mx-auto mb-12">
+            Platform eksklusif untuk 50+ trader elite dengan sistem manajemen trading terpadu, 
+            AI Mentor, dan akses ke modul strategi rahasia MPT Way.
+          </p>
 
-            <Link href="/calculator" className="group">
-              <Card variant="glass" interactive className="h-full">
-                <CardContent className="p-6 space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Calculator className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 dark:text-zinc-100">Calculator</h3>
-                  <p className="text-sm text-gray-600 dark:text-zinc-400">Risk management</p>
-                </CardContent>
-              </Card>
+          <div className="flex items-center justify-center gap-4">
+            <Link href="/register">
+              <Button className="bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold text-lg px-8 py-6">
+                <Rocket className="mr-2" size={20} />
+                Request Access
+              </Button>
             </Link>
-
-            <Link href="/ai-mentor" className="group">
-              <Card variant="glass" interactive className="h-full">
-                <CardContent className="p-6 space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Bot className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 dark:text-zinc-100">AI Mentor</h3>
-                  <p className="text-sm text-gray-600 dark:text-zinc-400">Get insights</p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/achievements" className="group">
-              <Card variant="glass" interactive className="h-full">
-                <CardContent className="p-6 space-y-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Trophy className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="font-bold text-gray-900 dark:text-zinc-100">Achievements</h3>
-                  <p className="text-sm text-gray-600 dark:text-zinc-400">View progress</p>
-                </CardContent>
-              </Card>
+            <Link href="/login">
+              <Button variant="outline" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 text-lg px-8 py-6">
+                Member Login
+              </Button>
             </Link>
           </div>
         </motion.div>
+      </section>
 
-        {/* Recent Trades - MODERN TABLE DESIGN */}
+      {/* FEATURES SECTION */}
+      <section className="max-w-7xl mx-auto px-6 py-20">
+        <h2 className="text-3xl md:text-4xl font-black text-center text-white mb-12">
+          EXCLUSIVE FEATURES
+          <span className="block text-amber-400 text-lg font-mono mt-2">Members Only</span>
+        </h2>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Feature 1 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="p-6 rounded-2xl border border-amber-500/20 bg-slate-900/50 backdrop-blur-sm hover:border-amber-500/40 transition-all"
+          >
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+              <Brain className="text-amber-400" size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">AI Mentor</h3>
+            <p className="text-slate-400">
+              Get real-time trading guidance powered by AI. Analyze market conditions and get strategic insights.
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <Lock size={14} className="text-amber-500" />
+              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+            </div>
+          </motion.div>
+
+          {/* Feature 2 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="p-6 rounded-2xl border border-amber-500/20 bg-slate-900/50 backdrop-blur-sm hover:border-amber-500/40 transition-all"
+          >
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+              <Shield className="text-amber-400" size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">The MPT Way</h3>
+            <p className="text-slate-400">
+              Access exclusive PDF modules containing proven strategies, mindset frameworks, and risk management blueprints.
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <Lock size={14} className="text-amber-500" />
+              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+            </div>
+          </motion.div>
+
+          {/* Feature 3 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="p-6 rounded-2xl border border-amber-500/20 bg-slate-900/50 backdrop-blur-sm hover:border-amber-500/40 transition-all"
+          >
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+              <Target className="text-amber-400" size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Trading Journal</h3>
+            <p className="text-slate-400">
+              Track every trade with detailed metrics, screenshots, and performance analytics. Learn from your history.
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <Lock size={14} className="text-amber-500" />
+              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+            </div>
+          </motion.div>
+
+          {/* Feature 4 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="p-6 rounded-2xl border border-amber-500/20 bg-slate-900/50 backdrop-blur-sm hover:border-amber-500/40 transition-all"
+          >
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+              <Zap className="text-amber-400" size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Risk Calculator</h3>
+            <p className="text-slate-400">
+              Calculate position size, risk/reward ratio, and lot sizing instantly. Never over-leverage again.
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <Lock size={14} className="text-amber-500" />
+              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+            </div>
+          </motion.div>
+
+          {/* Feature 5 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="p-6 rounded-2xl border border-amber-500/20 bg-slate-900/50 backdrop-blur-sm hover:border-amber-500/40 transition-all"
+          >
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+              <TrendingUp className="text-amber-400" size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Analytics Dashboard</h3>
+            <p className="text-slate-400">
+              Visualize your trading performance with advanced charts, win rate tracking, and profit/loss insights.
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <Lock size={14} className="text-amber-500" />
+              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+            </div>
+          </motion.div>
+
+          {/* Feature 6 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+            className="p-6 rounded-2xl border border-amber-500/20 bg-slate-900/50 backdrop-blur-sm hover:border-amber-500/40 transition-all"
+          >
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+              <Users className="text-amber-400" size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">War Zone Calendar</h3>
+            <p className="text-slate-400">
+              Stay ahead with economic calendar integration. Know when high-impact news will move the market.
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <Lock size={14} className="text-amber-500" />
+              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CTA SECTION */}
+      <section className="max-w-4xl mx-auto px-6 py-20 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="p-12 rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-slate-900/50 backdrop-blur-sm"
         >
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 flex items-center gap-2">
-              <Activity className="w-6 h-6 text-sky-500" />
-              Recent Trades
-            </h2>
-            <Link href="/journal">
-              <Button variant="ghost" size="sm" rightIcon={<ArrowUpRight className="w-4 h-4" />}>
-                View All
+          <h2 className="text-4xl font-black text-white mb-4">
+            Ready to Join the Elite?
+          </h2>
+          <p className="text-xl text-slate-300 mb-8">
+            Limited to 50+ exclusive members. Request access with invitation code.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/register">
+              <Button className="bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold text-lg px-10 py-6">
+                <CheckCircle className="mr-2" size={20} />
+                Request Access Now
               </Button>
             </Link>
           </div>
 
-          <Card variant="glass" padding="none">
-            {recentTrades.length === 0 ? (
-              <div className="p-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mx-auto mb-4">
-                  <BookOpen className="w-8 h-8 text-gray-400 dark:text-zinc-500" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-2">No trades yet</h3>
-                <p className="text-gray-600 dark:text-zinc-400 mb-4">Start logging your trades to see them here</p>
-                <Link href="/journal">
-                  <Button variant="primary">Log Your First Trade</Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200 dark:border-zinc-800">
-                      <th className="text-left p-4 text-sm font-semibold text-gray-600 dark:text-zinc-400">Date</th>
-                      <th className="text-left p-4 text-sm font-semibold text-gray-600 dark:text-zinc-400">Pair</th>
-                      <th className="text-left p-4 text-sm font-semibold text-gray-600 dark:text-zinc-400">Type</th>
-                      <th className="text-right p-4 text-sm font-semibold text-gray-600 dark:text-zinc-400">Pips</th>
-                      <th className="text-right p-4 text-sm font-semibold text-gray-600 dark:text-zinc-400">Result</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentTrades.map((trade, index) => (
-                      <motion.tr
-                        key={trade.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="border-b border-gray-100 dark:border-zinc-800/50 hover:bg-gray-50 dark:hover:bg-zinc-900/50 transition-colors"
-                      >
-                        <td className="p-4">
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-zinc-400">
-                            <Clock className="w-4 h-4" />
-                            {new Date(trade.tanggal).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <span className="font-semibold text-gray-900 dark:text-zinc-100">{trade.pair}</span>
-                        </td>
-                        <td className="p-4">
-                          <Badge variant="neutral" size="sm">
-                            {trade.posisi}
-                          </Badge>
-                        </td>
-                        <td className="p-4 text-right">
-                          <span className={`font-bold ${
-                            trade.pip >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
-                          }`}>
-                            {trade.pip >= 0 ? '+' : ''}{trade.pip}
-                          </span>
-                        </td>
-                        <td className="p-4 text-right">
-                          {trade.hasil === 'WIN' ? (
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 font-semibold text-sm">
-                              <CheckCircle2 className="w-4 h-4" />
-                              Win
-                            </div>
-                          ) : (
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400 font-semibold text-sm">
-                              <XCircle className="w-4 h-4" />
-                              Loss
-                            </div>
-                          )}
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Card>
+          <p className="text-sm text-slate-500 mt-6">
+            Already a member?{' '}
+            <Link href="/login" className="text-amber-400 hover:text-amber-300 font-bold">
+              Login here
+            </Link>
+          </p>
         </motion.div>
+      </section>
 
-        {/* Performance Insights - NEW SECTION */}
-        {totalTrades > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4"
-          >
-            <Card variant="bento" className="p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-sky-500/10 flex items-center justify-center">
-                  <Target className="w-5 h-5 text-sky-500" />
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-zinc-100">Win Rate</h3>
-              </div>
-              <div className="text-3xl font-black text-gray-900 dark:text-zinc-100">{winRate}%</div>
-              <p className="text-sm text-gray-600 dark:text-zinc-400 mt-1">{winTrades}W / {lossTrades}L</p>
-            </Card>
-
-            <Card variant="bento" className="p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                  <Flame className="w-5 h-5 text-orange-500" />
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-zinc-100">Best Streak</h3>
-              </div>
-              <div className="text-3xl font-black text-gray-900 dark:text-zinc-100">{bestStreak}</div>
-              <p className="text-sm text-gray-600 dark:text-zinc-400 mt-1">Consecutive wins</p>
-            </Card>
-
-            <Card variant="bento" className="p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-emerald-500" />
-                </div>
-                <h3 className="font-semibold text-gray-900 dark:text-zinc-100">Avg Pips/Win</h3>
-              </div>
-              <div className="text-3xl font-black text-gray-900 dark:text-zinc-100">+{avgPipsPerWin}</div>
-              <p className="text-sm text-gray-600 dark:text-zinc-400 mt-1">Per winning trade</p>
-            </Card>
-          </motion.div>
-        )}
-
-      </div>
+      {/* FOOTER */}
+      <footer className="border-t border-amber-500/20 bg-slate-950/50 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 py-8 text-center text-slate-500 text-sm">
+          <p>&copy; 2026 MPT Community. All rights reserved.</p>
+          <p className="mt-2 text-amber-500/70 font-mono">"Focus on the Plan, Not the Panic."</p>
+        </div>
+      </footer>
     </div>
   );
 }
