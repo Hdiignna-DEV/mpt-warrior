@@ -9,24 +9,24 @@ export const TRADING_PAIRS = {
 
 export const EMOTIONS = {
   FEAR: { label: 'Takut', color: 'text-red-500', value: 'fear' },
-  GREED: { label: 'Serakah', color: 'text-yellow-500', value: 'greed' },
+  GREED: { label: 'Serakah', color: 'text-accent-500', value: 'greed' },
   CONFIDENCE: { label: 'Percaya Diri', color: 'text-green-500', value: 'confidence' },
-  DOUBT: { label: 'Ragu', color: 'text-blue-500', value: 'doubt' },
-  FRUSTRATION: { label: 'Frustrasi', color: 'text-orange-500', value: 'frustration' },
+  DOUBT: { label: 'Ragu', color: 'text-primary-500', value: 'doubt' },
+  FRUSTRATION: { label: 'Frustrasi', color: 'text-accent-500', value: 'frustration' },
   EXCITEMENT: { label: 'Bersemangat', color: 'text-purple-500', value: 'excitement' },
 };
 
 export const TRADE_STATUS = {
-  OPEN: { label: 'Terbuka', color: 'bg-blue-500', value: 'OPEN' },
+  OPEN: { label: 'Terbuka', color: 'bg-primary-500', value: 'OPEN' },
   CLOSED: { label: 'Ditutup', color: 'bg-slate-500', value: 'CLOSED' },
   CANCELLED: { label: 'Dibatalkan', color: 'bg-red-500', value: 'CANCELLED' },
-  PENDING: { label: 'Pending', color: 'bg-yellow-500', value: 'PENDING' },
+  PENDING: { label: 'Pending', color: 'bg-accent-500', value: 'PENDING' },
 };
 
 export const TRADE_RESULT = {
   WIN: { label: 'Profit', color: 'text-green-500', icon: '📈' },
   LOSS: { label: 'Loss', color: 'text-red-500', icon: '📉' },
-  BREAKEVEN: { label: 'BE', color: 'text-yellow-500', icon: '➡️' },
+  BREAKEVEN: { label: 'BE', color: 'text-accent-500', icon: '➡️' },
 };
 
 export const TRADE_DIRECTION = {
@@ -63,7 +63,7 @@ export const ACHIEVEMENT_TYPES = {
     id: 'skill',
     label: 'Skill',
     icon: '⭐',
-    color: 'from-yellow-500 to-yellow-600',
+    color: 'from-accent-500 to-accent-600',
   },
   PSYCHOLOGY: {
     id: 'psychology',

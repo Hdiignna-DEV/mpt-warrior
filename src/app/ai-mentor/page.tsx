@@ -1,4 +1,7 @@
 'use client';
+
+import { useTranslation } from 'react-i18next';
+import '@/utils/i18n';
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Bot, Send, Paperclip, X, Sparkles, Zap, Brain, TrendingUp, Shield, Target, Download, Trash2, RotateCw, MessageCircle } from 'lucide-react';
@@ -74,6 +77,7 @@ function RiskCalculatorTable({ data }: { data: string }) {
 }
 
 export default function AIMentor() {
+  const { t, i18n } = useTranslation();
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Siap, Bro! 🚀 **MPT Warrior AI** aktif. Gue ready untuk:\n\n✅ **Analisa Chart** - Struktur, key level, entry points\n✅ **Hitung Risk** - Lot size dengan manajemen risk\n✅ **Reset Mental** - Mindset, affirmation, motivasi\n✅ **Strategy Review** - Evaluasi strategi trading Anda\n\nKirim chart atau tanya strategi. Mari kita menang! 💪' }
   ]);
@@ -146,7 +150,8 @@ export default function AIMentor() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           messages: contextualMessages, 
-          image: currentImage 
+          image: currentImage,
+          language: i18n.language // Send current language to API
         }),
       });
       const data = await response.json();
@@ -243,40 +248,62 @@ export default function AIMentor() {
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-slate-950 pb-safe">
-      {/* Header with Mode Selector & Controls */}
-      <header className="px-3 py-4 md:p-6 border-b border-slate-800 flex items-center justify-between gap-3 bg-gradient-to-r from-slate-950 to-slate-900">
-        <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
-          <div className="p-1.5 md:p-2 bg-purple-500/20 rounded-lg flex-shrink-0">
-            <Bot className="text-purple-500 w-5 h-5 md:w-6 md:h-6" />
+    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 pb-safe">
+      {/* WAR ROOM HUD HEADER */}
+      <header className="px-3 py-4 md:p-6 border-b border-amber-500/20 flex items-center justify-between gap-3 bg-slate-900/40 backdrop-blur-md relative overflow-hidden">
+        {/* Scan line animation background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent opacity-20 animate-pulse" />
+        
+        <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1 relative z-10">
+          {/* Pulsing Radar Avatar */}
+          <div className="relative flex-shrink-0">
+            <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping" />
+            <div className="relative w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-green-500/30 to-green-600/30 rounded-full flex items-center justify-center border-2 border-green-500/50">
+              <Bot className="text-green-400 w-5 h-5 md:w-6 md:h-6" />
+              {/* Radar sweep animation */}
+              <div className="absolute inset-0 rounded-full border-2 border-green-500/30 animate-spin" style={{clipPath: 'polygon(50% 50%, 50% 0%, 100% 0%)'}} />
+            </div>
           </div>
+          
           <div className="min-w-0 flex-1">
-            <h1 className="font-bold text-base md:text-xl text-yellow-500 truncate">AI Mentor</h1>
-            <p className="text-xs text-slate-400 hidden sm:block">Trading Guidance System</p>
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="font-mono font-black text-sm md:text-lg text-amber-400 tracking-wider uppercase">AI TACTICAL MENTOR</h1>
+              {/* System Status LED */}
+              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 border border-green-500/30 rounded text-[10px] font-mono uppercase tracking-widest">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-green-400">SYSTEM: ACTIVE</span>
+              </div>
+            </div>
+            <p className="text-[10px] md:text-xs text-slate-500 font-mono uppercase tracking-widest hidden sm:block">MPT WARRIOR INTELLIGENCE DIVISION</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+        {/* Encryption Badge */}
+        <div className="absolute top-2 right-3 md:top-4 md:right-6 text-[9px] font-mono text-amber-500/40 uppercase tracking-widest">
+          ENCRYPTION: AES-256_SECURE
+        </div>
+        
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0 relative z-10">
           <button
             onClick={exportChat}
-            className="p-2 md:p-2.5 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white active:bg-slate-700"
-            title="Export"
+            className="p-2 md:p-2.5 hover:bg-amber-500/10 rounded border border-amber-500/20 hover:border-amber-500/40 transition-all text-amber-400/60 hover:text-amber-400"
+            title="Export Data"
           >
-            <Download size={18} />
+            <Download size={16} />
           </button>
           <button
             onClick={() => setShowHistory(!showHistory)}
-            className="p-2 md:p-2.5 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white active:bg-slate-700 md:hidden"
-            title="History"
+            className="p-2 md:p-2.5 hover:bg-amber-500/10 rounded border border-amber-500/20 hover:border-amber-500/40 transition-all text-amber-400/60 hover:text-amber-400 md:hidden"
+            title="Archive"
           >
-            <MessageCircle size={18} />
+            <MessageCircle size={16} />
           </button>
           <button
             onClick={startNewChat}
-            className="p-2 md:p-2.5 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white active:bg-slate-700"
-            title="New Chat"
+            className="p-2 md:p-2.5 bg-green-500/10 hover:bg-green-500/20 rounded border border-green-500/30 hover:border-green-500/50 transition-all text-green-400"
+            title="New Operation"
           >
-            <RotateCw size={18} />
+            <RotateCw size={16} />
           </button>
         </div>
       </header>
@@ -334,46 +361,50 @@ export default function AIMentor() {
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Conversation Mode Selector */}
-          <div className="bg-slate-900 border-b border-slate-800 p-2 md:p-3 flex gap-1 md:gap-2 overflow-x-auto">
+          {/* TACTICAL MODE SELECTOR */}
+          <div className="bg-slate-900/60 border-b border-amber-500/20 p-2 md:p-3 flex gap-1 md:gap-2 overflow-x-auto backdrop-blur-sm">
             {(['general', 'analysis', 'strategy', 'mindset'] as const).map(mode => (
               <button
                 key={mode}
                 onClick={() => setConversationMode(mode)}
-                className={`px-3 md:px-4 py-2 rounded-lg font-semibold text-xs md:text-sm whitespace-nowrap transition-all active:scale-95 ${
+                className={`px-3 md:px-4 py-2 rounded-sm font-mono font-bold text-[10px] md:text-xs uppercase tracking-wider whitespace-nowrap transition-all border ${
                   conversationMode === mode
-                    ? 'bg-yellow-500 text-slate-900 shadow-lg shadow-yellow-500/50'
-                    : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+                    ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-lg shadow-amber-500/20'
+                    : 'bg-slate-800/50 text-slate-500 hover:text-amber-400 border-slate-700/50 hover:border-amber-500/30'
                 }`}
               >
-                {mode === 'general' && '💬 General'}
-                {mode === 'analysis' && '📊 Analysis'}
-                {mode === 'strategy' && '📈 Strategy'}
-                {mode === 'mindset' && '🧠 Mind'}
+                {mode === 'general' && '[ GENERAL_MODE ]'}
+                {mode === 'analysis' && '[ SCAN_STRUCTURE ]'}
+                {mode === 'strategy' && '[ STRATEGIC_REVIEW ]'}
+                {mode === 'mindset' && '[ MENTAL_RESET ]'}
               </button>
             ))}
             {/* History Button Desktop */}
             <button
               onClick={() => setShowHistory(!showHistory)}
-              className="hidden md:flex ml-auto px-3 py-2 rounded-lg font-semibold text-sm whitespace-nowrap bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition-all items-center gap-2"
+              className="hidden md:flex ml-auto px-3 py-2 rounded-sm font-mono font-bold text-xs uppercase tracking-wider whitespace-nowrap bg-slate-800/50 text-slate-500 hover:text-amber-400 border border-slate-700/50 hover:border-amber-500/30 transition-all items-center gap-2"
             >
-              <MessageCircle size={16} />
-              History
+              <MessageCircle size={14} />
+              ARCHIVE
             </button>
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4 md:space-y-5 flex flex-col pb-24 md:pb-36 pb-safe">
+          <div className="flex-1 overflow-y-auto px-2 py-3 md:p-6 space-y-3 md:space-y-4 flex flex-col pb-32 md:pb-40">
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                 {m.role === 'assistant' && (
-                  <div className="flex gap-2 md:gap-3 max-w-[90%] md:max-w-[85%]">
-                    <div className="flex-shrink-0 pt-1">
-                      <div className="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Bot className="text-white w-4 h-4 md:w-5 md:h-5" />
+                  <div className="flex gap-1.5 md:gap-3 max-w-[95%] md:max-w-[85%]">
+                    {/* Radar Avatar for AI */}
+                    <div className="flex-shrink-0 pt-0.5">
+                      <div className="relative w-6 h-6 md:w-8 md:h-8">
+                        <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping" />
+                        <div className="relative w-full h-full bg-gradient-to-br from-green-500/40 to-green-600/40 rounded-full flex items-center justify-center border border-green-500/50">
+                          <Bot className="text-green-300 w-4 h-4 md:w-5 md:h-5" />
+                        </div>
                       </div>
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 relative">
                       {/* Cek apakah ada risk calculation */}
                       {m.content.includes('LOT SIZE') && m.content.includes('Balance') ? (
                         <>
@@ -399,17 +430,21 @@ export default function AIMentor() {
                           </div>
                         </>
                       ) : (
-                        <div className="bg-slate-800/40 border border-slate-700/50 p-3 md:p-4 rounded-lg md:rounded-xl text-slate-100">
+                        <div className="relative bg-slate-900/40 backdrop-blur-sm border-l-2 md:border-l-4 border-amber-500 p-2.5 md:p-5 rounded-sm shadow-lg shadow-amber-500/10">
+                          {/* Intel Report Badge */}
+                          <div className="hidden md:block absolute top-2 right-2 text-[9px] font-mono text-amber-500/50 uppercase tracking-widest">
+                            INTEL-REPORT // SEC-ALPHA
+                          </div>
                           <ReactMarkdown 
                             components={{ 
-                              strong: ({...props}) => <span className="font-bold text-yellow-400" {...props} />,
-                              em: ({...props}) => <em className="text-slate-300 italic" {...props} />,
-                              code: ({...props}) => <code className="bg-slate-700/50 px-1.5 py-0.5 rounded text-xs font-mono text-yellow-300" {...props} />,
-                              p: ({...props}) => <p className="text-sm md:text-base leading-relaxed mb-2 last:mb-0" {...props} />,
-                              ul: ({...props}) => <ul className="list-disc list-inside text-sm md:text-base space-y-1 mb-2" {...props} />,
-                              li: ({...props}) => <li className="text-sm md:text-base" {...props} />,
-                              h3: ({...props}) => <h3 className="font-bold text-yellow-400 text-base mt-2 mb-1" {...props} />,
-                              blockquote: ({...props}) => <blockquote className="border-l-4 border-yellow-500 pl-3 italic text-slate-300" {...props} />,
+                              strong: ({...props}) => <span className="font-bold text-amber-400" {...props} />,
+                              em: ({...props}) => <em className="text-slate-300 italic font-mono" {...props} />,
+                              code: ({...props}) => <code className="bg-slate-800/60 px-1.5 py-0.5 rounded-sm text-[11px] md:text-xs font-mono text-green-400 border border-green-500/20" {...props} />,
+                              p: ({...props}) => <p className="text-[13px] leading-relaxed md:text-base font-mono mb-2 md:mb-3 last:mb-0 text-slate-100" {...props} />,
+                              ul: ({...props}) => <ul className="list-none text-[13px] md:text-base space-y-1.5 md:space-y-2 mb-2 md:mb-3 font-mono" {...props} />,
+                              li: ({...props}) => <li className="text-[13px] md:text-base before:content-['▸_'] before:text-amber-500 before:font-bold" {...props} />,
+                              h3: ({...props}) => <h3 className="font-mono font-bold text-amber-400 text-xs md:text-sm uppercase tracking-wider mt-2 md:mt-3 mb-1.5 md:mb-2 border-b border-amber-500/30 pb-1" {...props} />,
+                              blockquote: ({...props}) => <blockquote className="border-l-2 border-amber-500 pl-2 md:pl-4 italic text-slate-400 bg-amber-500/5 py-1.5 md:py-2 font-mono text-[13px] md:text-base" {...props} />,
                             }}
                           >
                             {m.content}
@@ -420,10 +455,10 @@ export default function AIMentor() {
                   </div>
                 )}
                 {m.role === 'user' && (
-                  <div className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-white p-3 md:p-4 rounded-lg md:rounded-xl max-w-[90%] md:max-w-[85%] shadow-lg">
+                  <div className="bg-transparent border-r-2 border-amber-500 text-slate-100 p-2.5 md:p-4 rounded-sm max-w-[95%] md:max-w-[85%] text-right">
                     <ReactMarkdown 
                       components={{ 
-                        p: ({...props}) => <p className="text-sm md:text-base" {...props} />,
+                        p: ({...props}) => <p className="text-[13px] leading-relaxed md:text-base font-mono" {...props} />,
                       }}
                     >
                       {m.content}
@@ -433,19 +468,25 @@ export default function AIMentor() {
               </div>
             ))}
             {isLoading && (
-              <div className="flex justify-start animate-fade-in gap-2">
-                <div className="flex-shrink-0 pt-1">
-                  <div className="w-7 h-7 md:w-8 md:h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
-                    <Bot className="text-white w-4 h-4 md:w-5 md:h-5 animate-pulse" />
+              <div className="flex justify-start animate-fade-in gap-1.5 md:gap-2">
+                <div className="flex-shrink-0 pt-0.5">
+                  <div className="relative w-6 h-6 md:w-8 md:h-8">
+                    <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping" />
+                    <div className="relative w-full h-full bg-gradient-to-br from-green-500/40 to-green-600/40 rounded-full flex items-center justify-center border border-green-500/50">
+                      <Bot className="text-green-300 w-3.5 h-3.5 md:w-5 md:h-5 animate-pulse" />
+                    </div>
                   </div>
                 </div>
-                <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg md:rounded-xl p-3 md:p-4 flex items-center gap-2">
+                <div className="bg-slate-900/40 backdrop-blur-sm border-l-2 md:border-l-4 border-green-500 rounded-sm p-2 md:p-4 flex items-center gap-2 md:gap-3 relative overflow-hidden">
+                  {/* Scanner line animation */}
+                  <div className="absolute left-0 right-0 h-px bg-green-500 animate-pulse" style={{top: '50%'}} />
                   <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                    <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-green-400 rounded-sm animate-pulse" style={{animationDelay: '0ms'}}></div>
+                    <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-green-400 rounded-sm animate-pulse" style={{animationDelay: '150ms'}}></div>
+                    <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-green-400 rounded-sm animate-pulse" style={{animationDelay: '300ms'}}></div>
                   </div>
-                  <span className="text-xs md:text-sm text-slate-400 italic">Sedang analisa...</span>
+                  <span className="text-[10px] md:text-sm text-green-400 font-mono uppercase tracking-wider">[ PROCESSING... ]</span>
+                  <span className="ml-1 md:ml-2 text-green-500 font-mono animate-pulse text-xs md:text-base">█</span>
                 </div>
               </div>
             )}
@@ -454,18 +495,19 @@ export default function AIMentor() {
 
           {/* Input Area */}
           <div className="sticky bottom-0 z-40 bg-slate-900 border-t border-slate-800 flex flex-col flex-shrink-0">
-            {/* Quick Actions - horizontally scrollable on mobile */}
-            <div className="p-3 md:p-4 border-b border-slate-800 max-h-36 md:max-h-48">
-              <p className="text-xs text-slate-400 mb-2 md:mb-3 font-semibold">⚡ QUICK ACTIONS</p>
+            {/* TACTICAL COMMAND BAR */}
+            <div className="p-3 md:p-4 border-b border-amber-500/20 max-h-36 md:max-h-48 bg-slate-900/60 backdrop-blur-sm">
+              <p className="text-[10px] text-amber-500 mb-2 md:mb-3 font-mono uppercase tracking-widest font-bold">[ QUICK_COMMANDS ]</p>
               <div className="flex gap-2 overflow-x-auto md:grid md:grid-cols-3 md:gap-2 no-scrollbar">
                 {quickActions.map((action, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSubmit(null, action.prompt)}
-                    className="flex flex-col items-start gap-1 p-2 md:p-3 bg-slate-800 border border-slate-700 rounded-lg hover:border-purple-500 hover:bg-slate-700 transition-all active:scale-95 group text-left min-w-[140px] md:min-w-0"
+                    className="px-3 py-2 bg-slate-800/50 border border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/10 rounded-sm transition-all text-left min-w-[140px] md:min-w-0 group"
                   >
-                    <span className="text-slate-400 group-hover:text-purple-400 transition-colors text-sm">{action.icon}</span>
-                    <span className="text-slate-300 group-hover:text-white font-semibold text-xs line-clamp-2">{action.label}</span>
+                    <span className="text-[10px] md:text-xs font-mono uppercase tracking-wider text-amber-500 group-hover:text-amber-400 font-bold">
+                      {action.label.replace('⚡ ', '[ ⚡ ').replace('🧠 ', '[ 🧠 ').replace('📊 ', '[ 📊 ').replace('📈 ', '[ 📈 ').replace('🛡️ ', '[ 🛡️ ').replace('🎯 ', '[ 🎯 ')} ]
+                    </span>
                   </button>
                 ))}
               </div>
@@ -494,8 +536,8 @@ export default function AIMentor() {
               </div>
             )}
 
-            {/* Input Form */}
-            <form onSubmit={handleSubmit} className="flex gap-2 md:gap-3 p-3 md:p-4 bg-slate-950">
+            {/* COMMAND INPUT BAR */}
+            <form onSubmit={handleSubmit} className="flex gap-2 md:gap-3 p-2.5 md:p-4 bg-slate-950 border-t border-amber-500/20 safe-area-bottom">
               <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -507,31 +549,34 @@ export default function AIMentor() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2.5 md:p-3 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 hover:border-purple-500 rounded-lg md:rounded-lg transition-all flex-shrink-0"
+                className="p-2 md:p-3 bg-slate-800/50 hover:bg-slate-700/50 border border-amber-500/20 hover:border-amber-500/40 rounded-sm transition-all flex-shrink-0"
                 title="Upload Chart"
               >
-                <Paperclip size={18} className="text-slate-400 hover:text-purple-400" />
+                <Paperclip size={16} className="text-amber-500/60 hover:text-amber-400" />
               </button>
 
               <input
-                className="flex-1 min-w-0 px-3 py-2 md:px-4 md:py-3 bg-slate-800 border border-slate-700 rounded-lg md:rounded-lg text-white text-sm placeholder-slate-500 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 focus:outline-none transition-all"
+                className="flex-1 min-w-0 px-2.5 py-2 md:px-4 md:py-3 bg-transparent border-b-2 border-amber-500/30 text-white text-[13px] md:text-sm font-mono placeholder-slate-600 focus:border-amber-500 focus:outline-none transition-all uppercase tracking-wider"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Tanya atau upload chart..."
+                placeholder="> COMMAND..."
                 disabled={isLoading}
               />
 
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
-                className="px-3 md:px-4 py-2.5 md:py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 active:from-yellow-700 active:to-yellow-800 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-slate-900 font-bold rounded-lg md:rounded-lg transition-all flex-shrink-0 flex items-center justify-center shadow-lg hover:shadow-yellow-500/20"
+                className="px-3 md:px-5 py-2 md:py-3 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 hover:border-amber-500 disabled:bg-slate-800/50 disabled:border-slate-700/50 disabled:cursor-not-allowed text-amber-400 disabled:text-slate-600 font-mono font-bold text-[10px] md:text-xs uppercase tracking-wider rounded-sm transition-all flex-shrink-0 flex items-center justify-center gap-1.5"
               >
-                <Send size={18} />
+                <Send size={14} className="md:w-4 md:h-4" />
+                <span className="hidden sm:inline">TRANSMIT</span>
               </button>
             </form>
 
-            {/* Footer Info */}
-            <p className="text-xs text-slate-500 px-3 md:px-4 py-2 md:py-3 text-center border-t border-slate-800">💡 Mode: <span className="font-bold text-yellow-400">{conversationMode.toUpperCase()}</span></p>
+            {/* SYSTEM STATUS */}
+            <div className="text-[9px] md:text-[10px] text-slate-600 px-2 md:px-4 py-1.5 md:py-3 text-center border-t border-amber-500/10 font-mono uppercase tracking-widest bg-slate-950">
+              <span className="text-amber-500/50">[ MODE:</span> <span className="font-bold text-amber-400">{conversationMode.toUpperCase()}</span> <span className="text-amber-500/50">] [ STATUS:</span> <span className="text-green-400">OPERATIONAL</span> <span className="text-amber-500/50">]</span>
+            </div>
           </div>
         </div>
       </div>

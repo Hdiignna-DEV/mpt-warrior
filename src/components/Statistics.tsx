@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TrendingUp, TrendingDown, Award, Target, Zap, BarChart3 } from 'lucide-react';
 import { calculateAnalytics, getMonthlyStats, getPairStats, getEquityCurve, getDrawdown } from '@/utils/analytics';
 
@@ -28,6 +29,7 @@ interface StatCard {
 }
 
 export default function Statistics({ trades, balance }: StatisticsProps) {
+  const { t } = useTranslation();
   const analytics = useMemo(() => calculateAnalytics(trades), [trades]);
   const monthlyStats = useMemo(() => getMonthlyStats(trades), [trades]);
   const pairStats = useMemo(() => getPairStats(trades), [trades]);
@@ -36,39 +38,39 @@ export default function Statistics({ trades, balance }: StatisticsProps) {
 
   const statCards: StatCard[] = [
     {
-      label: 'Total Trades',
+      label: t('stats.totalTrades'),
       value: analytics.totalTrades,
       icon: <BarChart3 size={24} />,
       color: 'blue',
     },
     {
-      label: 'Win Rate',
+      label: t('stats.winRate'),
       value: `${analytics.winRate.toFixed(2)}%`,
       icon: <TrendingUp size={24} />,
       color: 'green',
       trend: analytics.winRate > 50 ? 1 : -1,
     },
     {
-      label: 'Profit Factor',
+      label: t('stats.profitFactor'),
       value: analytics.profitFactor === Infinity ? '∞' : analytics.profitFactor.toFixed(2),
       icon: <Award size={24} />,
       color: 'yellow',
     },
     {
-      label: 'Total Pips',
+      label: t('stats.totalPips'),
       value: analytics.totalPips.toFixed(0),
       icon: <Target size={24} />,
       color: analytics.totalPips >= 0 ? 'green' : 'red',
       trend: analytics.totalPips >= 0 ? 1 : -1,
     },
     {
-      label: 'Avg Pips/Trade',
+      label: t('stats.avgPips'),
       value: analytics.averagePips.toFixed(2),
       icon: <Zap size={24} />,
       color: analytics.averagePips >= 0 ? 'green' : 'red',
     },
     {
-      label: 'Max Consecutive Wins',
+      label: t('stats.maxWins'),
       value: analytics.consecutiveWins,
       icon: <TrendingUp size={24} />,
       color: 'purple',
@@ -99,7 +101,7 @@ export default function Statistics({ trades, balance }: StatisticsProps) {
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <p className="text-sm text-slate-400 font-medium">{card.label}</p>
+                <p className="text-sm text-slate-400 font-medium" suppressHydrationWarning>{card.label}</p>
                 <h3 className="text-3xl font-bold mt-2">
                   {card.value}
                   {card.trend && (
@@ -186,16 +188,16 @@ export default function Statistics({ trades, balance }: StatisticsProps) {
       {/* Monthly Performance */}
       {Object.keys(monthlyStats).length > 0 && (
         <div className="bg-slate-800/50 border-2 border-purple-500 rounded-xl p-6">
-          <h3 className="text-lg font-bold text-purple-400 mb-4">📅 Monthly Performance</h3>
+          <h3 className="text-lg font-bold text-purple-400 mb-4" suppressHydrationWarning>📅 {t('stats.monthlyPerformance')}</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-slate-700">
-                  <th className="text-left py-2 px-3 text-slate-400">Month</th>
-                  <th className="text-center py-2 px-3 text-slate-400">Trades</th>
-                  <th className="text-center py-2 px-3 text-slate-400">Win Rate</th>
-                  <th className="text-center py-2 px-3 text-slate-400">Total Pips</th>
-                  <th className="text-center py-2 px-3 text-slate-400">Profit Factor</th>
+                  <th className="text-left py-2 px-3 text-slate-400" suppressHydrationWarning>{t('journal.date')}</th>
+                  <th className="text-center py-2 px-3 text-slate-400" suppressHydrationWarning>{t('stats.totalTrades')}</th>
+                  <th className="text-center py-2 px-3 text-slate-400" suppressHydrationWarning>{t('stats.winRate')}</th>
+                  <th className="text-center py-2 px-3 text-slate-400" suppressHydrationWarning>{t('stats.totalPips')}</th>
+                  <th className="text-center py-2 px-3 text-slate-400" suppressHydrationWarning>{t('stats.profitFactor')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -230,7 +232,7 @@ export default function Statistics({ trades, balance }: StatisticsProps) {
       {/* Pair Performance */}
       {Object.keys(pairStats).length > 0 && (
         <div className="bg-slate-800/50 border-2 border-cyan-500 rounded-xl p-6">
-          <h3 className="text-lg font-bold text-cyan-400 mb-4">💱 Performance by Pair</h3>
+          <h3 className="text-lg font-bold text-cyan-400 mb-4" suppressHydrationWarning>💱 {t('stats.pairPerformance')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {Object.entries(pairStats)
               .sort(([, a], [, b]) => b.totalTrades - a.totalTrades)
@@ -239,23 +241,23 @@ export default function Statistics({ trades, balance }: StatisticsProps) {
                   <h4 className="font-bold text-cyan-300 mb-3">{pair}</h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span>Trades:</span>
+                      <span suppressHydrationWarning>{t('stats.totalTrades')}:</span>
                       <span className="font-bold">{stats.totalTrades}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Win Rate:</span>
+                      <span suppressHydrationWarning>{t('stats.winRate')}:</span>
                       <span className={stats.winRate >= 50 ? 'text-green-400' : 'text-red-400'}>
                         {stats.winRate.toFixed(1)}%
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Total Pips:</span>
+                      <span suppressHydrationWarning>{t('stats.totalPips')}:</span>
                       <span className={stats.totalPips >= 0 ? 'text-green-400' : 'text-red-400'}>
                         {stats.totalPips.toFixed(0)}
                       </span>
                     </div>
                     <div className="flex justify-between border-t border-slate-600 pt-2">
-                      <span>Profit Factor:</span>
+                      <span suppressHydrationWarning>{t('stats.profitFactor')}:</span>
                       <span className="text-yellow-400">
                         {stats.profitFactor === Infinity ? '∞' : stats.profitFactor.toFixed(2)}
                       </span>

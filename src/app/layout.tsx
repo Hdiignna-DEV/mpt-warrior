@@ -8,14 +8,14 @@ import PanicButton from "@/components/PanicButton";
 import TradingViewCalendar from "@/components/TradingViewCalendar";
 import { ThemeProviderWrapper } from "@/components/ThemeProvider";
 import { ThemeScript } from "@/components/ThemeScript";
+import I18nProvider from "@/components/I18nProvider";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MPT Warrior Hub - Trading Excellence",
-  description: "Mindset Plan Trader Warrior Hub - Complete Trading System",
-  colorScheme: 'dark light',
-  themeColor: '#0f172a',
+  title: "MPT Warrior - Adapt to Every Market Condition",
+  description: "Command your trades in the dark of the night or the light of the day. MPT Warrior provides the clarity you need, whenever you need it.",
 };
 
 export default function RootLayout({
@@ -33,8 +33,24 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/mpt-logo.png" />
       </head>
-      <body className={`${inter.className} bg-white dark:bg-slate-950 text-slate-950 dark:text-slate-100 overflow-x-hidden flex flex-col min-h-screen transition-colors duration-300`} suppressHydrationWarning>
-        <ThemeProviderWrapper>
+      <body className={`${inter.className}`} suppressHydrationWarning>
+        <I18nProvider>
+          {/* Toast Notifications */}
+          <Toaster 
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: 'var(--glass-bg)',
+                color: 'rgb(var(--text-primary))',
+                border: '1px solid var(--glass-border)',
+                backdropFilter: 'blur(20px)',
+              },
+              className: 'sonner-toast',
+            }}
+            richColors
+            closeButton
+          />
+
           {/* Header */}
           <Header />
 
@@ -43,7 +59,7 @@ export default function RootLayout({
             <Sidebar />
 
             {/* Main Content with Footer */}
-            <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-white dark:bg-slate-950 w-full transition-colors duration-300">
+            <main className="flex-1 flex flex-col overflow-y-auto overflow-x-hidden w-full transition-all duration-300">
               <div className="flex-1 pb-8">
                 {children}
               </div>
@@ -55,7 +71,7 @@ export default function RootLayout({
           {/* Global Floating Components */}
           <PanicButton />
           <TradingViewCalendar />
-        </ThemeProviderWrapper>
+        </I18nProvider>
       </body>
     </html>
   );

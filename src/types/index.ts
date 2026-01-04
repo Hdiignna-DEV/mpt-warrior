@@ -1,14 +1,66 @@
 // Type definitions untuk MPT Warrior
 
+// ============================================
+// USER MANAGEMENT & AUTHENTICATION
+// ============================================
+
+export type UserRole = 'ADMIN' | 'WARRIOR' | 'PENDING';
+export type UserStatus = 'active' | 'pending' | 'suspended' | 'rejected';
+
 export interface User {
   id: string;
   email: string;
   name: string;
+  password: string; // Hashed password (bcrypt)
   avatar?: string;
+  
+  // Contact Information
+  whatsapp?: string;
+  telegram_id?: string;
+  
+  // Access Control
+  role: UserRole;
+  status: UserStatus;
+  
+  // Invitation & Referral
+  invitation_code: string;
+  invited_by?: string;
+  
+  // Timestamps
   createdAt: Date;
   updatedAt: Date;
+  join_date: Date;
+  approved_date?: Date;
+  approved_by?: string;
+  last_login?: Date;
+  login_count: number;
+  
+  // User Preferences & Stats
   settings: UserSettings;
   stats: UserStats;
+}
+
+export interface InvitationCode {
+  id: string;
+  code: string;
+  created_by: string;
+  max_uses: number;
+  used_count: number;
+  expires_at: Date;
+  is_active: boolean;
+  created_at: Date;
+  description?: string;
+}
+
+export interface AuditLog {
+  id: string;
+  action: 'user_registered' | 'user_approved' | 'user_rejected' | 'user_suspended' | 'code_created' | 'code_deactivated' | 'login' | 'logout';
+  performed_by: string;
+  target_user?: string;
+  timestamp: Date;
+  ip_address?: string;
+  user_agent?: string;
+  metadata?: Record<string, any>;
 }
 
 export interface UserSettings {

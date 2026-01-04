@@ -1,7 +1,6 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -11,74 +10,147 @@ import {
   X,
   BarChart3,
   Trophy,
-  Calendar,
+  Zap,
+  ArrowRight,
+  Sparkles,
 } from 'lucide-react';
-import { useState } from 'react';
-import { ThemeToggle } from './ThemeToggle';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const menuItems = [
-  { href: '/', label: 'Dasbor', icon: LayoutDashboard },
-  { href: '/analytics', label: 'Analitik', icon: BarChart3 },
-  { href: '/journal', label: 'Jurnal Trading', icon: BookOpen },
-  { href: '/calculator', label: 'Kalkulasi Risk', icon: Calculator },
-  { href: '/ai-mentor', label: 'Mentor AI', icon: Bot },
-  { href: '/achievements', label: 'Pencapaian', icon: Trophy },
+  { href: '/', label: 'nav.dashboard', fallback: 'Dashboard', icon: LayoutDashboard, description: 'Overview' },
+  { href: '/analytics', label: 'nav.analytics', fallback: 'Analytics', icon: BarChart3, description: 'Data Insights' },
+  { href: '/journal', label: 'nav.journal', fallback: 'Journal', icon: BookOpen, description: 'History' },
+  { href: '/calculator', label: 'nav.calculator', fallback: 'Calculator', icon: Calculator, description: 'Calculate' },
+  { href: '/ai-mentor', label: 'nav.aiMentor', fallback: 'AI Mentor', icon: Bot, description: 'Coach' },
+  { href: '/achievements', label: 'nav.achievements', fallback: 'Achievements', icon: Trophy, description: 'Progress' },
 ];
 
 export default function Sidebar() {
+  const { t } = useTranslation();
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isDesktopOpen, setIsDesktopOpen] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // Store desktop sidebar state in localStorage
+  useEffect(() => {
+    setMounted(true);
+    console.log('Sidebar mounted, language:', localStorage.getItem('mpt-language'));
+    const stored = localStorage.getItem('sidebar-desktop-open');
+    if (stored !== null) {
+      setIsDesktopOpen(stored === 'true');
+    }
+  }, []);
+
+  // Listen to localStorage changes (from Header component)
+  useEffect(() => {
+    // Also listen to custom event from same window
+    const handleToggle = () => {
+      const stored = localStorage.getItem('sidebar-desktop-open');
+      if (stored !== null) {
+        const newState = stored === 'true';
+        setIsDesktopOpen(newState);
+      }
+    };
+
+    window.addEventListener('sidebar-toggle', handleToggle);
+    
+    return () => {
+      window.removeEventListener('sidebar-toggle', handleToggle);
+    };
+  }, []);
+
+  // Set initial body class on mount
+  useEffect(() => {
+    if (isDesktopOpen) {
+      document.body.classList.add('sidebar-open');
+    } else {
+      document.body.classList.add('sidebar-closed');
+    }
+  }, [isDesktopOpen]);
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="sm:hidden fixed top-4 left-4 z-60 p-2.5 bg-gradient-to-br from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 rounded-lg text-white transition-all duration-300 hover:shadow-xl hover:shadow-yellow-500/40 hover:scale-110 active:scale-95"
-        aria-label="Toggle menu"
-      >
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
-
       {/* Overlay for mobile */}
-      {isOpen && (
+      {isDesktopOpen && (
         <div
-          onClick={() => setIsOpen(false)}
-          className="sm:hidden fixed inset-0 bg-black/60 z-30 backdrop-blur-md"
+          onClick={() => {
+            localStorage.setItem('sidebar-desktop-open', 'false');
+            setIsDesktopOpen(false);
+            document.body.classList.add('sidebar-closed');
+            document.body.classList.remove('sidebar-open');
+            window.dispatchEvent(new Event('sidebar-toggle'));
+          }}
+          className="sm:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
+          style={{
+            animation: 'fadeIn 0.3s ease-out'
+          }}
         />
       )}
 
       {/* Sidebar */}
       <aside
         className={`
-          fixed sm:static inset-y-0 left-0 z-60
-          w-64 bg-gradient-to-b from-slate-900/98 via-slate-900/95 to-slate-950/98 border-r border-slate-700/60
-          flex flex-col transition-all duration-300 ease-out
-          ${isOpen ? 'translate-x-0 shadow-2xl shadow-black/60' : '-translate-x-full sm:translate-x-0'}
-          h-screen overflow-y-auto
-          dark:from-slate-900/98 dark:via-slate-900/95 dark:to-slate-950/98
+          fixed inset-y-0 left-0 z-50
+          w-72 bg-white dark:bg-slate-900
+          flex flex-col
+          ${isDesktopOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
+          h-screen overflow-hidden
+          border-r border-slate-200 dark:border-slate-800
         `}
+        style={{
+          transition: 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease, background-color 0.3s ease',
+          willChange: 'transform'
+        }}
       >
-        {/* Logo/Header */}
-        <div className="p-4 sm:p-6 border-b border-slate-700/50 flex flex-col items-center flex-shrink-0 bg-gradient-to-b from-slate-900/90 via-slate-850/70 to-slate-900/50 dark:from-slate-900/90 dark:via-slate-850/70 dark:to-slate-900/50 backdrop-blur-xl hover:border-yellow-500/30 transition-all duration-300">
-          <div className="w-24 sm:w-32 h-24 sm:h-32 mb-2 sm:mb-3 relative group">
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 to-orange-500/10 rounded-full blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100"></div>
-            <Image
-              src="/mpt-logo.png"
-              alt="MPT Logo"
-              fill
-              className="object-contain drop-shadow-lg group-hover:scale-110 transition-transform duration-300"
-              priority
-            />
+        {/* Premium Header Section */}
+        <div className="relative p-6 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-900 transition-all duration-300">
+          {/* Close Button - Mobile */}
+          <button
+            onClick={() => {
+              localStorage.setItem('sidebar-desktop-open', 'false');
+              setIsDesktopOpen(false);
+              document.body.classList.add('sidebar-closed');
+              document.body.classList.remove('sidebar-open');
+              window.dispatchEvent(new Event('sidebar-toggle'));
+            }}
+            className="sm:hidden absolute top-4 right-4 z-10 p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+            aria-label="Close sidebar"
+            type="button"
+          >
+            <X size={20} />
+          </button>
+          
+          <div className="relative space-y-4">
+            {/* Logo Container */}
+            <div className="flex justify-center">
+              <div className="relative group">
+                <div className="absolute -inset-3 bg-gradient-to-r from-amber-500/30 to-orange-500/30 rounded-full blur-2xl opacity-75 group-hover:opacity-100 transition-all duration-500" />
+                
+                <div className="relative w-24 h-24 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center shadow-2xl border-4 border-amber-400 dark:border-amber-500 group-hover:scale-105 transition-all duration-300 overflow-hidden p-1.5">
+                  <img src="/mpt-logo.png" alt="MPT Logo" className="w-full h-full object-contain brightness-110 contrast-125" />
+                </div>
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="text-center space-y-1">
+              <h1 className="text-lg font-black bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400 uppercase tracking-tight">
+                MPT Warrior
+              </h1>
+              <p className="text-xs text-gray-500 dark:text-zinc-500 font-bold uppercase tracking-widest">Trading Hub</p>
+            </div>
+
+            {/* Status Badge */}
+            <div className="flex items-center justify-center gap-2 px-3 py-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Active</span>
+            </div>
           </div>
-          <h1 className="text-base sm:text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 text-center group-hover:scale-105 transition-transform duration-300">
-            MINDSET PLAN TRADER
-          </h1>
-          <p className="text-xs text-slate-500 mt-2 text-center font-bold uppercase tracking-widest">Warrior Trading Hub</p>
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 p-3 sm:p-4 space-y-2 overflow-y-auto">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -87,52 +159,53 @@ export default function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setIsOpen(false)}
                 className={`
-                  group relative flex items-center gap-3 px-3 sm:px-4 py-3 sm:py-3.5 rounded-xl
-                  transition-all duration-300 text-sm sm:text-base font-semibold
-                  overflow-hidden
+                  group relative flex items-center gap-3 px-4 py-3 rounded-xl
+                  transition-all duration-300 font-semibold
                   ${isActive 
-                    ? 'bg-gradient-to-r from-yellow-500 to-orange-600 text-white font-bold shadow-xl shadow-yellow-500/40 scale-100' 
-                    : 'text-slate-300 hover:text-yellow-300 border border-slate-700/40 hover:border-yellow-500/50'
+                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30 scale-[1.02]' 
+                    : 'text-gray-700 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 hover:bg-gray-100 dark:hover:bg-zinc-900'
                   }
                 `}
-                style={{ animationDelay: `${index * 50}ms` }}
               >
-                {/* Background gradient overlay */}
-                {!isActive && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/0 via-yellow-500/10 to-yellow-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                )}
-                
-                <div className={`flex-shrink-0 transition-all duration-300 ${isActive ? 'scale-115' : 'group-hover:scale-125 group-hover:-rotate-12'}`}>
-                  <Icon size={20} className={isActive ? 'text-yellow-100' : ''} />
+                {/* Icon Container */}
+                <div className={`
+                  flex-shrink-0 p-2 rounded-lg transition-all duration-300
+                  ${isActive 
+                    ? 'bg-white/20' 
+                    : 'bg-gray-100 dark:bg-zinc-800 group-hover:bg-gray-200 dark:group-hover:bg-zinc-700'
+                  }
+                `}>
+                  <Icon size={20} />
                 </div>
-                <span className="truncate group-hover:font-bold transition-all duration-300">{item.label}</span>
+
+                {/* Text Content */}
+                <div className="flex-1">
+                  <p className="text-sm font-bold" suppressHydrationWarning>{t(item.label)}</p>
+                  <p className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500 dark:text-zinc-500'}`}>
+                    {item.description}
+                  </p>
+                </div>
+
+                {/* Active Indicator */}
                 {isActive && (
-                  <div className="ml-auto flex items-center gap-1 text-yellow-100">
-                    <span className="text-xs font-bold">●</span>
-                  </div>
+                  <ArrowRight className="w-5 h-5 text-white/80" />
                 )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Theme Toggle & Footer */}
-        <div className="p-3 sm:p-4 border-t border-slate-700/50 flex-shrink-0 space-y-3 bg-gradient-to-t from-slate-950/95 via-slate-900/60 to-slate-900/20 dark:from-slate-950/95 dark:via-slate-900/60 dark:to-slate-900/20 backdrop-blur-xl">
-          <div className="flex justify-center">
-            <ThemeToggle />
-          </div>
-          <div className="text-center space-y-2 py-2">
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
-              MPT Warrior
-            </p>
-            <p className="text-xs text-slate-600 font-medium">
-              Trading Excellence
-            </p>
-            <div className="flex justify-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-xs text-slate-500">Live Ready</span>
+        {/* Footer Section */}
+        <div className="p-4 border-t border-gray-200 dark:border-zinc-800 flex-shrink-0 space-y-4 bg-gradient-to-t from-gray-50 to-transparent dark:from-zinc-950 dark:to-transparent">
+          {/* Premium Info Card */}
+          <div className="relative p-4 rounded-xl border border-sky-200 dark:border-sky-800 bg-gradient-to-br from-sky-50 to-orange-50 dark:from-sky-950/20 dark:to-orange-950/20">
+            <div className="text-center space-y-2">
+              <div className="flex items-center justify-center gap-2">
+                <Sparkles className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                <p className="text-sm font-bold text-sky-600 dark:text-sky-400">Premium Edition</p>
+              </div>
+              <p className="text-xs text-gray-600 dark:text-zinc-400">Trading Excellence</p>
             </div>
           </div>
         </div>

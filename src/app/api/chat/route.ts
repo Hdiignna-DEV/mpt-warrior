@@ -23,15 +23,32 @@ export async function POST(req: Request): Promise<Response> {
     // 🔥 PERBAIKAN DISINI: Balik ke "gemini-flash-latest" (Jalur Aman & Gratis)
     const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" }); 
 
-    const { messages, image } = await req.json() as { messages: Array<{ role: string; content: string }>, image?: string };
+    const { messages, image, language } = await req.json() as { messages: Array<{ role: string; content: string }>, image?: string, language?: string };
     const lastMessage = messages[messages.length - 1].content;
+    
+    // Language-aware system instruction
+    const languageInstruction = language === 'id'
+      ? 'User menggunakan bahasa Indonesia. Jawab dalam bahasa Indonesia yang baik, NAMUN istilah trading (BUY, SELL, WIN, LOSS, pips, SL, TP, leverage, margin, entry, exit) TETAP gunakan bahasa Inggris sesuai standar MPT Warrior.'
+      : 'User is using English. Respond in English while maintaining professional trading terminology.';
+    
+    const systemPrompt = language === 'id' ? SYSTEM_INSTRUCTION : `
+ROLE: You are "MPT Bot", a Mindset Plan Trader (MPT) mentor assistant.
+TONE: Professional, Firm, Masculine, Supportive (Bro-to-Bro).
+LANGUAGE: English.
+
+RULES:
+1. IF USER SENDS CHART IMAGE: Analyze market structure (Trend, Support/Resistance). Give objective view. DON'T GIVE BUY/SELL SIGNALS DIRECTLY, but ask: "What's your plan in this area?" or "Where's your SL?".
+2. Always refer to 4 Pillars: Mindset, Plan, Risk (1%), Discipline.
+3. Answer concisely (max 3 paragraphs).
+`;
 
     const conversationHistory = messages.slice(0, -1).map((m) => 
       `${m.role === 'user' ? 'User' : 'MPT Bot'}: ${m.content}`
     ).join('\n');
 
     const finalPrompt = `
-    ${SYSTEM_INSTRUCTION}
+    ${systemPrompt}
+    ${languageInstruction}
     --------------------------------------------------
     HISTORY CHAT:
     ${conversationHistory}

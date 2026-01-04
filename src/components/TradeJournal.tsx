@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { BookOpen, Plus, Trash2, Download, Share2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { getTrades, saveTrades, onTradesUpdated } from '@/utils/storage-sync';
 import type { Trade } from '@/utils/storage-sync';
 
@@ -27,6 +28,7 @@ const POPULAR_PAIRS = [
 ];
 
 export default function JurnalTrading() {
+  const { t } = useTranslation();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [pair, setPair] = useState('XAUUSD');
   const [posisi, setPosisi] = useState<'BUY' | 'SELL'>('BUY');
@@ -65,13 +67,13 @@ export default function JurnalTrading() {
 
   const tambahTrade = () => {
     if (!pair || !pip) {
-      alert('Isi Pair dan Pip terlebih dahulu!');
+      alert(t('journal.fillPairPip'));
       return;
     }
 
     const pipValue = parseFloat(pip);
     if (isNaN(pipValue) || pipValue === 0) {
-      alert('Pip harus berupa angka bukan 0!');
+      alert(t('journal.invalidPip'));
       return;
     }
 
@@ -206,12 +208,12 @@ export default function JurnalTrading() {
       <div className="mb-8 md:mb-10">
         <div className="flex items-center justify-between gap-3 md:gap-4 mb-4">
           <div className="flex items-center gap-3 md:gap-4 flex-1">
-            <div className="p-2 md:p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
-              <BookOpen className="text-blue-400" size={24} />
+            <div className="p-2 md:p-3 bg-amber-500/20 rounded-lg border border-amber-500/30">
+              <BookOpen className="text-amber-400" size={24} />
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl md:text-4xl font-black text-white">Jurnal Trading</h1>
-              <p className="text-slate-400 text-sm md:text-base">Catat setiap trade Anda untuk tracking progress.</p>
+              <h1 className="text-2xl md:text-4xl font-black text-amber-400" suppressHydrationWarning>{t('journal.title')}</h1>
+              <p className="text-slate-300 text-sm md:text-base" suppressHydrationWarning>{t('journal.subtitle')}</p>
             </div>
           </div>
 
@@ -221,7 +223,7 @@ export default function JurnalTrading() {
               className="p-2 md:p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2 font-bold text-sm md:text-base"
             >
               <Download size={20} />
-              <span className="hidden md:inline">Export</span>
+              <span className="hidden md:inline" suppressHydrationWarning>{t('journal.export')}</span>
             </button>
 
             {showExportOptions && (
@@ -230,8 +232,8 @@ export default function JurnalTrading() {
                   onClick={exportToEnhancedCSV}
                   className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 text-sm flex flex-col gap-1"
                 >
-                  <span className="font-bold text-green-400">📈 Enhanced CSV</span>
-                  <span className="text-xs text-slate-400">Dengan statistics & summary</span>
+                  <span className="font-bold text-green-400" suppressHydrationWarning>📈 {t('journal.exportCSV')}</span>
+                  <span className="text-xs text-slate-400">Enhanced with statistics</span>
                 </button>
 
                 <button
@@ -239,7 +241,7 @@ export default function JurnalTrading() {
                   className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors text-sm flex flex-col gap-1"
                 >
                   <span className="font-bold text-red-400 flex items-center gap-2">
-                    <Share2 size={16} /> Share Stats
+                    <Share2 size={16} /> <span suppressHydrationWarning>{t('journal.share')}</span>
                   </span>
                   <span className="text-xs text-slate-400">Copy to clipboard</span>
                 </button>
@@ -253,7 +255,7 @@ export default function JurnalTrading() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-8">
         <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-800/50">
-          <p className="text-slate-400 text-xs md:text-sm mb-1">Total</p>
+          <p className="text-slate-400 text-xs md:text-sm mb-1" suppressHydrationWarning>{t('stats.totalTrades')}</p>
           <p className="text-2xl md:text-3xl font-black text-white">{totalTrade}</p>
         </div>
         <div className="bg-slate-900/60 rounded-xl p-4 border border-green-500/30">
@@ -265,11 +267,11 @@ export default function JurnalTrading() {
           <p className="text-2xl md:text-3xl font-black text-red-400">{loss}</p>
         </div>
         <div className="bg-slate-900/60 rounded-xl p-4 border border-yellow-500/30">
-          <p className="text-slate-400 text-xs md:text-sm mb-1">Win Rate</p>
+          <p className="text-slate-400 text-xs md:text-sm mb-1" suppressHydrationWarning>{t('stats.winRate')}</p>
           <p className="text-2xl md:text-3xl font-black text-yellow-400">{winRate}%</p>
         </div>
         <div className={`bg-slate-900/60 rounded-xl p-4 border ${totalPips >= 0 ? 'border-green-500/30' : 'border-red-500/30'}`}>
-          <p className="text-slate-400 text-xs md:text-sm mb-1">Total Pips</p>
+          <p className="text-slate-400 text-xs md:text-sm mb-1" suppressHydrationWarning>{t('stats.totalPips')}</p>
           <p className={`text-2xl md:text-3xl font-black ${totalPips >= 0 ? 'text-green-400' : 'text-red-400'}`}>
             {totalPips >= 0 ? '+' : ''}{totalPips}
           </p>
@@ -279,13 +281,13 @@ export default function JurnalTrading() {
       {/* Form Input */}
       <div className="bg-slate-900/60 rounded-2xl border border-slate-800/50 p-5 md:p-8 backdrop-blur-sm mb-8">
         <h2 className="text-lg md:text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <Plus size={24} className="text-blue-400" /> Input Trade Baru
+          <Plus size={24} className="text-blue-400" /> <span suppressHydrationWarning>{t('journal.addTrade')}</span>
         </h2>
 
         <div className="space-y-4 md:space-y-5">
           {/* Pair Dropdown */}
           <div>
-            <label className="block text-sm font-semibold text-slate-300 mb-2">Pair</label>
+            <label className="block text-sm font-semibold text-slate-300 mb-2" suppressHydrationWarning>{t('journal.pair')}</label>
             <div className="relative">
               <button
                 onClick={() => setShowPairDropdown(!showPairDropdown)}
@@ -318,7 +320,7 @@ export default function JurnalTrading() {
 
           {/* Posisi */}
           <div>
-            <label className="block text-sm font-semibold text-slate-300 mb-2">Posisi</label>
+            <label className="block text-sm font-semibold text-slate-300 mb-2" suppressHydrationWarning>{t('journal.position')}</label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setPosisi('BUY')}
@@ -345,12 +347,12 @@ export default function JurnalTrading() {
 
           {/* Pip */}
           <div>
-            <label className="block text-sm font-semibold text-slate-300 mb-2">
-              Pip (Hasil auto-detect)
+            <label className="block text-sm font-semibold text-slate-300 mb-2" suppressHydrationWarning>
+              {t('journal.pips')} (Auto-detect)
             </label>
             <input
               type="number"
-              placeholder="Contoh: 35 (WIN) atau -20 (LOSS)"
+              placeholder="Example: 35 (WIN) or -20 (LOSS)"
               value={pip}
               onChange={(e) => setPip(e.target.value)}
               className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
@@ -359,7 +361,7 @@ export default function JurnalTrading() {
             {pip && (
               <div className="mt-3 flex gap-3">
                 <div className="flex-1">
-                  <p className="text-xs text-slate-400 mb-2">Pip Input:</p>
+                  <p className="text-xs text-slate-400 mb-2" suppressHydrationWarning>{t('journal.pips')} Input:</p>
                   <div className={`px-3 py-2 rounded-lg font-bold text-center ${
                     parseFloat(pip) > 0 ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
                   }`}>
@@ -367,7 +369,7 @@ export default function JurnalTrading() {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs text-slate-400 mb-2">Hasil (Auto):</p>
+                  <p className="text-xs text-slate-400 mb-2" suppressHydrationWarning>{t('journal.result')} (Auto):</p>
                   <div className={`px-3 py-2 rounded-lg font-bold text-center ${
                     currentHasil === 'WIN' ? 'bg-green-500/30 text-green-400' : 'bg-red-500/30 text-red-400'
                   }`}>
@@ -380,9 +382,9 @@ export default function JurnalTrading() {
 
           {/* Catatan */}
           <div>
-            <label className="block text-sm font-semibold text-slate-300 mb-2">Catatan (Opsional)</label>
+            <label className="block text-sm font-semibold text-slate-300 mb-2" suppressHydrationWarning>{t('journal.notes')} (Optional)</label>
             <textarea
-              placeholder="Tulis catatan trade Anda di sini..."
+              placeholder={t('journal.notes') + '...'}
               value={catatan}
               onChange={(e) => setCatatan(e.target.value)}
               rows={3}
@@ -395,19 +397,20 @@ export default function JurnalTrading() {
             onClick={tambahTrade}
             className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
-            <Plus size={20} /> Tambah Trade
+            <Plus size={20} /> <span suppressHydrationWarning>{t('journal.addTrade')}</span>
           </button>
         </div>
       </div>
 
       {/* Trade List */}
       <div className="bg-slate-900/60 rounded-2xl border border-slate-800/50 p-5 md:p-8 backdrop-blur-sm">
-        <h2 className="text-lg md:text-xl font-bold text-white mb-6">📊 Riwayat Trade</h2>
+        <h2 className="text-lg md:text-xl font-bold text-white mb-6">📊 <span suppressHydrationWarning>{t('journal.title')}</span></h2>
 
         {trades.length === 0 ? (
           <div className="text-center py-12">
             <BookOpen size={48} className="mx-auto text-slate-600 mb-4" />
-            <p className="text-slate-400 text-lg">Belum ada trade. Mulai input trade Anda!</p>
+            <p className="text-slate-400 text-lg font-bold tracking-wider" suppressHydrationWarning>{t('journal.noData')}</p>
+            <p className="text-slate-500 text-sm mt-2" suppressHydrationWarning>{t('journal.startTrading')}</p>
           </div>
         ) : (
           <div className="space-y-3 md:space-y-4">

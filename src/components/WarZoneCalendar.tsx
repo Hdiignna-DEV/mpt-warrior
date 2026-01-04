@@ -1,10 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function WarZoneCalendar() {
+  const { t } = useTranslation();
   const [showModal, setShowModal] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Check initial theme
+    setMounted(true);
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    
+    checkTheme();
+    
+    // Listen for theme changes
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <>
@@ -17,12 +37,12 @@ export default function WarZoneCalendar() {
         <div className="relative">
           <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75"></span>
           
-          <div className="relative flex items-center gap-3 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white px-6 py-4 rounded-full shadow-lg shadow-red-500/50 transition-all duration-300 hover:scale-105">
+          <div className="relative flex items-center gap-3 bg-gradient-to-r from-danger-600 to-danger-600 hover:from-danger-700 hover:to-danger-700 text-white px-6 py-4 rounded-full shadow-lg shadow-danger-500/50 transition-all duration-300 hover:scale-105">
             <AlertTriangle className="w-6 h-6 animate-pulse flex-shrink-0" />
             <div className="text-left">
-              <p className="text-xs text-red-100">WAR ZONE ALERT</p>
-              <p className="text-sm font-bold text-yellow-300">
-                Economic Calendar (Live)
+              <p className="text-xs text-red-100" suppressHydrationWarning>{t('warzone.alert')}</p>
+              <p className="text-sm font-bold text-secondary-300" suppressHydrationWarning>
+                {t('warzone.economicCalendar')}
               </p>
             </div>
           </div>
@@ -42,7 +62,7 @@ export default function WarZoneCalendar() {
           <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4">
             {/* Modal Box */}
             <div 
-              className="w-full h-[90vh] md:h-auto md:max-w-4xl md:max-h-[90vh] bg-gradient-to-br from-slate-900 to-slate-800 rounded-t-3xl md:rounded-2xl shadow-2xl border border-red-500/30 overflow-hidden flex flex-col"
+              className="w-full h-[90vh] md:h-auto md:max-w-4xl md:max-h-[90vh] bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 rounded-t-3xl md:rounded-2xl shadow-2xl border border-red-500/30 overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               
@@ -61,11 +81,11 @@ export default function WarZoneCalendar() {
                     <AlertTriangle className="w-5 h-5 md:w-8 md:h-8 text-white" />
                   </div>
                   <div className="min-w-0">
-                    <h2 className="text-lg md:text-2xl font-black text-white tracking-wider truncate">
-                      🚨 WAR ZONE CALENDAR
+                    <h2 className="text-lg md:text-2xl font-black text-white tracking-wider truncate" suppressHydrationWarning>
+                      🚨 {t('warzone.title')}
                     </h2>
-                    <p className="text-xs md:text-sm text-red-100 truncate">
-                      Real-Time Economic Events
+                    <p className="text-xs md:text-sm text-red-100 truncate" suppressHydrationWarning>
+                      {t('warzone.subtitle')}
                     </p>
                   </div>
                 </div>
@@ -73,7 +93,7 @@ export default function WarZoneCalendar() {
 
               {/* Content */}
               <div className="flex-1 overflow-y-auto w-full px-4 md:px-6 py-4 md:py-6">
-                <div className="w-full h-[350px] md:h-[500px] border border-slate-700 rounded-xl overflow-hidden bg-slate-950">
+                <div className="w-full h-[350px] md:h-[500px] border border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-950">
                   <iframe
                     title="TradingView Economic Calendar"
                     src="https://www.tradingview.com/events/"
@@ -82,7 +102,7 @@ export default function WarZoneCalendar() {
                       width: '100%',
                       height: '100%',
                       border: 'none',
-                      backgroundColor: '#030712',
+                      backgroundColor: isDark ? '#030712' : '#ffffff',
                     }}
                     sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -91,9 +111,9 @@ export default function WarZoneCalendar() {
               </div>
 
               {/* Footer */}
-              <div className="bg-slate-950/50 border-t border-red-500/30 px-4 md:px-6 py-3 md:py-4 flex-shrink-0">
-                <p className="text-slate-300 text-xs md:text-sm text-center">
-                  <strong className="text-red-400">⚠️ HIGH IMPACT</strong> = Stay away or tighten SL
+              <div className="bg-slate-100/50 dark:bg-slate-950/50 border-t border-red-500/30 px-4 md:px-6 py-3 md:py-4 flex-shrink-0">
+                <p className="text-slate-700 dark:text-slate-300 text-xs md:text-sm text-center" suppressHydrationWarning>
+                  <strong className="text-red-400">⚠️ {t('warzone.warning')}</strong> = {t('warzone.warningText')}
                 </p>
               </div>
 
@@ -101,9 +121,10 @@ export default function WarZoneCalendar() {
               <div className="px-4 md:px-6 pb-4 md:pb-6 flex-shrink-0">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-slate-900 font-black py-3 md:py-4 rounded-lg md:rounded-xl transition-all duration-300 hover:scale-105 shadow-lg shadow-yellow-500/30 text-sm md:text-base"
+                  className="w-full bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-slate-900 font-black py-3 md:py-4 rounded-lg md:rounded-xl transition-all duration-300 hover:scale-105 shadow-lg shadow-accent-500/30 text-sm md:text-base"
+                  suppressHydrationWarning
                 >
-                  CLOSE ✅
+                  {t('warzone.close')} ✅
                 </button>
               </div>
             </div>
