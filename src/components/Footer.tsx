@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import MptLogo from './MptLogo';
 import Image from 'next/image';
 import { MessageCircle, Users, Send, FileText } from 'lucide-react';
 
@@ -42,12 +43,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 md:w-14 md:h-14 relative flex-shrink-0">
-                <img 
-                  src="/logo.png" 
-                  alt="MPT Community Logo" 
-                  className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(245,166,35,0.6)]"
-                  loading="eager"
-                />
+                <MptLogo size={56} className="filter drop-shadow-[0_0_8px_rgba(245,166,35,0.6)]" />
               </div>
               <h3 className="font-black text-base md:text-lg text-amber-400 uppercase tracking-wider">
                 MPT COMMUNITY
