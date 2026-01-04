@@ -29,9 +29,10 @@ export default function RootLayout({
         <ThemeScript />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/mpt-logo.png" />
+        <link rel="icon" type="image/png" href="/mpt-logo.png" />
       </head>
       <body className={`${inter.className}`} suppressHydrationWarning>
         <I18nProvider>
