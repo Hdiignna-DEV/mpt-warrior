@@ -43,30 +43,30 @@ export default function LandingPage() {
         >
           <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-amber-500/30 bg-amber-500/5 mb-4 sm:mb-6">
             <Lock size={14} className="text-amber-400 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm font-mono text-amber-400">EXCLUSIVE MEMBERSHIP</span>
+            <span className="text-xs sm:text-sm font-mono text-amber-400">KEANGGOTAAN EKSKLUSIF</span>
           </div>
           
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-4 sm:mb-6 leading-tight">
             MINDSET PLAN TRADER
           </h1>
           <p className="text-base sm:text-xl md:text-2xl text-amber-400 font-bold mb-3 sm:mb-4">
-            "Focus on the Plan, Not the Panic."
+            "Fokus pada Rencana, Bukan Panik."
           </p>
           <p className="text-sm sm:text-lg text-slate-400 max-w-3xl mx-auto mb-8 sm:mb-12 px-2">
             Platform eksklusif untuk 50+ trader elite dengan sistem manajemen trading terpadu, 
-            AI Mentor, dan akses ke modul strategi rahasia MPT Way.
+            AI Mentor, dan akses ke modul strategi rahasia The MPT Way.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4">
             <Link href="/register" className="w-full sm:w-auto">
               <Button className="bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 w-full sm:w-auto">
                 <Rocket className="mr-2" size={18} />
-                Request Access
+                Ajukan Akses
               </Button>
             </Link>
             <Link href="/login" className="w-full sm:w-auto">
               <Button variant="outline" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 w-full sm:w-auto">
-                Member Login
+                Login Member
               </Button>
             </Link>
           </div>
@@ -76,8 +76,8 @@ export default function LandingPage() {
       {/* FEATURES SECTION */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-center text-white mb-8 sm:mb-12">
-          EXCLUSIVE FEATURES
-          <span className="block text-amber-400 text-base sm:text-lg font-mono mt-2">Members Only</span>
+          FITUR EKSKLUSIF
+          <span className="block text-amber-400 text-base sm:text-lg font-mono mt-2">Khusus Member</span>
         </h2>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -93,11 +93,11 @@ export default function LandingPage() {
             </div>
             <h3 className="text-lg sm:text-xl font-bold text-white mb-2">AI Mentor</h3>
             <p className="text-sm sm:text-base text-slate-400">
-              Get real-time trading guidance powered by AI. Analyze market conditions and get strategic insights.
+              Dapatkan panduan trading real-time dengan AI. Analisis kondisi pasar dan insights strategis.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <Lock size={14} className="text-amber-500" />
-              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+              <span className="text-xs text-amber-500 font-mono">TERKUNCI</span>
             </div>
           </motion.div>
 
@@ -114,11 +114,11 @@ export default function LandingPage() {
             </div>
             <h3 className="text-xl font-bold text-white mb-2">The MPT Way</h3>
             <p className="text-slate-400">
-              Access exclusive PDF modules containing proven strategies, mindset frameworks, and risk management blueprints.
+              Akses modul PDF eksklusif berisi strategi terbukti, framework mindset, dan blueprint manajemen risiko.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <Lock size={14} className="text-amber-500" />
-              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+              <span className="text-xs text-amber-500 font-mono">TERKUNCI</span>
             </div>
           </motion.div>
 
@@ -135,11 +135,11 @@ export default function LandingPage() {
             </div>
             <h3 className="text-xl font-bold text-white mb-2">Trading Journal</h3>
             <p className="text-slate-400">
-              Track every trade with detailed metrics, screenshots, and performance analytics. Learn from your history.
+              Catat setiap trade dengan metrik detail, screenshot, dan analisis performa. Belajar dari history Anda.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <Lock size={14} className="text-amber-500" />
-              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+              <span className="text-xs text-amber-500 font-mono">TERKUNCI</span>
             </div>
           </motion.div>
 
@@ -156,11 +156,11 @@ export default function LandingPage() {
             </div>
             <h3 className="text-xl font-bold text-white mb-2">Risk Calculator</h3>
             <p className="text-slate-400">
-              Calculate position size, risk/reward ratio, and lot sizing instantly. Never over-leverage again.
+              Hitung position size, risk/reward ratio, dan lot sizing secara instant. Tidak pernah over-leverage lagi.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <Lock size={14} className="text-amber-500" />
-              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+              <span className="text-xs text-amber-500 font-mono">TERKUNCI</span>
             </div>
           </motion.div>
 
@@ -177,11 +177,11 @@ export default function LandingPage() {
             </div>
             <h3 className="text-xl font-bold text-white mb-2">Analytics Dashboard</h3>
             <p className="text-slate-400">
-              Visualize your trading performance with advanced charts, win rate tracking, and profit/loss insights.
+              Visualisasi performa trading Anda dengan chart advanced, tracking win rate, dan insights profit/loss.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <Lock size={14} className="text-amber-500" />
-              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+              <span className="text-xs text-amber-500 font-mono">TERKUNCI</span>
             </div>
           </motion.div>
 
@@ -198,11 +198,11 @@ export default function LandingPage() {
             </div>
             <h3 className="text-xl font-bold text-white mb-2">War Zone Calendar</h3>
             <p className="text-slate-400">
-              Stay ahead with economic calendar integration. Know when high-impact news will move the market.
+              Tetap selangkah lebih maju dengan integrasi kalender ekonomi. Tahu kapan berita high-impact akan menggerakkan pasar.
             </p>
             <div className="mt-4 flex items-center gap-2">
               <Lock size={14} className="text-amber-500" />
-              <span className="text-xs text-amber-500 font-mono">LOCKED</span>
+              <span className="text-xs text-amber-500 font-mono">TERKUNCI</span>
             </div>
           </motion.div>
         </div>
@@ -217,25 +217,25 @@ export default function LandingPage() {
           className="p-6 sm:p-12 rounded-2xl sm:rounded-3xl border border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-slate-900/50 backdrop-blur-sm"
         >
           <h2 className="text-2xl sm:text-4xl font-black text-white mb-3 sm:mb-4">
-            Ready to Join the Elite?
+            Siap Bergabung dengan Elite?
           </h2>
           <p className="text-base sm:text-xl text-slate-300 mb-6 sm:mb-8">
-            Limited to 50+ exclusive members. Request access with invitation code.
+            Terbatas untuk 50+ member eksklusif. Ajukan akses dengan kode undangan.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Link href="/register" className="w-full sm:w-auto">
               <Button className="bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-6 w-full sm:w-auto">
                 <CheckCircle className="mr-2" size={18} />
-                Request Access Now
+                Ajukan Akses Sekarang
               </Button>
             </Link>
           </div>
 
           <p className="text-xs sm:text-sm text-slate-500 mt-4 sm:mt-6">
-            Already a member?{' '}
+            Sudah menjadi member?{' '}
             <Link href="/login" className="text-amber-400 hover:text-amber-300 font-bold">
-              Login here
+              Login di sini
             </Link>
           </p>
         </motion.div>
@@ -244,8 +244,8 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer className="border-t border-amber-500/20 bg-slate-950/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 text-center text-slate-500 text-xs sm:text-sm">
-          <p>&copy; 2026 MPT Community. All rights reserved.</p>
-          <p className="mt-2 text-amber-500/70 font-mono text-xs sm:text-sm">"Focus on the Plan, Not the Panic."</p>
+          <p>&copy; 2026 MPT Community. Hak cipta dilindungi.</p>
+          <p className="mt-2 text-amber-500/70 font-mono text-xs sm:text-sm">"Fokus pada Rencana, Bukan Panik."</p>
         </div>
       </footer>
     </div>
