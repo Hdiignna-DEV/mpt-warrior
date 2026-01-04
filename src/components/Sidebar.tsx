@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
@@ -129,7 +128,7 @@ export default function Sidebar() {
                 <div className="absolute -inset-3 bg-gradient-to-r from-amber-500/30 to-orange-500/30 rounded-full blur-2xl opacity-75 group-hover:opacity-100 transition-all duration-500" />
                 
                 <div className="relative w-24 h-24 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center shadow-2xl border-4 border-amber-400 dark:border-amber-500 group-hover:scale-105 transition-all duration-300 overflow-hidden p-1.5">
-                  <Image src="/mpt-logo.png" alt="MPT Logo" width={96} height={96} className="object-contain brightness-110 contrast-125" priority unoptimized />
+                  <img src="https://mpt-community.vercel.app/mpt-logo.png" alt="MPT Logo" className="w-full h-full object-contain brightness-110 contrast-125" loading="eager" />
                 </div>
               </div>
             </div>

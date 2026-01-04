@@ -42,14 +42,11 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 md:w-14 md:h-14 relative flex-shrink-0">
-                <Image 
-                  src="/mpt-logo.png" 
+                <img 
+                  src="https://mpt-community.vercel.app/mpt-logo.png" 
                   alt="MPT Community Logo" 
-                  width={56} 
-                  height={56}
-                  className="object-contain filter drop-shadow-[0_0_8px_rgba(245,166,35,0.6)]"
-                  priority
-                  unoptimized
+                  className="w-full h-full object-contain filter drop-shadow-[0_0_8px_rgba(245,166,35,0.6)]"
+                  loading="eager"
                 />
               </div>
               <h3 className="font-black text-base md:text-lg text-amber-400 uppercase tracking-wider">
