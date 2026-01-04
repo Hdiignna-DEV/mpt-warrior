@@ -1,0 +1,22 @@
+{
+  "name": "MPT Community - Trading Hub",
+  "short_name": "MPT",
+  "description": "Mindset Plan Trader - Complete Trading Management System",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#eab308",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
