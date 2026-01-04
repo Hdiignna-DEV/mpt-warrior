@@ -1,7 +1,12 @@
 'use client';
 
+import { useState } from 'react';
+
 export default function MptLogo({ className = "", size = 96 }: { className?: string; size?: number }) {
-  return (
+  const [imgError, setImgError] = useState(false);
+
+  // SVG Fallback
+  const SvgFallback = () => (
     <svg 
       width={size} 
       height={size} 
@@ -10,11 +15,8 @@ export default function MptLogo({ className = "", size = 96 }: { className?: str
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      {/* Background Circle */}
       <circle cx="100" cy="100" r="95" fill="#F59E0B" />
       <circle cx="100" cy="100" r="90" fill="#020617" />
-      
-      {/* MPT Text */}
       <text 
         x="100" 
         y="75" 
@@ -26,19 +28,30 @@ export default function MptLogo({ className = "", size = 96 }: { className?: str
       >
         MPT
       </text>
-      
-      {/* Shield/Badge Shape */}
       <path 
         d="M 100 120 L 140 140 L 140 170 L 100 185 L 60 170 L 60 140 Z" 
         fill="#F59E0B" 
         opacity="0.3"
       />
-      
-      {/* Bottom accent */}
       <circle cx="100" cy="155" r="8" fill="#F59E0B" />
-      
-      {/* Glow effect */}
       <circle cx="100" cy="100" r="95" fill="none" stroke="#F59E0B" strokeWidth="2" opacity="0.5" />
     </svg>
+  );
+
+  // Try loading PNG first, fallback to SVG if fails
+  if (imgError) {
+    return <SvgFallback />;
+  }
+
+  return (
+    <img 
+      src="/mpt-logo.png" 
+      alt="MPT Logo" 
+      width={size}
+      height={size}
+      className={className}
+      onError={() => setImgError(true)}
+      loading="eager"
+    />
   );
 }
