@@ -12,12 +12,10 @@ export function ThemeProviderWrapper({ children }: ThemeProviderWrapperProps) {
     <ThemeProvider 
       attribute="class" 
       defaultTheme="dark" 
-      enableSystem={true}
-      enableColorScheme={false}
-      storageKey="mpt-theme"
-      forcedTheme={undefined}
+      enableSystem={false}
+      storageKey="mpt-warrior-theme"
       disableTransitionOnChange={false}
-      themes={['light', 'dark']}
+      forcedTheme={undefined}
     >
       {children}
     </ThemeProvider>
