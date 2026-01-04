@@ -2,6 +2,7 @@
 
 import { Zap, TrendingUp, Target, BarChart3, DollarSign, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 import LanguageToggle from './LanguageToggle';
@@ -126,7 +127,7 @@ export default function Header() {
             <Link href="/" className="flex items-center gap-2 group shrink-0">
             <div className="relative w-12 h-12 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center shadow-xl border-2 border-amber-400 dark:border-amber-500 transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl group-hover:border-amber-500 dark:group-hover:border-amber-400 overflow-hidden p-0.5">
               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-500/0 via-amber-500/10 to-amber-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <img src="/mpt-logo.png" alt="MPT Logo" className="w-full h-full object-contain relative z-10 brightness-110 contrast-125" />
+              <Image src="/mpt-logo.png" alt="MPT Logo" width={48} height={48} className="object-contain relative z-10 brightness-110 contrast-125" priority />
             </div>
             <div className="hidden sm:block">
               <h1 className="text-lg font-black bg-clip-text text-transparent bg-gradient-to-r from-amber-600 to-orange-600 dark:from-amber-400 dark:to-orange-400 leading-none">
