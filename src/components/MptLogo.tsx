@@ -1,8 +1,12 @@
 'use client';
 
+import { useState } from 'react';
+
 export default function MptLogo({ className = "", size = 96 }: { className?: string; size?: number }) {
-  // Gunakan SVG permanent karena PNG tidak bisa load di Vercel
-  return (
+  const [imgError, setImgError] = useState(false);
+
+  // SVG Fallback
+  const SvgFallback = () => (
     <svg 
       width={size} 
       height={size} 
@@ -32,5 +36,23 @@ export default function MptLogo({ className = "", size = 96 }: { className?: str
       <circle cx="100" cy="155" r="8" fill="#F59E0B" />
       <circle cx="100" cy="100" r="95" fill="none" stroke="#F59E0B" strokeWidth="2" opacity="0.5" />
     </svg>
+  );
+
+  if (imgError) {
+    return <SvgFallback />;
+  }
+
+  // Try GitHub raw URL for PNG
+  return (
+    <img 
+      src="https://raw.githubusercontent.com/Hdiignna-DEV/mpt-warrior/main/public/mpt-logo.png" 
+      alt="MPT Logo" 
+      width={size}
+      height={size}
+      className={className}
+      onError={() => setImgError(true)}
+      loading="eager"
+      crossOrigin="anonymous"
+    />
   );
 }
