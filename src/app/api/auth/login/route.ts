@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Return user data and token
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: 'Login berhasil!',
       user: {
@@ -87,6 +87,17 @@ export async function POST(request: NextRequest) {
       },
       token,
     });
+
+    // Set HTTP-only cookie with token
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    });
+
+    return response;
   } catch (error: any) {
     console.error('Login error:', error);
     return NextResponse.json(
