@@ -42,10 +42,13 @@ export async function POST(request: NextRequest) {
 
     const user = resources[0];
 
-    // Update user to ADMIN + active
+    // Promote to SUPER_ADMIN if email matches, otherwise ADMIN
+    const targetRole = email === 'info.mptcommunity@gmail.com' ? 'SUPER_ADMIN' : 'ADMIN';
+    
+    // Update user to ADMIN/SUPER_ADMIN + active
     const updatedUser = {
       ...user,
-      role: 'ADMIN',
+      role: targetRole,
       status: 'active',
       approved_by: decoded!.email,
       approved_date: new Date(),
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `User ${email} promoted to ADMIN successfully`,
+      message: `User ${email} promoted to ${targetRole} successfully`,
       user: {
         id: updatedUser.id,
         email: updatedUser.email,

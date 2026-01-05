@@ -4,7 +4,7 @@
 // USER MANAGEMENT & AUTHENTICATION
 // ============================================
 
-export type UserRole = 'ADMIN' | 'WARRIOR' | 'PENDING';
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'WARRIOR' | 'PENDING';
 export type UserStatus = 'active' | 'pending' | 'suspended' | 'rejected';
 
 export interface User {

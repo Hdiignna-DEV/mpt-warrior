@@ -12,7 +12,7 @@ export interface DecodedToken {
   userId: string;
   email: string;
   name: string;
-  role: 'ADMIN' | 'WARRIOR';
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'WARRIOR';
   status: 'active' | 'pending' | 'suspended' | 'rejected';
 }
 
@@ -61,11 +61,11 @@ export function requireActiveStatus(decoded: DecodedToken): NextResponse | null 
 }
 
 /**
- * Verify user has admin role
+ * Verify user has admin role (ADMIN or SUPER_ADMIN)
  * Returns 403 if user is not admin
  */
 export function requireAdminRole(decoded: DecodedToken): NextResponse | null {
-  if (decoded.role !== 'ADMIN') {
+  if (decoded.role !== 'ADMIN' && decoded.role !== 'SUPER_ADMIN') {
     return NextResponse.json(
       { error: 'Forbidden: Admin access required' },
       { status: 403 }
@@ -73,6 +73,21 @@ export function requireAdminRole(decoded: DecodedToken): NextResponse | null {
   }
   
   return null; // No error, user is admin
+}
+
+/**
+ * Verify user has super admin role
+ * Returns 403 if user is not super admin
+ */
+export function requireSuperAdminRole(decoded: DecodedToken): NextResponse | null {
+  if (decoded.role !== 'SUPER_ADMIN') {
+    return NextResponse.json(
+      { error: 'Forbidden: Super Admin access required' },
+      { status: 403 }
+    );
+  }
+  
+  return null; // No error, user is super admin
 }
 
 /**
@@ -133,6 +148,46 @@ export function validateAdmin(request: NextRequest): {
     }
     
     const roleError = requireAdminRole(decoded);
+    
+    if (roleError) {
+      return { error: roleError };
+    }
+    
+    return { decoded };
+  } catch (error: any) {
+    return {
+      error: NextResponse.json(
+        { error: error.message || 'Unauthorized' },
+        { status: 401 }
+      ),
+    };
+  }
+}
+
+/**
+ * Combined middleware: Verify token + active status + super admin role
+ * Returns error response if validation fails, null otherwise
+ * 
+ * Usage:
+ * ```typescript
+ * const { decoded, error } = validateSuperAdmin(request);
+ * if (error) return error;
+ * // Continue with decoded super admin token
+ * ```
+ */
+export function validateSuperAdmin(request: NextRequest): {
+  decoded?: DecodedToken;
+  error?: NextResponse;
+} {
+  try {
+    const decoded = verifyToken(request);
+    const statusError = requireActiveStatus(decoded);
+    
+    if (statusError) {
+      return { error: statusError };
+    }
+    
+    const roleError = requireSuperAdminRole(decoded);
     
     if (roleError) {
       return { error: roleError };
