@@ -94,12 +94,20 @@ export async function useInvitationCode(code: string, usedBy: string): Promise<v
     throw new Error("Code sudah mencapai limit penggunaan");
   }
 
-  const updatedCode: InvitationCode = {
-    ...resource,
+  const updatedCode = {
+    id: resource.id,
+    code: resource.code,
+    created_by: resource.created_by,
+    max_uses: resource.max_uses,
     used_count: resource.used_count + 1,
+    expires_at: resource.expires_at,
+    is_active: resource.is_active,
+    role: resource.role,
+    created_at: resource.created_at,
+    description: resource.description,
   };
   
-  // Use the actual id from database (could be UUID or code)
+  // Replace using actual id and partition key value
   await container.item(resource.id, resource.code).replace(updatedCode);
   
   console.log('[USE CODE] Success! New count:', updatedCode.used_count);
@@ -158,12 +166,20 @@ export async function deactivateInvitationCode(code: string, deactivatedBy: stri
   
   const resource = resources[0];
 
-  const updatedCode: InvitationCode = {
-    ...resource,
+  const updatedCode = {
+    id: resource.id,
+    code: resource.code,
+    created_by: resource.created_by,
+    max_uses: resource.max_uses,
+    used_count: resource.used_count,
+    expires_at: resource.expires_at,
     is_active: false,
+    role: resource.role,
+    created_at: resource.created_at,
+    description: resource.description,
   };
 
-  // Use the actual id from database (could be UUID or code)
+  // Replace using actual id and partition key value
   await container.item(resource.id, resource.code).replace(updatedCode);
   
   // Log audit
