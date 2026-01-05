@@ -79,7 +79,7 @@ export async function createInvitationCode(codeData: Omit<InvitationCode, 'id' |
   const log: AuditLog = {
     id: `log-${Date.now()}-${Math.random().toString(36).substring(7)}`,
     action: 'code_created',
-    performed_by: codeData.created_by,
+    performed_by: codeData.created_by || 'system',
     timestamp: new Date(),
     metadata: { code: codeData.code, max_uses: codeData.max_uses },
   };
