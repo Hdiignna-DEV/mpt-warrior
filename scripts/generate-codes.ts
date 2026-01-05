@@ -26,6 +26,7 @@ async function main() {
         max_uses: maxUsesPerCode,
         expires_at: expiresAt,
         is_active: true,
+        role: 'WARRIOR', // Default role for batch generation
         description: `Batch 1 - Code ${i + 1}`,
       });
 
