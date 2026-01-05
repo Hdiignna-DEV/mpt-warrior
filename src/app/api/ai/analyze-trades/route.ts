@@ -1,25 +1,23 @@
 /**
  * AI Analyze Trades API
- * Uses OpenAI GPT-4 to analyze user's trading history
+ * Uses Google Gemini to analyze user's trading history
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getUserTrades, getUserTradeStats } from '@/lib/db/trade-service';
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function POST(request: NextRequest) {
   try {
     // Check if API key exists
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.GEMINI_API_KEY) {
       return NextResponse.json({ 
-        error: 'OPENAI_API_KEY is not configured. Please contact admin.' 
+        error: 'GEMINI_API_KEY is not configured. Please contact admin.' 
       }, { status: 500 });
     }
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
     // Verify token
     const decoded = await verifyToken(request);
@@ -96,24 +94,14 @@ Sebagai MPT Warrior AI Mentor, analisis performa trading ini dengan format:
 
 Gunakan emoji dan bahasa yang engaging tapi tetap profesional. Berikan feedback yang spesifik berdasarkan data aktual.`;
 
-    // Call OpenAI GPT-4
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: 'Anda adalah MPT Warrior AI Mentor, seorang expert trading analyst yang memberikan feedback konstruktif dan actionable untuk trader.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 2048,
+    // Call Gemini API - WITHOUT 'models/' prefix
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-flash-latest'
     });
-
-    const analysis = completion.choices[0]?.message?.content || 'No analysis generated';
+    
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const analysis = response.text();
 
     return NextResponse.json({
       success: true,
