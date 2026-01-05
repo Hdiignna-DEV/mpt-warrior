@@ -194,26 +194,27 @@ export default function PendingApprovalPage() {
 
             {/* Logout Button */}
             <button
-            onClick={handleLogout}
-            className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition-colors"
-          >
-            Logout
-          </button>
-        </div>
-
-        {/* Contact Info */}
-        <div className="mt-6 text-center text-sm text-slate-400">
-          <p>
-            Butuh bantuan?{' '}
-            <a
-              href="https://t.me/MPTCommunity"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 font-bold"
+              onClick={handleLogout}
+              className="flex-1 px-6 py-4 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition-colors"
             >
-              Hubungi Admin
-            </a>
-          </p>
+              Logout
+            </button>
+          </div>
+
+          {/* Contact Info */}
+          <div className="mt-6 text-center text-sm text-slate-400">
+            <p>
+              Butuh bantuan?{' '}
+              <a
+                href="https://t.me/MPTCommunity"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 font-bold"
+              >
+                Hubungi Admin
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
