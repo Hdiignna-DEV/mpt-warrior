@@ -287,7 +287,7 @@ export default function Dashboard() {
               ) : (
                 <>
                   <div className="text-3xl font-black text-gray-900 dark:text-zinc-100 mb-2">
-                    ${currentBalance.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+                    ${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                   
                   <div className={`flex items-center gap-2 text-sm font-semibold ${
@@ -299,7 +299,7 @@ export default function Dashboard() {
                       <ArrowDownRight className="w-4 h-4" />
                     )}
                     <span>
-                      {profitLoss >= 0 ? '+' : ''} ${Math.abs(profitLoss).toLocaleString()} ({profitLoss >= 0 ? '+' : ''}{profitLossPercentage}%)
+                      {profitLoss >= 0 ? '+' : ''}${Math.abs(profitLoss).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ({profitLoss >= 0 ? '+' : ''}{profitLossPercentage}%)
                     </span>
                   </div>
                 </>

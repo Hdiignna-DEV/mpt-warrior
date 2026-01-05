@@ -158,11 +158,11 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ stats }) => {
       <div className="sm:col-span-2">
         <StatCard
           label="Current Balance"
-          value={`$${stats.balance.toLocaleString('en-US', { maximumFractionDigits: 0 })}`}
+          value={`$${stats.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           subtext={
             stats.profitLoss >= 0 
-              ? `+$${stats.profitLoss.toLocaleString('en-US', { maximumFractionDigits: 0 })} profit`
-              : `-$${Math.abs(stats.profitLoss).toLocaleString('en-US', { maximumFractionDigits: 0 })} loss`
+              ? `+$${stats.profitLoss.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} profit`
+              : `-$${Math.abs(stats.profitLoss).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} loss`
           }
           icon={DollarSign}
           variant={stats.profitLoss >= 0 ? 'success' : 'danger'}
