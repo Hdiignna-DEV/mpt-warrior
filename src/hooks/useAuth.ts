@@ -7,7 +7,7 @@ interface User {
   id: string;
   email: string;
   name: string;
-  role: 'ADMIN' | 'WARRIOR';
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'WARRIOR';
   status: string;
 }
 
@@ -39,8 +39,8 @@ export function useAuth(requireAuth: boolean = true, requireAdmin: boolean = fal
             return;
           }
 
-          // If admin is required but user is not admin
-          if (requireAdmin && parsedUser.role !== 'ADMIN') {
+          // If admin is required but user is not admin or super admin
+          if (requireAdmin && parsedUser.role !== 'ADMIN' && parsedUser.role !== 'SUPER_ADMIN') {
             window.location.href = '/dashboard';
             return;
           }

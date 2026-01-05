@@ -221,8 +221,8 @@ export default function Sidebar() {
             );
           })}
 
-          {/* Admin HQ Menu - Only for ADMIN role */}
-          {userRole === 'ADMIN' && (
+          {/* Admin HQ Menu - Only for ADMIN and SUPER_ADMIN roles */}
+          {(userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') && (
             <>
               {/* Divider */}
               <div className="py-2">
