@@ -60,22 +60,49 @@ function validateCodeResource(resource: InvitationCode): { valid: boolean; reaso
 
 /**
  * Use invitation code (increment usage count)
+ * Note: Uses query approach to support both UUID-based ids (bulk) and code-based ids (manual)
  */
 export async function useInvitationCode(code: string, usedBy: string): Promise<void> {
   const container = getCodesContainer();
+  const normalizedCode = code.trim();
   
-  const { resource } = await container.item(code, code).read<InvitationCode>();
-
-  if (!resource) {
-    throw new Error("Code not found");
+  console.log('[USE CODE] Incrementing usage for code:', normalizedCode);
+  
+  // Find code using query (supports both UUID and code-based ids)
+  const query = {
+    query: 'SELECT * FROM c WHERE UPPER(c.code) = UPPER(@code)',
+    parameters: [{ name: '@code', value: normalizedCode }],
+  };
+  
+  const { resources } = await container.items.query<InvitationCode>(query, {
+    maxItemCount: 1,
+  }).fetchAll();
+  
+  if (resources.length === 0) {
+    console.error('[USE CODE] Code not found:', normalizedCode);
+    throw new Error("Code tidak ditemukan");
+  }
+  
+  const resource = resources[0];
+  
+  // Double-check validity before incrementing
+  if (!resource.is_active) {
+    throw new Error("Code sudah tidak aktif");
+  }
+  
+  if (resource.used_count >= resource.max_uses) {
+    throw new Error("Code sudah mencapai limit penggunaan");
   }
 
   const updatedCode: InvitationCode = {
     ...resource,
     used_count: resource.used_count + 1,
   };
-
-  await container.item(code, code).replace(updatedCode);
+  
+  // Use the actual id from database (could be UUID or code)
+  await container.item(resource.id, resource.code).replace(updatedCode);
+  
+  console.log('[USE CODE] Success! New count:', updatedCode.used_count);
 }
 
 /**
@@ -109,22 +136,35 @@ export async function createInvitationCode(codeData: Omit<InvitationCode, 'id' |
 
 /**
  * Deactivate invitation code
+ * Note: Uses query approach to support both UUID-based ids (bulk) and code-based ids (manual)
  */
 export async function deactivateInvitationCode(code: string, deactivatedBy: string): Promise<void> {
   const container = getCodesContainer();
+  const normalizedCode = code.trim();
   
-  const { resource } = await container.item(code, code).read<InvitationCode>();
-
-  if (!resource) {
-    throw new Error("Code not found");
+  // Find code using query (supports both UUID and code-based ids)
+  const query = {
+    query: 'SELECT * FROM c WHERE UPPER(c.code) = UPPER(@code)',
+    parameters: [{ name: '@code', value: normalizedCode }],
+  };
+  
+  const { resources } = await container.items.query<InvitationCode>(query, {
+    maxItemCount: 1,
+  }).fetchAll();
+  
+  if (resources.length === 0) {
+    throw new Error("Code tidak ditemukan");
   }
+  
+  const resource = resources[0];
 
   const updatedCode: InvitationCode = {
     ...resource,
     is_active: false,
   };
 
-  await container.item(code, code).replace(updatedCode);
+  // Use the actual id from database (could be UUID or code)
+  await container.item(resource.id, resource.code).replace(updatedCode);
   
   // Log audit
   const logsContainer = getAuditLogsContainer();
@@ -133,7 +173,7 @@ export async function deactivateInvitationCode(code: string, deactivatedBy: stri
     action: 'code_deactivated',
     performed_by: deactivatedBy,
     timestamp: new Date(),
-    metadata: { code },
+    metadata: { code: normalizedCode },
   };
   await logsContainer.items.create(log);
 }

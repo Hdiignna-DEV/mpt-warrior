@@ -57,6 +57,10 @@ export async function POST(request: NextRequest) {
     // Get role from invitation code (default to WARRIOR if not specified)
     const assignedRole = codeValidation.code?.role || 'WARRIOR';
 
+    // IMPORTANT: Mark invitation code as used FIRST
+    // If this fails, we don't create the user (prevents orphaned users)
+    await useInvitationCode(invitation_code, email);
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -99,9 +103,6 @@ export async function POST(request: NextRequest) {
       settings: defaultSettings,
       stats: defaultStats,
     });
-
-    // Mark invitation code as used
-    await useInvitationCode(invitation_code, email);
 
     // Return success (don't include password hash in response)
     const roleMessage = assignedRole === 'ADMIN' 
