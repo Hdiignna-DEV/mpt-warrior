@@ -2,11 +2,53 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Clock, Shield, CheckCircle } from 'lucide-react';
+import { Clock, Shield, CheckCircle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 export default function PendingApprovalPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [checking, setChecking] = useState(false);
+  const [lastCheck, setLastCheck] = useState<Date | null>(null);
+
+  const checkStatus = async () => {
+    if (!user?.email) return;
+    
+    setChecking(true);
+    try {
+      const response = await fetch('/api/auth/check-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Update localStorage with latest data
+        localStorage.setItem('mpt_user', JSON.stringify(data.user));
+        setUser(data.user);
+        setLastCheck(new Date());
+
+        // If approved, redirect to login to get token
+        if (data.user.status === 'active') {
+          alert('🎉 Selamat! Akun Anda telah disetujui. Silakan login kembali.');
+          localStorage.removeItem('mpt_user');
+          localStorage.removeItem('mpt_token');
+          router.push('/login');
+        } else if (data.user.status === 'rejected') {
+          alert('❌ Maaf, pendaftaran Anda ditolak oleh admin.');
+          localStorage.removeItem('mpt_user');
+          localStorage.removeItem('mpt_token');
+          router.push('/login');
+        }
+      }
+    } catch (error) {
+      console.error('Error checking status:', error);
+    } finally {
+      setChecking(false);
+    }
+  };
 
   useEffect(() => {
     // Get user from localStorage
@@ -15,15 +57,26 @@ export default function PendingApprovalPage() {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
 
-      // If user is already approved, redirect to dashboard
+      // If user is already approved, redirect to login
       if (parsedUser.status === 'active') {
-        router.push('/dashboard');
+        router.push('/login');
       }
     } else {
       // No user data, redirect to login
       router.push('/login');
     }
   }, [router]);
+
+  // Auto-check status every 30 seconds
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(() => {
+      checkStatus();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleLogout = () => {
     localStorage.removeItem('mpt_user');
@@ -127,8 +180,20 @@ export default function PendingApprovalPage() {
             </ul>
           </div>
 
-          {/* Logout Button */}
-          <button
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Check Status Button */}
+            <Button
+              onClick={checkStatus}
+              disabled={checking}
+              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 flex items-center justify-center gap-2"
+            >
+              <RefreshCw className={`w-5 h-5 ${checking ? 'animate-spin' : ''}`} />
+              {checking ? 'Checking...' : 'Check Status'}
+            </Button>
+
+            {/* Logout Button */}
+            <button
             onClick={handleLogout}
             className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition-colors"
           >
