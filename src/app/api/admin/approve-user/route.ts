@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { approveUser } from '@/lib/db/user-service';
+import { sendApprovalEmail } from '@/lib/email/resend-client';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -32,6 +33,17 @@ export async function POST(request: NextRequest) {
 
     // Approve user
     const updatedUser = await approveUser(userId, decoded.email);
+
+    // Send approval email (non-blocking)
+    if (updatedUser.email && updatedUser.name) {
+      const emailResult = await sendApprovalEmail(updatedUser.email, updatedUser.name);
+      if (emailResult.success) {
+        console.log(`✅ Approval email sent to: ${updatedUser.email}`);
+      } else {
+        console.error(`❌ Failed to send approval email: ${emailResult.error}`);
+        // Don't fail the approval if email fails
+      }
+    }
 
     return NextResponse.json({
       success: true,
