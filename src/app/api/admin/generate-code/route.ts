@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { getCodesContainer } from '@/lib/db/cosmos-client';
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify admin token
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    const decoded = verifyToken(token);
-    
-    if (!decoded || decoded.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    // Verify admin access
+    const adminCheck = await requireAdmin(request);
+    if (adminCheck instanceof Response) {
+      return adminCheck;
     }
 
     const { code, description } = await request.json();
