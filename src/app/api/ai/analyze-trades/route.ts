@@ -8,10 +8,17 @@ import { verifyToken } from '@/lib/auth';
 import { getUserTrades, getUserTradeStats } from '@/lib/db/trade-service';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-
 export async function POST(request: NextRequest) {
   try {
+    // Check if API key exists
+    if (!process.env.GEMINI_API_KEY) {
+      return NextResponse.json({ 
+        error: 'GEMINI_API_KEY is not configured. Please contact admin.' 
+      }, { status: 500 });
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
     // Verify token
     const decoded = await verifyToken(request);
     if (!decoded) {
