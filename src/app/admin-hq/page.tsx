@@ -175,6 +175,62 @@ export default function AdminHQPage() {
     }
   };
 
+  const handleGenerateCode = async () => {
+    const code = prompt('Masukkan kode invitation (contoh: MPT-2026-FOXTROT):');
+    if (!code) return;
+
+    const description = prompt('Deskripsi (opsional):') || '';
+
+    try {
+      const token = localStorage.getItem('mpt_token');
+      const response = await fetch('/api/admin/generate-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ code, description }),
+      });
+
+      if (response.ok) {
+        alert('✅ Kode invitation berhasil dibuat!');
+        loadData();
+      } else {
+        const data = await response.json();
+        alert(`❌ ${data.error || 'Gagal membuat kode'}`);
+      }
+    } catch (error) {
+      console.error('Error generating code:', error);
+      alert('❌ Terjadi kesalahan');
+    }
+  };
+
+  const handleDeleteCode = async (code: string) => {
+    if (!confirm(`Hapus kode ${code}? Aksi ini tidak bisa dibatalkan!`)) return;
+
+    try {
+      const token = localStorage.getItem('mpt_token');
+      const response = await fetch('/api/admin/delete-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ code }),
+      });
+
+      if (response.ok) {
+        alert('✅ Kode berhasil dihapus!');
+        loadData();
+      } else {
+        alert('❌ Gagal menghapus kode');
+      }
+    } catch (error) {
+      console.error('Error deleting code:', error);
+      alert('❌ Terjadi kesalahan');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 flex items-center justify-center">
@@ -188,17 +244,17 @@ export default function AdminHQPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
             <div className="p-4 bg-red-500/20 rounded-2xl">
               <Shield className="text-red-400" size={48} />
             </div>
             <div className="flex-1">
-              <h1 className="text-4xl font-black text-red-400">ADMIN HQ</h1>
-              <p className="text-slate-300">Commander Control Panel</p>
+              <h1 className="text-3xl md:text-4xl font-black text-red-400">ADMIN HQ</h1>
+              <p className="text-slate-300 text-sm md:text-base">Commander Control Panel</p>
             </div>
-            <div className="text-right text-sm text-slate-400">
-              <p className="font-bold text-white">{currentUser?.name}</p>
-              <p>{currentUser?.email}</p>
+            <div className="text-left md:text-right text-sm text-slate-400 w-full md:w-auto">
+              <p className="font-bold text-white truncate">{currentUser?.name}</p>
+              <p className="truncate">{currentUser?.email}</p>
             </div>
           </div>
           <div className="h-1 bg-gradient-to-r from-red-500 via-amber-500 to-transparent rounded-full"></div>
@@ -240,36 +296,36 @@ export default function AdminHQPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
           <button
             onClick={() => setActiveTab('pending')}
-            className={`px-6 py-3 rounded-xl font-bold transition-colors ${
+            className={`px-4 md:px-6 py-3 rounded-xl font-bold transition-colors whitespace-nowrap text-sm md:text-base ${
               activeTab === 'pending'
                 ? 'bg-yellow-500 text-slate-950'
                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
             }`}
           >
-            Pending Users ({pendingUsers.length})
+            Pending ({pendingUsers.length})
           </button>
           <button
             onClick={() => setActiveTab('active')}
-            className={`px-6 py-3 rounded-xl font-bold transition-colors ${
+            className={`px-4 md:px-6 py-3 rounded-xl font-bold transition-colors whitespace-nowrap text-sm md:text-base ${
               activeTab === 'active'
                 ? 'bg-green-500 text-slate-950'
                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
             }`}
           >
-            Active Users ({activeUsers.length})
+            Active ({activeUsers.length})
           </button>
           <button
             onClick={() => setActiveTab('codes')}
-            className={`px-6 py-3 rounded-xl font-bold transition-colors ${
+            className={`px-4 md:px-6 py-3 rounded-xl font-bold transition-colors whitespace-nowrap text-sm md:text-base ${
               activeTab === 'codes'
                 ? 'bg-blue-500 text-slate-950'
                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
             }`}
           >
-            Invitation Codes ({invitationCodes.length})
+            Codes ({invitationCodes.length})
           </button>
         </div>
 
@@ -282,30 +338,30 @@ export default function AdminHQPage() {
               </div>
             ) : (
               pendingUsers.map((user) => (
-                <div key={user.id} className="glass-premium rounded-2xl p-6">
-                  <div className="flex items-start justify-between gap-4">
+                <div key={user.id} className="glass-premium rounded-2xl p-4 md:p-6">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="text-xl font-black text-white mb-2">{user.name}</h3>
-                      <div className="space-y-1 text-sm text-slate-400">
-                        <p>📧 {user.email}</p>
+                      <h3 className="text-lg md:text-xl font-black text-white mb-2">{user.name}</h3>
+                      <div className="space-y-1 text-xs md:text-sm text-slate-400">
+                        <p className="truncate">📧 {user.email}</p>
                         {user.whatsapp && <p>📱 WA: {user.whatsapp}</p>}
                         {user.telegram_id && <p>✈️ TG: {user.telegram_id}</p>}
                         <p>🔑 Code: <span className="text-amber-400 font-mono">{user.invitation_code}</span></p>
                         <p>📅 Registered: {new Date(user.createdAt).toLocaleDateString('id-ID')}</p>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <button
                         onClick={() => handleApprove(user.id)}
-                        className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center gap-2 transition-colors"
+                        className="flex-1 md:flex-none px-3 md:px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-sm"
                       >
-                        <CheckCircle size={20} /> APPROVE
+                        <CheckCircle size={18} /> APPROVE
                       </button>
                       <button
                         onClick={() => handleReject(user.id)}
-                        className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold flex items-center gap-2 transition-colors"
+                        className="flex-1 md:flex-none px-3 md:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-sm"
                       >
-                        <XCircle size={20} /> REJECT
+                        <XCircle size={18} /> REJECT
                       </button>
                     </div>
                   </div>
@@ -318,26 +374,26 @@ export default function AdminHQPage() {
         {activeTab === 'active' && (
           <div className="space-y-4">
             {activeUsers.map((user) => (
-              <div key={user.id} className="glass-premium rounded-2xl p-6">
-                <div className="flex items-start justify-between gap-4">
+              <div key={user.id} className="glass-premium rounded-2xl p-4 md:p-6">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div className="flex-1">
-                    <h3 className="text-xl font-black text-white mb-2">{user.name}</h3>
-                    <div className="space-y-1 text-sm text-slate-400">
-                      <p>📧 {user.email}</p>
+                    <h3 className="text-lg md:text-xl font-black text-white mb-2">{user.name}</h3>
+                    <div className="space-y-1 text-xs md:text-sm text-slate-400">
+                      <p className="truncate">📧 {user.email}</p>
                       {user.whatsapp && <p>📱 WA: {user.whatsapp}</p>}
                       {user.telegram_id && <p>✈️ TG: {user.telegram_id}</p>}
                       <p>📅 Joined: {new Date(user.join_date).toLocaleDateString('id-ID')}</p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <div className="px-4 py-2 bg-green-500/20 rounded-xl border border-green-500/30">
-                      <span className="text-green-400 font-bold text-sm">ACTIVE</span>
+                  <div className="flex gap-2 flex-wrap items-center">
+                    <div className="px-3 md:px-4 py-2 bg-green-500/20 rounded-xl border border-green-500/30">
+                      <span className="text-green-400 font-bold text-xs md:text-sm">ACTIVE</span>
                     </div>
                     <button
                       onClick={() => handleSuspend(user.id)}
-                      className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold flex items-center gap-2 transition-colors"
+                      className="flex-1 md:flex-none px-3 md:px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-sm"
                     >
-                      <Ban size={20} /> SUSPEND
+                      <Ban size={18} /> SUSPEND
                     </button>
                   </div>
                 </div>
@@ -349,32 +405,41 @@ export default function AdminHQPage() {
         {activeTab === 'codes' && (
           <div className="space-y-4">
             <div className="flex justify-end mb-4">
-              <button className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold flex items-center gap-2">
+              <button 
+                onClick={handleGenerateCode}
+                className="px-4 md:px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold flex items-center gap-2 text-sm md:text-base transition-colors"
+              >
                 <Plus size={20} /> Generate New Code
               </button>
             </div>
 
             {invitationCodes.map((code) => (
-              <div key={code.code} className="glass-premium rounded-2xl p-6">
-                <div className="flex items-start justify-between gap-4">
+              <div key={code.code} className="glass-premium rounded-2xl p-4 md:p-6">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div className="flex-1">
-                    <h3 className="text-2xl font-black text-amber-400 font-mono mb-2">{code.code}</h3>
-                    <div className="space-y-1 text-sm text-slate-400">
+                    <h3 className="text-xl md:text-2xl font-black text-amber-400 font-mono mb-2 break-all">{code.code}</h3>
+                    <div className="space-y-1 text-xs md:text-sm text-slate-400">
                       <p>📊 Usage: {code.used_count} / {code.max_uses}</p>
                       <p>📅 Expires: {new Date(code.expires_at).toLocaleDateString('id-ID')}</p>
                       {code.description && <p>📝 {code.description}</p>}
                     </div>
                   </div>
-                  <div>
+                  <div className="flex gap-2 flex-wrap items-start">
                     {code.is_active ? (
-                      <div className="px-4 py-2 bg-green-500/20 rounded-xl border border-green-500/30">
-                        <span className="text-green-400 font-bold text-sm">ACTIVE</span>
+                      <div className="px-3 md:px-4 py-2 bg-green-500/20 rounded-xl border border-green-500/30">
+                        <span className="text-green-400 font-bold text-xs md:text-sm">ACTIVE</span>
                       </div>
                     ) : (
-                      <div className="px-4 py-2 bg-red-500/20 rounded-xl border border-red-500/30">
-                        <span className="text-red-400 font-bold text-sm">INACTIVE</span>
+                      <div className="px-3 md:px-4 py-2 bg-red-500/20 rounded-xl border border-red-500/30">
+                        <span className="text-red-400 font-bold text-xs md:text-sm">INACTIVE</span>
                       </div>
                     )}
+                    <button
+                      onClick={() => handleDeleteCode(code.code)}
+                      className="px-3 md:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold flex items-center gap-2 transition-colors text-xs md:text-sm"
+                    >
+                      <XCircle size={16} /> DELETE
+                    </button>
                   </div>
                 </div>
               </div>
