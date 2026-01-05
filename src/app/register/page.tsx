@@ -46,10 +46,13 @@ export default function RegisterPage() {
     }
 
     try {
+      // Remove confirmPassword before sending (only used for client validation)
+      const { confirmPassword, ...registrationData } = formData;
+      
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(registrationData),
       });
 
       const data = await response.json();
