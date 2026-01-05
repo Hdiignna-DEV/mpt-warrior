@@ -12,7 +12,7 @@ import { InvitationCode, AuditLog } from "@/types";
 export async function validateInvitationCode(code: string): Promise<{ valid: boolean; reason?: string; code?: InvitationCode }> {
   try {
     // Trim whitespace and normalize code
-    const normalizedCode = code.trim();
+    const normalizedCode = code.trim().toUpperCase();
     
     console.log('[CODE VALIDATION] Checking code:', {
       original: code,
@@ -22,43 +22,56 @@ export async function validateInvitationCode(code: string): Promise<{ valid: boo
     
     const container = getCodesContainer();
     
-    // Try direct read first (case-sensitive)
+    // Strategy 1: Try exact match with uppercase (most codes are uppercase)
     try {
       const { resource } = await container.item(normalizedCode, normalizedCode).read<InvitationCode>();
       if (resource) {
-        console.log('[CODE VALIDATION] Found via direct read:', resource.code);
+        console.log('[CODE VALIDATION] Found via direct read (uppercase):', resource.code);
         return validateCodeResource(resource);
       }
     } catch (error: any) {
-      // Code not found with direct read, try query (case-insensitive)
-      if (error.code === 404) {
-        console.log('[CODE VALIDATION] Direct read failed, trying case-insensitive query');
-        
-        const query = {
-          query: 'SELECT * FROM c WHERE UPPER(c.code) = UPPER(@code)',
-          parameters: [{ name: '@code', value: normalizedCode }],
-        };
-        
-        const { resources } = await container.items.query<InvitationCode>(query).fetchAll();
-        
-        console.log('[CODE VALIDATION] Query result:', {
-          found: resources.length,
-          codes: resources.map(r => r.code)
-        });
-        
-        if (resources.length === 0) {
-          return { valid: false, reason: "Code tidak ditemukan" };
-        }
-        
-        return validateCodeResource(resources[0]);
-      }
-      throw error;
+      if (error.code !== 404) throw error;
     }
-
-    return { valid: false, reason: "Code tidak ditemukan" };
+    
+    // Strategy 2: Try exact match with original input
+    if (code.trim() !== normalizedCode) {
+      try {
+        const originalTrimmed = code.trim();
+        const { resource } = await container.item(originalTrimmed, originalTrimmed).read<InvitationCode>();
+        if (resource) {
+          console.log('[CODE VALIDATION] Found via direct read (original case):', resource.code);
+          return validateCodeResource(resource);
+        }
+      } catch (error: any) {
+        if (error.code !== 404) throw error;
+      }
+    }
+    
+    // Strategy 3: Cross-partition query for case-insensitive search
+    console.log('[CODE VALIDATION] Direct reads failed, trying cross-partition query');
+    
+    const query = {
+      query: 'SELECT * FROM c WHERE UPPER(c.code) = UPPER(@code)',
+      parameters: [{ name: '@code', value: code.trim() }],
+    };
+    
+    const { resources } = await container.items.query<InvitationCode>(query, {
+      maxItemCount: 1,
+    }).fetchAll();
+    
+    console.log('[CODE VALIDATION] Query result:', {
+      found: resources.length,
+      codes: resources.map(r => r.code)
+    });
+    
+    if (resources.length === 0) {
+      return { valid: false, reason: "Code tidak ditemukan" };
+    }
+    
+    return validateCodeResource(resources[0]);
   } catch (error: any) {
     console.error('[CODE VALIDATION] Error:', error);
-    return { valid: false, reason: "Terjadi kesalahan sistem" };
+    return { valid: false, reason: "Terjadi kesalahan sistem: " + error.message };
   }
 }
 
