@@ -40,6 +40,15 @@ interface InvitationCode {
   description?: string;
 }
 
+interface AuditLog {
+  id: string;
+  action: string;
+  performed_by: string;
+  target_user?: string;
+  timestamp: string;
+  metadata?: any;
+}
+
 export default function AdminHQPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth(true, true); // Require auth + admin
@@ -47,8 +56,9 @@ export default function AdminHQPage() {
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [activeUsers, setActiveUsers] = useState<User[]>([]);
   const [invitationCodes, setInvitationCodes] = useState<InvitationCode[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'pending' | 'active' | 'codes'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'active' | 'codes' | 'audit'>('pending');
 
   useEffect(() => {
     // Check if user is admin
@@ -93,6 +103,13 @@ export default function AdminHQPage() {
       });
       const codesData = await codesRes.json();
       setInvitationCodes(codesData.codes || []);
+
+      // Load audit logs
+      const auditRes = await fetch('/api/admin/audit-logs?limit=50', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const auditData = await auditRes.json();
+      setAuditLogs(auditData.logs || []);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -473,6 +490,16 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
           >
             Codes ({invitationCodes.length})
           </button>
+          <button
+            onClick={() => setActiveTab('audit')}
+            className={`px-4 md:px-6 py-3 rounded-xl font-bold transition-colors whitespace-nowrap text-sm md:text-base ${
+              activeTab === 'audit'
+                ? 'bg-purple-500 text-slate-950'
+                : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+            }`}
+          >
+            Audit Logs ({auditLogs.length})
+          </button>
         </div>
 
         {/* Content */}
@@ -609,6 +636,54 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {activeTab === 'audit' && (
+          <div className="space-y-4">
+            {auditLogs.length === 0 ? (
+              <div className="glass-premium rounded-2xl p-12 text-center">
+                <p className="text-slate-400">Belum ada audit logs</p>
+              </div>
+            ) : (
+              auditLogs.map((log) => (
+                <div key={log.id} className="glass-premium rounded-2xl p-4 md:p-6">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`px-3 py-1 rounded-lg font-bold text-xs md:text-sm ${
+                          log.action.includes('approve') ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                          log.action.includes('reject') ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                          log.action.includes('suspend') ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
+                          log.action.includes('register') ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                          'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                        }`}>
+                          {log.action.replace('_', ' ').toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="space-y-1 text-xs md:text-sm text-slate-400">
+                        <p>👤 Performed by: <span className="text-white font-mono">{log.performed_by}</span></p>
+                        {log.target_user && <p>🎯 Target: <span className="text-amber-400 font-mono">{log.target_user}</span></p>}
+                        <p>🕐 {new Date(log.timestamp).toLocaleString('id-ID', {
+                          dateStyle: 'medium',
+                          timeStyle: 'short'
+                        })}</p>
+                        {log.metadata && Object.keys(log.metadata).length > 0 && (
+                          <details className="mt-2">
+                            <summary className="cursor-pointer text-blue-400 hover:text-blue-300">
+                              📋 View metadata
+                            </summary>
+                            <pre className="mt-2 p-2 bg-slate-950/50 rounded text-xs overflow-x-auto">
+                              {JSON.stringify(log.metadata, null, 2)}
+                            </pre>
+                          </details>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
       </div>
