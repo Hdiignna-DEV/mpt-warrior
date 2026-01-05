@@ -12,7 +12,8 @@ import {
   Clock,
   Ban,
   Plus,
-  RefreshCw
+  RefreshCw,
+  Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
@@ -57,6 +58,7 @@ export default function AdminHQPage() {
   const [activeUsers, setActiveUsers] = useState<User[]>([]);
   const [invitationCodes, setInvitationCodes] = useState<InvitationCode[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [statistics, setStatistics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'pending' | 'active' | 'codes' | 'audit'>('pending');
   
@@ -115,6 +117,13 @@ export default function AdminHQPage() {
       });
       const auditData = await auditRes.json();
       setAuditLogs(auditData.logs || []);
+
+      // Load statistics
+      const statsRes = await fetch('/api/admin/statistics', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const statsData = await statsRes.json();
+      setStatistics(statsData.statistics || null);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -244,6 +253,80 @@ export default function AdminHQPage() {
       console.error('Error promoting user:', error);
       alert('❌ Terjadi kesalahan');
     }
+  };
+
+  // Export to CSV functions
+  const downloadCSV = (data: string, filename: string) => {
+    const blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportPendingUsersCSV = () => {
+    const headers = ['Name', 'Email', 'WhatsApp', 'Telegram', 'Invitation Code', 'Role', 'Registered Date'];
+    const rows = filteredPendingUsers.map(user => [
+      user.name,
+      user.email,
+      user.whatsapp || '-',
+      user.telegram_id || '-',
+      user.invitation_code,
+      user.role,
+      new Date(user.createdAt).toLocaleDateString('id-ID')
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    downloadCSV(csvContent, `pending-users-${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
+  const exportActiveUsersCSV = () => {
+    const headers = ['Name', 'Email', 'WhatsApp', 'Telegram', 'Role', 'Status', 'Join Date'];
+    const rows = filteredActiveUsers.map(user => [
+      user.name,
+      user.email,
+      user.whatsapp || '-',
+      user.telegram_id || '-',
+      user.role,
+      user.status,
+      new Date(user.join_date).toLocaleDateString('id-ID')
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    downloadCSV(csvContent, `active-users-${new Date().toISOString().split('T')[0]}.csv`);
+  };
+
+  const exportCodesCSV = () => {
+    const headers = ['Code', 'Role', 'Usage', 'Max Uses', 'Status', 'Created Date', 'Expires Date', 'Description'];
+    const rows = filteredCodes.map(code => [
+      code.code,
+      (code as any).role || 'WARRIOR',
+      code.used_count.toString(),
+      code.max_uses.toString(),
+      code.is_active ? 'Active' : 'Inactive',
+      new Date(code.created_at).toLocaleDateString('id-ID'),
+      new Date(code.expires_at).toLocaleDateString('id-ID'),
+      code.description || '-'
+    ]);
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+    
+    downloadCSV(csvContent, `invitation-codes-${new Date().toISOString().split('T')[0]}.csv`);
   };
 
   const handleGenerateCode = async () => {
@@ -476,13 +559,14 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="glass-premium rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-2">
               <Clock className="text-yellow-400" size={24} />
               <span className="text-slate-400 text-sm font-bold">PENDING</span>
             </div>
-            <p className="text-4xl font-black text-yellow-400">{pendingUsers.length}</p>
+            <p className="text-4xl font-black text-yellow-400">{statistics?.users?.pending || pendingUsers.length}</p>
+            <p className="text-xs text-slate-500 mt-1">Waiting approval</p>
           </div>
 
           <div className="glass-premium rounded-2xl p-6">
@@ -490,7 +574,10 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
               <Users className="text-green-400" size={24} />
               <span className="text-slate-400 text-sm font-bold">ACTIVE</span>
             </div>
-            <p className="text-4xl font-black text-green-400">{activeUsers.length}</p>
+            <p className="text-4xl font-black text-green-400">{statistics?.users?.active || activeUsers.length}</p>
+            <p className="text-xs text-slate-500 mt-1">
+              {statistics?.users?.breakdown?.warriors || 0} Warriors · {statistics?.users?.breakdown?.admins || 0} Admins
+            </p>
           </div>
 
           <div className="glass-premium rounded-2xl p-6">
@@ -498,15 +585,19 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
               <Key className="text-blue-400" size={24} />
               <span className="text-slate-400 text-sm font-bold">CODES</span>
             </div>
-            <p className="text-4xl font-black text-blue-400">{invitationCodes.length}</p>
+            <p className="text-4xl font-black text-blue-400">{statistics?.codes?.active || invitationCodes.filter(c => c.is_active).length}</p>
+            <p className="text-xs text-slate-500 mt-1">
+              {statistics?.codes?.usage?.usageRate || 0}% usage rate
+            </p>
           </div>
 
           <div className="glass-premium rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-2">
               <Activity className="text-amber-400" size={24} />
-              <span className="text-slate-400 text-sm font-bold">TOTAL</span>
+              <span className="text-slate-400 text-sm font-bold">GROWTH</span>
             </div>
-            <p className="text-4xl font-black text-amber-400">{pendingUsers.length + activeUsers.length}</p>
+            <p className="text-4xl font-black text-amber-400">+{statistics?.users?.growth?.last7Days || 0}</p>
+            <p className="text-xs text-slate-500 mt-1">Last 7 days</p>
           </div>
         </div>
 
@@ -557,15 +648,24 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
         {/* Content */}
         {activeTab === 'pending' && (
           <div className="space-y-4">
-            {/* Search Box */}
-            <div className="glass-premium rounded-xl p-4">
-              <input
-                type="text"
-                placeholder="🔍 Search by name, email, or invitation code..."
-                value={searchPending}
-                onChange={(e) => setSearchPending(e.target.value)}
-                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
-              />
+            {/* Search Box and Export */}
+            <div className="flex gap-2 flex-col sm:flex-row">
+              <div className="glass-premium rounded-xl p-4 flex-1">
+                <input
+                  type="text"
+                  placeholder="🔍 Search by name, email, or invitation code..."
+                  value={searchPending}
+                  onChange={(e) => setSearchPending(e.target.value)}
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <button
+                onClick={exportPendingUsersCSV}
+                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors whitespace-nowrap"
+                disabled={filteredPendingUsers.length === 0}
+              >
+                <Download size={18} /> Export CSV
+              </button>
             </div>
 
             {filteredPendingUsers.length === 0 ? (
@@ -620,15 +720,24 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
 
         {activeTab === 'active' && (
           <div className="space-y-4">
-            {/* Search Box */}
-            <div className="glass-premium rounded-xl p-4">
-              <input
-                type="text"
-                placeholder="🔍 Search by name, email, or role..."
-                value={searchActive}
-                onChange={(e) => setSearchActive(e.target.value)}
-                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
-              />
+            {/* Search Box and Export */}
+            <div className="flex gap-2 flex-col sm:flex-row">
+              <div className="glass-premium rounded-xl p-4 flex-1">
+                <input
+                  type="text"
+                  placeholder="🔍 Search by name, email, or role..."
+                  value={searchActive}
+                  onChange={(e) => setSearchActive(e.target.value)}
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <button
+                onClick={exportActiveUsersCSV}
+                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors whitespace-nowrap"
+                disabled={filteredActiveUsers.length === 0}
+              >
+                <Download size={18} /> Export CSV
+              </button>
             </div>
 
             {filteredActiveUsers.length === 0 ? (
@@ -694,15 +803,24 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
               </button>
             </div>
 
-            {/* Search Box */}
-            <div className="glass-premium rounded-xl p-4">
-              <input
-                type="text"
-                placeholder="🔍 Search by code or description..."
-                value={searchCodes}
-                onChange={(e) => setSearchCodes(e.target.value)}
-                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
-              />
+            {/* Search Box and Export */}
+            <div className="flex gap-2 flex-col sm:flex-row">
+              <div className="glass-premium rounded-xl p-4 flex-1">
+                <input
+                  type="text"
+                  placeholder="🔍 Search by code or description..."
+                  value={searchCodes}
+                  onChange={(e) => setSearchCodes(e.target.value)}
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+                />
+              </div>
+              <button
+                onClick={exportCodesCSV}
+                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors whitespace-nowrap"
+                disabled={filteredCodes.length === 0}
+              >
+                <Download size={18} /> Export CSV
+              </button>
             </div>
 
             {filteredCodes.length === 0 ? (
