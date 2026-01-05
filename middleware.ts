@@ -10,9 +10,24 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 // ==========================================
 
 // Public routes (Landing page + Auth pages only)
-const PUBLIC_ROUTES = ['/', '/login', '/register', '/pending-approval', '/access-denied'];
+// NOTE: Dashboard routes menggunakan client-side protection karena token di localStorage
+const PUBLIC_ROUTES = [
+  '/', 
+  '/login', 
+  '/register', 
+  '/pending-approval', 
+  '/access-denied',
+  '/dashboard',        // Client-side protected
+  '/ai-mentor',        // Client-side protected
+  '/journal',          // Client-side protected
+  '/calculator',       // Client-side protected
+  '/achievements',     // Client-side protected
+  '/analytics',        // Client-side protected
+  '/tutorial',         // Client-side protected
+  '/admin-hq',         // Client-side protected
+];
 
-// Admin-only routes
+// Admin-only routes (checked client-side)
 const ADMIN_ROUTES = ['/admin-hq'];
 
 // Protected routes - ALL FEATURES LOCKED (members only)
