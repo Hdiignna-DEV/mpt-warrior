@@ -179,6 +179,9 @@ export default function AdminHQPage() {
     const code = prompt('Masukkan kode invitation (contoh: MPT-2026-FOXTROT):');
     if (!code) return;
 
+    const roleChoice = confirm('Kode ini untuk ADMIN?\n\nOK = ADMIN\nCancel = WARRIOR (member biasa)');
+    const role = roleChoice ? 'ADMIN' : 'WARRIOR';
+
     const description = prompt('Deskripsi (opsional):') || '';
 
     try {
@@ -189,7 +192,7 @@ export default function AdminHQPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ code, description }),
+        body: JSON.stringify({ code, description, role }),
       });
 
       if (response.ok) {
@@ -422,6 +425,7 @@ export default function AdminHQPage() {
                     <div className="space-y-1 text-xs md:text-sm text-slate-400">
                       <p>📊 Usage: {code.used_count} / {code.max_uses}</p>
                       <p>📅 Expires: {new Date(code.expires_at).toLocaleDateString('id-ID')}</p>
+                      <p>🎖️ Role: <span className={`font-bold ${(code as any).role === 'ADMIN' ? 'text-red-400' : 'text-blue-400'}`}>{(code as any).role || 'WARRIOR'}</span></p>
                       {code.description && <p>📝 {code.description}</p>}
                     </div>
                   </div>

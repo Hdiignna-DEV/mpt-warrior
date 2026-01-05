@@ -10,11 +10,14 @@ export async function POST(request: NextRequest) {
       return adminCheck;
     }
 
-    const { code, description } = await request.json();
+    const { code, description, role } = await request.json();
 
     if (!code) {
       return NextResponse.json({ error: 'Code is required' }, { status: 400 });
     }
+
+    // Validate role
+    const assignedRole = role === 'ADMIN' ? 'ADMIN' : 'WARRIOR';
 
     // Validate code format
     if (!code.match(/^MPT-\d{4}-[A-Z]+$/)) {
@@ -45,6 +48,7 @@ export async function POST(request: NextRequest) {
       max_uses: 1,
       used_count: 0,
       is_active: true,
+      role: assignedRole,
       expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year
       created_at: new Date().toISOString(),
       description: description || '',

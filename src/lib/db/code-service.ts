@@ -9,7 +9,7 @@ import { InvitationCode, AuditLog } from "@/types";
 /**
  * Validate invitation code
  */
-export async function validateInvitationCode(code: string): Promise<{ valid: boolean; reason?: string }> {
+export async function validateInvitationCode(code: string): Promise<{ valid: boolean; reason?: string; code?: InvitationCode }> {
   try {
     const container = getCodesContainer();
     const { resource } = await container.item(code, code).read<InvitationCode>();
@@ -30,7 +30,7 @@ export async function validateInvitationCode(code: string): Promise<{ valid: boo
       return { valid: false, reason: "Code sudah expired" };
     }
 
-    return { valid: true };
+    return { valid: true, code: resource };
   } catch (error: any) {
     if (error.code === 404) {
       return { valid: false, reason: "Code tidak ditemukan" };

@@ -43,11 +43,12 @@ export interface User {
 export interface InvitationCode {
   id: string;
   code: string;
-  created_by: string;
+  created_by?: string;
   max_uses: number;
   used_count: number;
   expires_at: Date;
   is_active: boolean;
+  role: 'ADMIN' | 'WARRIOR'; // Role assigned to users who register with this code
   created_at: Date;
   description?: string;
 }

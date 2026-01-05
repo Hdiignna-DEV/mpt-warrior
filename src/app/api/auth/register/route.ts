@@ -54,6 +54,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get role from invitation code (default to WARRIOR if not specified)
+    const assignedRole = codeValidation.code?.role || 'WARRIOR';
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -82,7 +85,9 @@ export async function POST(request: NextRequest) {
       largestLoss: 0,
     };
 
-    // Create user with PENDING status
+    // Create user with role from invitation code
+    // ADMIN codes create active admin users immediately
+    // WARRIOR codes create pending users that need approval
     const newUser = await createUser({
       email,
       name,
@@ -90,8 +95,8 @@ export async function POST(request: NextRequest) {
       whatsapp,
       telegram_id,
       invitation_code,
-      role: 'PENDING',
-      status: 'pending',
+      role: assignedRole === 'ADMIN' ? 'ADMIN' : 'WARRIOR',
+      status: assignedRole === 'ADMIN' ? 'active' : 'pending',
       settings: defaultSettings,
       stats: defaultStats,
     });
