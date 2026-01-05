@@ -18,22 +18,8 @@ export async function POST(request: NextRequest) {
 
     const container = getCodesContainer();
 
-    // Check if code exists and is not used
-    try {
-      const { resource } = await container.item(code, code).read();
-      if (resource && resource.used_count > 0) {
-        return NextResponse.json({ 
-          error: 'Cannot delete used code. Consider deactivating instead.' 
-        }, { status: 400 });
-      }
-    } catch (error: any) {
-      if (error.code === 404) {
-        return NextResponse.json({ error: 'Code not found' }, { status: 404 });
-      }
-      throw error;
-    }
-
-    // Delete the invitation code
+    // Delete the invitation code directly
+    // Note: Admin has full control to delete any code
     await container.item(code, code).delete();
 
     return NextResponse.json({ 

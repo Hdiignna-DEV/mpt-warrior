@@ -223,7 +223,8 @@ export default function AdminHQPage() {
         alert('✅ Kode berhasil dihapus!');
         loadData();
       } else {
-        alert('❌ Gagal menghapus kode');
+        const data = await response.json();
+        alert(`❌ ${data.error || 'Gagal menghapus kode'}`);
       }
     } catch (error) {
       console.error('Error deleting code:', error);
