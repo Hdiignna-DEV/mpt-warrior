@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { validateActiveUser } from '@/lib/middleware/auth';
 import { getUserTrades, getUserTradeStats } from '@/lib/db/trade-service';
 import Groq from 'groq-sdk';
 
@@ -21,20 +21,13 @@ export async function POST(request: NextRequest) {
       apiKey: process.env.GROQ_API_KEY,
     });
 
-    // Verify token
-    const decoded = await verifyToken(request);
-    if (!decoded) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check if user is active
-    if (decoded.status !== 'active') {
-      return NextResponse.json({ error: 'Account not active - please wait for approval' }, { status: 403 });
-    }
+    // Validate auth + active status
+    const { decoded, error } = validateActiveUser(request);
+    if (error) return error;
 
     // Get user's trades from Cosmos DB
-    const trades = await getUserTrades(decoded.userId);
-    const stats = await getUserTradeStats(decoded.userId);
+    const trades = await getUserTrades(decoded!.userId);
+    const stats = await getUserTradeStats(decoded!.userId);
 
     if (trades.length === 0) {
       return NextResponse.json({

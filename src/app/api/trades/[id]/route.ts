@@ -3,7 +3,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { validateActiveUser } from '@/lib/middleware/auth';
 import { getTradeById, updateTrade, deleteTrade } from '@/lib/db/trade-service';
 
 export async function GET(
@@ -11,17 +11,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const decoded = await verifyToken(request);
-    if (!decoded) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (decoded.status !== 'active') {
-      return NextResponse.json({ error: 'Account not active' }, { status: 403 });
-    }
+    const { decoded, error } = validateActiveUser(request);
+    if (error) return error;
 
     const { id } = await params;
-    const trade = await getTradeById(decoded.userId, id);
+    const trade = await getTradeById(decoded!.userId, id);
     
     if (!trade) {
       return NextResponse.json({ error: 'Trade not found' }, { status: 404 });
@@ -42,18 +36,12 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const decoded = await verifyToken(request);
-    if (!decoded) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (decoded.status !== 'active') {
-      return NextResponse.json({ error: 'Account not active' }, { status: 403 });
-    }
+    const { decoded, error } = validateActiveUser(request);
+    if (error) return error;
 
     const { id } = await params;
     const body = await request.json();
-    const updatedTrade = await updateTrade(decoded.userId, id, body);
+    const updatedTrade = await updateTrade(decoded!.userId, id, body);
 
     return NextResponse.json({
       success: true,
@@ -74,17 +62,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const decoded = await verifyToken(request);
-    if (!decoded) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (decoded.status !== 'active') {
-      return NextResponse.json({ error: 'Account not active' }, { status: 403 });
-    }
+    const { decoded, error } = validateActiveUser(request);
+    if (error) return error;
 
     const { id } = await params;
-    await deleteTrade(decoded.userId, id);
+    await deleteTrade(decoded!.userId, id);
 
     return NextResponse.json({
       success: true,

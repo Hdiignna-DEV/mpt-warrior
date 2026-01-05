@@ -4,27 +4,20 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
+import { validateActiveUser } from '@/lib/middleware/auth';
 import { getUserTrades, createTrade, getUserTradeStats } from '@/lib/db/trade-service';
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify token and get user
-    const decoded = await verifyToken(request);
-    if (!decoded) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check if user is active
-    if (decoded.status !== 'active') {
-      return NextResponse.json({ error: 'Account not active' }, { status: 403 });
-    }
+    // Validate auth + active status
+    const { decoded, error } = validateActiveUser(request);
+    if (error) return error;
 
     // Get trades for this user
-    const trades = await getUserTrades(decoded.userId);
+    const trades = await getUserTrades(decoded!.userId);
     
     // Get stats
-    const stats = await getUserTradeStats(decoded.userId);
+    const stats = await getUserTradeStats(decoded!.userId);
 
     return NextResponse.json({
       success: true,
@@ -43,16 +36,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify token and get user
-    const decoded = await verifyToken(request);
-    if (!decoded) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Check if user is active
-    if (decoded.status !== 'active') {
-      return NextResponse.json({ error: 'Account not active' }, { status: 403 });
-    }
+    // Validate auth + active status
+    const { decoded, error } = validateActiveUser(request);
+    if (error) return error;
 
     const body = await request.json();
     const { pair, position, result, pips, entryPrice, exitPrice, stopLoss, takeProfit, lotSize, notes, emotionalState, tags, screenshot, tradeDate } = body;
@@ -66,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create trade
-    const newTrade = await createTrade(decoded.userId, {
+    const newTrade = await createTrade(decoded!.userId, {
       pair,
       position,
       result,
