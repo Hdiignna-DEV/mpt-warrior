@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Reject user
-    await rejectUser(userId, decoded.email);
+    await rejectUser(userId, decoded!.email);
 
     return NextResponse.json({
       success: true,

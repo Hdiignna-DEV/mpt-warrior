@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Suspend user
-    const updatedUser = await suspendUser(userId, decoded.email);
+    const updatedUser = await suspendUser(userId, decoded!.email);
 
     return NextResponse.json({
       success: true,

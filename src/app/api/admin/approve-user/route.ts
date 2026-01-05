@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Approve user
-    const updatedUser = await approveUser(userId, decoded.email);
+    const updatedUser = await approveUser(userId, decoded!.email);
 
     // Send approval email (non-blocking)
     if (updatedUser.email && updatedUser.name) {
