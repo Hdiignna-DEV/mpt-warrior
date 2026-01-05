@@ -107,8 +107,16 @@ export async function useInvitationCode(code: string, usedBy: string): Promise<v
     description: resource.description,
   };
   
-  // Replace using actual id and partition key value
-  await container.item(resource.id, resource.code).replace(updatedCode);
+  console.log('[USE CODE] Updating code:', {
+    id: resource.id,
+    code: resource.code,
+    oldCount: resource.used_count,
+    newCount: updatedCode.used_count,
+  });
+  
+  // Use upsert instead of replace to avoid partition key issues
+  // Upsert works with just the document, no need for exact id/partition key match
+  await container.items.upsert(updatedCode);
   
   console.log('[USE CODE] Success! New count:', updatedCode.used_count);
 }
@@ -179,8 +187,8 @@ export async function deactivateInvitationCode(code: string, deactivatedBy: stri
     description: resource.description,
   };
 
-  // Replace using actual id and partition key value
-  await container.item(resource.id, resource.code).replace(updatedCode);
+  // Use upsert instead of replace to avoid partition key issues
+  await container.items.upsert(updatedCode);
   
   // Log audit
   const logsContainer = getAuditLogsContainer();
