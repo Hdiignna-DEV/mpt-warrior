@@ -268,13 +268,22 @@ export default function Dashboard() {
 
               {isEditingBalance ? (
                 <div className="space-y-3">
-                  <input
-                    type="number"
-                    value={tempBalance}
-                    onChange={(e) => setTempBalance(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100"
-                    autoFocus
-                  />
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                      Initial Balance (IDR)
+                    </label>
+                    <input
+                      type="number"
+                      value={tempBalance}
+                      onChange={(e) => setTempBalance(e.target.value)}
+                      placeholder="10000000"
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100"
+                      autoFocus
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Contoh: 10000000 (10 juta), 5000000 (5 juta)
+                    </p>
+                  </div>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={handleSaveBalance} className="flex-1">
                       <Check className="w-4 h-4" />
