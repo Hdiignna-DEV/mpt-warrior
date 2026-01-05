@@ -2,8 +2,16 @@
 import { useState, useEffect } from 'react';
 import { BookOpen, Plus, Trash2, Download, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getTrades, saveTrades, onTradesUpdated } from '@/utils/storage-sync';
-import type { Trade } from '@/utils/storage-sync';
+
+interface Trade {
+  id: string;
+  pair: string;
+  posisi: 'BUY' | 'SELL';
+  hasil: 'WIN' | 'LOSS';
+  pip: number;
+  tanggal: string;
+  catatan: string;
+}
 
 // List of popular trading pairs
 const POPULAR_PAIRS = [
@@ -30,6 +38,8 @@ const POPULAR_PAIRS = [
 export default function JurnalTrading() {
   const { t } = useTranslation();
   const [trades, setTrades] = useState<Trade[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [pair, setPair] = useState('XAUUSD');
   const [posisi, setPosisi] = useState<'BUY' | 'SELL'>('BUY');
   const [pip, setPip] = useState('');
@@ -37,26 +47,41 @@ export default function JurnalTrading() {
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [showPairDropdown, setShowPairDropdown] = useState(false);
 
-  // Load dari localStorage
+  // Load trades from API
   useEffect(() => {
-    const saved = getTrades();
-    setTrades(saved);
+    loadTrades();
   }, []);
 
-  // Subscribe to trades updates
-  useEffect(() => {
-    const unsubscribe = onTradesUpdated((updatedTrades) => {
-      setTrades(updatedTrades);
-    });
-    return unsubscribe;
-  }, []);
+  const loadTrades = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('mpt_token');
+      const response = await fetch('/api/trades', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
 
-  // Save ke localStorage
-  useEffect(() => {
-    if (trades.length > 0) {
-      saveTrades(trades);
+      if (response.ok) {
+        const data = await response.json();
+        // Convert API format to display format
+        const formattedTrades = data.trades.map((t: any) => ({
+          id: t.id,
+          pair: t.pair,
+          posisi: t.position,
+          hasil: t.result,
+          pip: t.pips,
+          tanggal: t.tradeDate.split('T')[0],
+          catatan: t.notes || '',
+        }));
+        setTrades(formattedTrades);
+      } else {
+        console.error('Failed to load trades');
+      }
+    } catch (error) {
+      console.error('Error loading trades:', error);
+    } finally {
+      setLoading(false);
     }
-  }, [trades]);
+  };
 
   // Auto-determine WIN/LOSS based on pips
   const getHasil = (): 'WIN' | 'LOSS' => {
@@ -65,7 +90,7 @@ export default function JurnalTrading() {
     return pipValue > 0 ? 'WIN' : 'LOSS';
   };
 
-  const tambahTrade = () => {
+  const tambahTrade = async () => {
     if (!pair || !pip) {
       alert(t('journal.fillPairPip'));
       return;
@@ -77,27 +102,68 @@ export default function JurnalTrading() {
       return;
     }
 
-    const hasil = getHasil();
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem('mpt_token');
+      const response = await fetch('/api/trades', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pair,
+          position: posisi,
+          result: getHasil(),
+          pips: pipValue,
+          notes: catatan,
+          tradeDate: new Date().toISOString(),
+        }),
+      });
 
-    const tradeBaru: Trade = {
-      id: Date.now().toString(),
-      pair,
-      posisi,
-      hasil,
-      pip: pipValue,
-      tanggal: new Date().toISOString().split('T')[0],
-      catatan,
-    };
-
-    setTrades([tradeBaru, ...trades]);
-    setPair('XAUUSD');
-    setPip('');
-    setCatatan('');
-    setPosisi('BUY');
+      if (response.ok) {
+        // Reload trades from API
+        await loadTrades();
+        
+        // Reset form
+        setPair('XAUUSD');
+        setPip('');
+        setCatatan('');
+        setPosisi('BUY');
+        
+        alert('✅ Trade berhasil disimpan!');
+      } else {
+        const data = await response.json();
+        alert('❌ ' + (data.error || 'Gagal menyimpan trade'));
+      }
+    } catch (error) {
+      console.error('Error adding trade:', error);
+      alert('❌ Terjadi kesalahan saat menyimpan trade');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const hapusTrade = (id: string) => {
-    setTrades(trades.filter((t) => t.id !== id));
+  const hapusTrade = async (id: string) => {
+    if (!confirm('Hapus trade ini?')) return;
+
+    try {
+      const token = localStorage.getItem('mpt_token');
+      const response = await fetch(`/api/trades/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        await loadTrades();
+        alert('✅ Trade dihapus');
+      } else {
+        alert('❌ Gagal menghapus trade');
+      }
+    } catch (error) {
+      console.error('Error deleting trade:', error);
+      alert('❌ Terjadi kesalahan');
+    }
   };
 
   // Export functions
@@ -402,9 +468,18 @@ export default function JurnalTrading() {
           {/* Submit Button */}
           <button
             onClick={tambahTrade}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+            disabled={submitting}
+            className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
-            <Plus size={20} /> <span suppressHydrationWarning>{t('journal.addTrade')}</span>
+            {submitting ? (
+              <>
+                <div className="animate-spin">⏳</div> Menyimpan...
+              </>
+            ) : (
+              <>
+                <Plus size={20} /> <span suppressHydrationWarning>{t('journal.addTrade')}</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -413,7 +488,12 @@ export default function JurnalTrading() {
       <div className="bg-slate-900/60 rounded-2xl border border-slate-800/50 p-5 md:p-8 backdrop-blur-sm">
         <h2 className="text-lg md:text-xl font-bold text-white mb-6">📊 <span suppressHydrationWarning>{t('journal.title')}</span></h2>
 
-        {trades.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin text-5xl mb-4">⏳</div>
+            <p className="text-slate-400">Loading trades...</p>
+          </div>
+        ) : trades.length === 0 ? (
           <div className="text-center py-12">
             <BookOpen size={48} className="mx-auto text-slate-600 mb-4" />
             <p className="text-slate-400 text-lg font-bold tracking-wider" suppressHydrationWarning>{t('journal.noData')}</p>
