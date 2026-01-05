@@ -1,25 +1,20 @@
 /**
  * AI Analyze Trades API
- * Uses OpenAI GPT-4 to analyze user's trading history
+ * Uses You.com Platform AI to analyze user's trading history
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getUserTrades, getUserTradeStats } from '@/lib/db/trade-service';
-import OpenAI from 'openai';
 
 export async function POST(request: NextRequest) {
   try {
     // Check if API key exists
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.YOU_API_KEY) {
       return NextResponse.json({ 
-        error: 'OPENAI_API_KEY is not configured. Please contact admin.' 
+        error: 'YOU_API_KEY is not configured. Please contact admin.' 
       }, { status: 500 });
     }
-
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
 
     // Verify token
     const decoded = await verifyToken(request);
@@ -96,24 +91,37 @@ Sebagai MPT Warrior AI Mentor, analisis performa trading ini dengan format:
 
 Gunakan emoji dan bahasa yang engaging tapi tetap profesional. Berikan feedback yang spesifik berdasarkan data aktual.`;
 
-    // Call OpenAI GPT-4o-mini
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: 'Anda adalah MPT Warrior AI Mentor, seorang expert trading analyst yang memberikan feedback konstruktif dan actionable untuk trader.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 2048,
+    // Call You.com Chat API
+    const response = await fetch('https://api.you.com/smart/v1/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': process.env.YOU_API_KEY || '',
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: 'system',
+            content: 'Anda adalah MPT Warrior AI Mentor, seorang expert trading analyst yang memberikan feedback konstruktif dan actionable untuk trader.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        model: 'gpt-4o',
+        max_tokens: 2048,
+        temperature: 0.7,
+      }),
     });
 
-    const analysis = completion.choices[0]?.message?.content || 'No analysis generated';
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`You.com API error: ${error}`);
+    }
+
+    const data = await response.json();
+    const analysis = data.choices?.[0]?.message?.content || 'No analysis generated';
 
     return NextResponse.json({
       success: true,
