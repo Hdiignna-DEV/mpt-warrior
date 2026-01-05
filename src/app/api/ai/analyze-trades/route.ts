@@ -87,9 +87,9 @@ export async function POST(request: NextRequest) {
     const prompt = `${roleContext}
 
 **User Profile:**
-- Email: ${decoded.email}
-- Role: ${decoded.role}
-- Status: ${decoded.status}
+- Email: ${decoded!.email}
+- Role: ${decoded!.role}
+- Status: ${decoded!.status}
 
 **Trading Statistics:**
 - Total Trades: ${stats.totalTrades}
