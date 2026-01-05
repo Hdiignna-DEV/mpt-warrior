@@ -11,23 +11,40 @@ import { InvitationCode, AuditLog } from "@/types";
  */
 export async function validateInvitationCode(code: string): Promise<{ valid: boolean; reason?: string; code?: InvitationCode }> {
   try {
+    // Trim whitespace and normalize code
+    const normalizedCode = code.trim();
+    
+    console.log('[CODE VALIDATION] Checking code:', {
+      original: code,
+      normalized: normalizedCode,
+      length: normalizedCode.length
+    });
+    
     const container = getCodesContainer();
     
     // Try direct read first (case-sensitive)
     try {
-      const { resource } = await container.item(code, code).read<InvitationCode>();
+      const { resource } = await container.item(normalizedCode, normalizedCode).read<InvitationCode>();
       if (resource) {
+        console.log('[CODE VALIDATION] Found via direct read:', resource.code);
         return validateCodeResource(resource);
       }
     } catch (error: any) {
       // Code not found with direct read, try query (case-insensitive)
       if (error.code === 404) {
+        console.log('[CODE VALIDATION] Direct read failed, trying case-insensitive query');
+        
         const query = {
           query: 'SELECT * FROM c WHERE UPPER(c.code) = UPPER(@code)',
-          parameters: [{ name: '@code', value: code }],
+          parameters: [{ name: '@code', value: normalizedCode }],
         };
         
         const { resources } = await container.items.query<InvitationCode>(query).fetchAll();
+        
+        console.log('[CODE VALIDATION] Query result:', {
+          found: resources.length,
+          codes: resources.map(r => r.code)
+        });
         
         if (resources.length === 0) {
           return { valid: false, reason: "Code tidak ditemukan" };
@@ -40,7 +57,7 @@ export async function validateInvitationCode(code: string): Promise<{ valid: boo
 
     return { valid: false, reason: "Code tidak ditemukan" };
   } catch (error: any) {
-    console.error('Error validating code:', error);
+    console.error('[CODE VALIDATION] Error:', error);
     return { valid: false, reason: "Terjadi kesalahan sistem" };
   }
 }
