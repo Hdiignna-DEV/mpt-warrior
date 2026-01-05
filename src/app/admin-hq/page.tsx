@@ -69,7 +69,7 @@ export default function AdminHQPage() {
     }
 
     const user = JSON.parse(userData);
-    if (user.role !== 'ADMIN') {
+    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
       router.push('/access-denied');
       return;
     }
