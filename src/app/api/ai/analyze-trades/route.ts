@@ -91,12 +91,12 @@ Sebagai MPT Warrior AI Mentor, analisis performa trading ini dengan format:
 
 Gunakan emoji dan bahasa yang engaging tapi tetap profesional. Berikan feedback yang spesifik berdasarkan data aktual.`;
 
-    // Call You.com Chat API
-    const response = await fetch('https://api.you.com/smart/v1/chat', {
+    // Call You.com Chat API - correct endpoint
+    const response = await fetch('https://api.you.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-API-Key': process.env.YOU_API_KEY || '',
+        'Authorization': `Bearer ${process.env.YOU_API_KEY}`,
       },
       body: JSON.stringify({
         messages: [
