@@ -206,7 +206,9 @@ export default function PendingApprovalPage() {
             <p>
               Butuh bantuan?{' '}
               <a
-                href="https://t.me/MPTCommunity"
+                href={`https://wa.me/6285173193389?text=${encodeURIComponent(
+                  `Halo Admin MPT Warrior,\n\nSaya ingin menanyakan status approval akun saya:\n\nNama: ${user?.name || '-'}\nEmail: ${user?.email || '-'}\n\nMohon bantuan untuk pengecekan. Terima kasih! 🙏`
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 font-bold"
