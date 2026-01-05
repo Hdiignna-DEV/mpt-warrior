@@ -12,31 +12,53 @@ import { InvitationCode, AuditLog } from "@/types";
 export async function validateInvitationCode(code: string): Promise<{ valid: boolean; reason?: string; code?: InvitationCode }> {
   try {
     const container = getCodesContainer();
-    const { resource } = await container.item(code, code).read<InvitationCode>();
-
-    if (!resource) {
-      return { valid: false, reason: "Code tidak ditemukan" };
+    
+    // Try direct read first (case-sensitive)
+    try {
+      const { resource } = await container.item(code, code).read<InvitationCode>();
+      if (resource) {
+        return validateCodeResource(resource);
+      }
+    } catch (error: any) {
+      // Code not found with direct read, try query (case-insensitive)
+      if (error.code === 404) {
+        const query = {
+          query: 'SELECT * FROM c WHERE UPPER(c.code) = UPPER(@code)',
+          parameters: [{ name: '@code', value: code }],
+        };
+        
+        const { resources } = await container.items.query<InvitationCode>(query).fetchAll();
+        
+        if (resources.length === 0) {
+          return { valid: false, reason: "Code tidak ditemukan" };
+        }
+        
+        return validateCodeResource(resources[0]);
+      }
+      throw error;
     }
 
-    if (!resource.is_active) {
-      return { valid: false, reason: "Code sudah tidak aktif" };
-    }
-
-    if (resource.used_count >= resource.max_uses) {
-      return { valid: false, reason: "Code sudah mencapai limit penggunaan" };
-    }
-
-    if (new Date(resource.expires_at) < new Date()) {
-      return { valid: false, reason: "Code sudah expired" };
-    }
-
-    return { valid: true, code: resource };
+    return { valid: false, reason: "Code tidak ditemukan" };
   } catch (error: any) {
-    if (error.code === 404) {
-      return { valid: false, reason: "Code tidak ditemukan" };
-    }
-    throw error;
+    console.error('Error validating code:', error);
+    return { valid: false, reason: "Terjadi kesalahan sistem" };
   }
+}
+
+function validateCodeResource(resource: InvitationCode): { valid: boolean; reason?: string; code?: InvitationCode } {
+  if (!resource.is_active) {
+    return { valid: false, reason: "Code sudah tidak aktif" };
+  }
+
+  if (resource.used_count >= resource.max_uses) {
+    return { valid: false, reason: "Code sudah mencapai limit penggunaan" };
+  }
+
+  if (new Date(resource.expires_at) < new Date()) {
+    return { valid: false, reason: "Code sudah expired" };
+  }
+
+  return { valid: true, code: resource };
 }
 
 /**
