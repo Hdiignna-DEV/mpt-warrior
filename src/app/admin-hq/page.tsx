@@ -170,7 +170,21 @@ export default function AdminHQPage() {
         if (data.emailStatus === 'sent') {
           alert('✅ User berhasil di-approve!\n📧 Email notifikasi terkirim.');
         } else if (data.emailStatus === 'failed') {
-          alert(`✅ User berhasil di-approve!\n⚠️ Email gagal terkirim: ${data.emailError}\n\nSilakan informasikan user secara manual.`);
+          const errorMsg = data.emailError || '';
+          
+          // Check if it's Resend domain verification issue
+          if (errorMsg.includes('verify a domain') || errorMsg.includes('testing emails')) {
+            alert(
+              '✅ User berhasil di-approve!\n\n' +
+              '⚠️ Email Limitation (Resend Free Tier):\n' +
+              '- Hanya bisa kirim ke email: dedenhadigun@gmail.com\n' +
+              '- Untuk kirim ke semua user, verify domain di resend.com/domains\n\n' +
+              '💡 Untuk sekarang:\n' +
+              'Informasikan user via WhatsApp bahwa akun sudah approved.'
+            );
+          } else {
+            alert(`✅ User berhasil di-approve!\n⚠️ Email gagal terkirim: ${errorMsg}\n\nSilakan informasikan user secara manual.`);
+          }
         } else {
           alert('✅ User berhasil di-approve!\n⚠️ Email tidak terkirim (RESEND_API_KEY belum disetup)');
         }
