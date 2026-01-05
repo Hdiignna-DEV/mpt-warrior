@@ -37,14 +37,8 @@ export default function LoginPage() {
       localStorage.setItem('mpt_user', JSON.stringify(data.user));
       localStorage.setItem('mpt_token', data.token);
 
-      // Redirect based on status
-      if (data.user.status === 'pending') {
-        router.push('/pending-approval');
-      } else if (data.user.role === 'ADMIN') {
-        router.push('/admin-hq');
-      } else {
-        router.push('/dashboard');
-      }
+      // Force page reload to trigger middleware with new token
+      window.location.href = data.user.role === 'ADMIN' ? '/admin-hq' : '/dashboard';
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan saat login');
     } finally {
