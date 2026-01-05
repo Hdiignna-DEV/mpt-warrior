@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Download, FileText, Shield, Sword, Brain, Lock, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import MptLogo from '@/components/MptLogo';
 
 export default function TutorialPage() {
   const router = useRouter();
@@ -51,14 +51,8 @@ export default function TutorialPage() {
               
               {/* Cover Design */}
               <div className="p-6 text-center flex flex-col items-center justify-center h-full relative z-10">
-                <div className="w-12 h-12 mb-6 relative">
-                  <Image 
-                    src="/mpt-logo.png" 
-                    alt="MPT Warrior Logo" 
-                    width={48} 
-                    height={48}
-                    className="object-contain filter drop-shadow-[0_0_8px_rgba(245,166,35,0.6)]"
-                  />
+                <div className="w-16 h-16 mb-6 relative flex items-center justify-center">
+                  <MptLogo size={64} className="filter drop-shadow-[0_0_8px_rgba(245,166,35,0.6)]" />
                 </div>
                 <p className="text-[10px] text-amber-500/80 font-mono tracking-widest mb-2">MPT WARRIOR</p>
                 <h2 className="text-2xl md:text-3xl font-black text-amber-400 mt-4 tracking-wider uppercase">THE<br/>DOCTRINE</h2>
