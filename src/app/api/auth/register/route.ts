@@ -86,8 +86,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Create user with role from invitation code
-    // ADMIN codes create active admin users immediately
-    // WARRIOR codes create pending users that need approval
+    // ALL users (ADMIN & WARRIOR) require approval for security
     const newUser = await createUser({
       email,
       name,
@@ -96,7 +95,7 @@ export async function POST(request: NextRequest) {
       telegram_id,
       invitation_code,
       role: assignedRole === 'ADMIN' ? 'ADMIN' : 'WARRIOR',
-      status: assignedRole === 'ADMIN' ? 'active' : 'pending',
+      status: 'pending', // All users need approval, even admins
       settings: defaultSettings,
       stats: defaultStats,
     });
@@ -105,14 +104,19 @@ export async function POST(request: NextRequest) {
     await useInvitationCode(invitation_code, email);
 
     // Return success (don't include password hash in response)
+    const roleMessage = assignedRole === 'ADMIN' 
+      ? 'Pendaftaran sebagai ADMIN berhasil! Tunggu approval dari Super Commander.' 
+      : 'Pendaftaran berhasil! Tunggu approval dari Commander.';
+    
     return NextResponse.json({
       success: true,
-      message: 'Pendaftaran berhasil! Tunggu approval dari Commander.',
+      message: roleMessage,
       user: {
         id: newUser.id,
         email: newUser.email,
         name: newUser.name,
         status: newUser.status,
+        role: newUser.role,
       },
     });
   } catch (error: any) {
