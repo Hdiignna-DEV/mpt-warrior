@@ -235,6 +235,49 @@ export default function AdminHQPage() {
     }
   };
 
+  const handleEditCode = async (codeItem: InvitationCode) => {
+    const newMaxUses = prompt(`Berapa user yang bisa pakai code ${codeItem.code}?`, String(codeItem.max_uses));
+    if (!newMaxUses) return;
+
+    const maxUses = parseInt(newMaxUses);
+    if (isNaN(maxUses) || maxUses < 1) {
+      alert('❌ Jumlah user harus angka minimal 1');
+      return;
+    }
+
+    const newDescription = prompt('Deskripsi baru (opsional):', codeItem.description || '');
+    const toggleActive = confirm(`Code saat ini ${codeItem.is_active ? 'AKTIF' : 'NONAKTIF'}.\n\nOK = Ubah status\nCancel = Biarkan ${codeItem.is_active ? 'aktif' : 'nonaktif'}`);
+    const isActive = toggleActive ? !codeItem.is_active : codeItem.is_active;
+
+    try {
+      const token = localStorage.getItem('mpt_token');
+      const response = await fetch('/api/admin/edit-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          code: codeItem.code,
+          max_uses: maxUses,
+          description: newDescription || codeItem.description,
+          is_active: isActive,
+        }),
+      });
+
+      if (response.ok) {
+        alert('✅ Code berhasil diupdate!');
+        loadData();
+      } else {
+        const data = await response.json();
+        alert(`❌ ${data.error || 'Gagal update code'}`);
+      }
+    } catch (error) {
+      console.error('Error editing code:', error);
+      alert('❌ Terjadi kesalahan');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 flex items-center justify-center">
@@ -439,6 +482,12 @@ export default function AdminHQPage() {
                         <span className="text-red-400 font-bold text-xs md:text-sm">INACTIVE</span>
                       </div>
                     )}
+                    <button
+                      onClick={() => handleEditCode(code)}
+                      className="px-3 md:px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold flex items-center gap-2 transition-colors text-xs md:text-sm"
+                    >
+                      ✏️ EDIT
+                    </button>
                     <button
                       onClick={() => handleDeleteCode(code.code)}
                       className="px-3 md:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold flex items-center gap-2 transition-colors text-xs md:text-sm"
