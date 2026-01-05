@@ -4,24 +4,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getPendingUsers } from '@/lib/db/user-service';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+import { validateAdmin } from '@/lib/middleware/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify admin token
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    const decoded: any = jwt.verify(token, JWT_SECRET);
-
-    if (decoded.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // Validate admin access
+    const { decoded, error } = validateAdmin(request);
+    if (error) return error;
 
     // Get pending users
     const users = await getPendingUsers();
