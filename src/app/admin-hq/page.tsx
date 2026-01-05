@@ -281,6 +281,28 @@ export default function AdminHQPage() {
     }
   };
 
+  const handleCopyTemplate = (code: string) => {
+    const template = `🎖️ Selamat! Kamu diundang bergabung ke MPT Warrior Community!
+
+Kode Invitation: ${code}
+Daftar di: https://mpt-community.vercel.app/register
+
+MPT Warrior adalah platform eksklusif untuk trader yang ingin:
+✅ Trading Journal dengan AI Analysis
+✅ Dashboard tracking performa real-time
+✅ Economic Calendar terintegrasi
+✅ Komunitas trader profesional
+
+Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
+
+    navigator.clipboard.writeText(template).then(() => {
+      alert('✅ Template berhasil dicopy ke clipboard!\n\nTinggal paste dan kirim ke calon warrior! 🚀');
+    }).catch((err) => {
+      console.error('Failed to copy:', err);
+      alert('❌ Gagal copy template');
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 flex items-center justify-center">
@@ -495,6 +517,12 @@ export default function AdminHQPage() {
                         <span className="text-red-400 font-bold text-xs md:text-sm">INACTIVE</span>
                       </div>
                     )}
+                    <button
+                      onClick={() => handleCopyTemplate(code.code)}
+                      className="px-3 md:px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold flex items-center gap-2 transition-colors text-xs md:text-sm"
+                    >
+                      📋 COPY
+                    </button>
                     <button
                       onClick={() => handleEditCode(code)}
                       className="px-3 md:px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold flex items-center gap-2 transition-colors text-xs md:text-sm"
