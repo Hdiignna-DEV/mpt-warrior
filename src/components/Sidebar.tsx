@@ -19,7 +19,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const menuItems = [
-  { href: '/', label: 'nav.dashboard', fallback: 'Dashboard', icon: LayoutDashboard, description: 'Overview' },
+  { href: '/dashboard', label: 'nav.dashboard', fallback: 'Dashboard', icon: LayoutDashboard, description: 'Overview' },
   { href: '/analytics', label: 'nav.analytics', fallback: 'Analytics', icon: BarChart3, description: 'Data Insights' },
   { href: '/journal', label: 'nav.journal', fallback: 'Journal', icon: BookOpen, description: 'History' },
   { href: '/calculator', label: 'nav.calculator', fallback: 'Calculator', icon: Calculator, description: 'Calculate' },
