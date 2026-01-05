@@ -24,12 +24,18 @@ export async function POST(request: NextRequest) {
     const updatedUser = await approveUser(userId, decoded!.email, decoded!.role);
 
     // Send approval email (non-blocking)
+    let emailStatus = 'not_sent';
+    let emailError = null;
+    
     if (updatedUser.email && updatedUser.name) {
       const emailResult = await sendApprovalEmail(updatedUser.email, updatedUser.name);
       if (emailResult.success) {
         console.log(`✅ Approval email sent to: ${updatedUser.email}`);
+        emailStatus = 'sent';
       } else {
         console.error(`❌ Failed to send approval email: ${emailResult.error}`);
+        emailStatus = 'failed';
+        emailError = emailResult.error;
         // Don't fail the approval if email fails
       }
     }
@@ -38,6 +44,8 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'User approved successfully',
       user: updatedUser,
+      emailStatus,
+      emailError,
     });
   } catch (error: any) {
     console.error('Error approving user:', error);

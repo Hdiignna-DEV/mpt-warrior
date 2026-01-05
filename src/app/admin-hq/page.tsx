@@ -164,7 +164,17 @@ export default function AdminHQPage() {
       });
 
       if (response.ok) {
-        alert('✅ User berhasil di-approve!');
+        const data = await response.json();
+        
+        // Show email status to admin
+        if (data.emailStatus === 'sent') {
+          alert('✅ User berhasil di-approve!\n📧 Email notifikasi terkirim.');
+        } else if (data.emailStatus === 'failed') {
+          alert(`✅ User berhasil di-approve!\n⚠️ Email gagal terkirim: ${data.emailError}\n\nSilakan informasikan user secara manual.`);
+        } else {
+          alert('✅ User berhasil di-approve!\n⚠️ Email tidak terkirim (RESEND_API_KEY belum disetup)');
+        }
+        
         loadData();
       } else {
         alert('❌ Gagal approve user');

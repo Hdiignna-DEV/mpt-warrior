@@ -17,6 +17,17 @@ export async function sendApprovalEmail(
   userName: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Check if RESEND_API_KEY is configured
+    if (!process.env.RESEND_API_KEY) {
+      console.warn('⚠️ RESEND_API_KEY not configured - email not sent');
+      return { 
+        success: false, 
+        error: 'RESEND_API_KEY not configured. Please add it to Vercel environment variables.' 
+      };
+    }
+
+    console.log(`📧 Sending approval email to: ${to}`);
+
     const { data, error } = await resend.emails.send({
       from: SENDER_EMAIL,
       to: [to],
