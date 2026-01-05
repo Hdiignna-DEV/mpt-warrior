@@ -30,6 +30,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               'text-slate-900 dark:text-white',
               'placeholder-slate-400 dark:placeholder-slate-500',
               'focus:outline-none focus:ring-0',
+              '[&:-webkit-autofill]:!text-slate-900 [&:-webkit-autofill]:dark:!text-white',
+              '[&:-webkit-autofill]:!bg-white [&:-webkit-autofill]:dark:!bg-slate-800',
+              '[&:-webkit-autofill]:[-webkit-text-fill-color:rgb(15_23_42)] [&:-webkit-autofill]:dark:[-webkit-text-fill-color:rgb(255_255_255)]',
+              '[&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] [&:-webkit-autofill]:dark:shadow-[0_0_0_1000px_rgb(30_41_59)_inset]',
               icon ? 'pl-10' : '',
               error
                 ? 'border-red-500 dark:border-red-500 focus:border-red-600'
@@ -37,7 +41,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               'disabled:bg-slate-50 dark:disabled:bg-slate-900 disabled:text-slate-400 disabled:cursor-not-allowed',
               className
             )}
-            style={{ WebkitTextFillColor: 'currentColor', opacity: 1 }}
+            style={{ 
+              WebkitTextFillColor: 'currentColor',
+              color: 'currentColor',
+              opacity: 1 
+            }}
             {...props}
           />
         </div>
