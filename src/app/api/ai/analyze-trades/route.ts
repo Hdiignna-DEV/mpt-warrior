@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     if (currentStreakType === 'LOSS') maxLossStreak = Math.max(maxLossStreak, currentStreak);
 
     // Build enhanced context-aware prompt based on user role
-    const roleContext = decoded.role === 'ADMIN' 
+    const roleContext = decoded!.role === 'ADMIN' 
       ? `Anda sedang menganalisis data trading seorang Commander (ADMIN). Berikan insight yang mendalam dan strategis dengan fokus pada:
 - Pola trading yang sistematis
 - Konsistensi eksekusi strategi
