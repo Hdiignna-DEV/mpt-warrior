@@ -1,13 +1,20 @@
 /**
- * Resend Email Client
- * Centralized email sending utility
+ * Email Client
+ * Supports Gmail SMTP and Resend
  */
 
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
+// Gmail SMTP Configuration
+const gmailTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER || 'info.mptcommunity@gmail.com',
+    pass: process.env.GMAIL_APP_PASSWORD, // App Password, bukan password biasa
+  },
+});
 
-export const SENDER_EMAIL = 'MPT Warrior <onboarding@resend.dev>'; // Change to your verified domain
+export const SENDER_EMAIL = 'MPT Community <info.mptcommunity@gmail.com>';
 
 /**
  * Send approval notification email
@@ -17,20 +24,21 @@ export async function sendApprovalEmail(
   userName: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Check if RESEND_API_KEY is configured
-    if (!process.env.RESEND_API_KEY) {
-      console.warn('⚠️ RESEND_API_KEY not configured - email not sent');
+    // Check if Gmail credentials are configured
+    if (!process.env.GMAIL_APP_PASSWORD) {
+      console.warn('⚠️ GMAIL_APP_PASSWORD not configured - email not sent');
       return { 
         success: false, 
-        error: 'RESEND_API_KEY not configured. Please add it to Vercel environment variables.' 
+        error: 'GMAIL_APP_PASSWORD not configured. Please add Gmail App Password to Vercel environment variables.' 
       };
     }
 
     console.log(`📧 Sending approval email to: ${to}`);
 
-    const { data, error } = await resend.emails.send({
+    // Send email via Gmail SMTP
+    await gmailTransporter.sendMail({
       from: SENDER_EMAIL,
-      to: [to],
+      to: to,
       subject: '🎉 Your MPT Warrior Account Has Been Approved!',
       html: `
 <!DOCTYPE html>
@@ -105,15 +113,10 @@ export async function sendApprovalEmail(
       `,
     });
 
-    if (error) {
-      console.error('Resend error:', error);
-      return { success: false, error: error.message };
-    }
-
-    console.log('Approval email sent:', data);
+    console.log('✅ Approval email sent successfully to:', to);
     return { success: true };
   } catch (error: any) {
-    console.error('Error sending approval email:', error);
+    console.error('❌ Error sending approval email:', error);
     return { success: false, error: error.message };
   }
 }
