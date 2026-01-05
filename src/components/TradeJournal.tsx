@@ -40,6 +40,8 @@ export default function JurnalTrading() {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [pair, setPair] = useState('XAUUSD');
   const [posisi, setPosisi] = useState<'BUY' | 'SELL'>('BUY');
   const [pip, setPip] = useState('');
@@ -166,6 +168,37 @@ export default function JurnalTrading() {
     }
   };
 
+  const analyzeMyTrades = async () => {
+    if (trades.length === 0) {
+      alert('❌ Belum ada trade untuk dianalisis');
+      return;
+    }
+
+    setAnalyzing(true);
+    try {
+      const token = localStorage.getItem('mpt_token');
+      const response = await fetch('/api/ai/analyze-trades', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAiAnalysis(data.analysis);
+      } else {
+        const data = await response.json();
+        alert('❌ ' + (data.error || 'Gagal menganalisis trades'));
+      }
+    } catch (error) {
+      console.error('Error analyzing trades:', error);
+      alert('❌ Terjadi kesalahan saat menganalisis trades');
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   // Export functions
   const exportToEnhancedCSV = () => {
     if (trades.length === 0) {
@@ -283,36 +316,59 @@ export default function JurnalTrading() {
             </div>
           </div>
 
-          <div className="relative">
+          <div className="flex items-center gap-2">
+            {/* AI Analyze Button */}
             <button
-              onClick={() => setShowExportOptions(!showExportOptions)}
-              className="p-2 md:p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2 font-bold text-sm md:text-base"
+              onClick={analyzeMyTrades}
+              disabled={analyzing || trades.length === 0}
+              className="p-2 md:p-3 bg-purple-500 hover:bg-purple-600 disabled:bg-purple-500/50 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2 font-bold text-sm md:text-base"
+              title={trades.length === 0 ? 'Add trades first' : 'Analyze your trading performance'}
             >
-              <Download size={20} />
-              <span className="hidden md:inline" suppressHydrationWarning>{t('journal.export')}</span>
+              {analyzing ? (
+                <>
+                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                  <span className="hidden md:inline">Analyzing...</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-xl">🧠</span>
+                  <span className="hidden md:inline">Analyze Trades</span>
+                </>
+              )}
             </button>
 
-            {showExportOptions && (
-              <div className="absolute top-full right-0 mt-2 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 w-56">
-                <button
-                  onClick={exportToEnhancedCSV}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 text-sm flex flex-col gap-1"
-                >
-                  <span className="font-bold text-green-400" suppressHydrationWarning>📈 {t('journal.exportCSV')}</span>
-                  <span className="text-xs text-slate-400">Enhanced with statistics</span>
-                </button>
+            {/* Export Button */}
+            <div className="relative">
+              <button
+                onClick={() => setShowExportOptions(!showExportOptions)}
+                className="p-2 md:p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center gap-2 font-bold text-sm md:text-base"
+              >
+                <Download size={20} />
+                <span className="hidden md:inline" suppressHydrationWarning>{t('journal.export')}</span>
+              </button>
 
-                <button
-                  onClick={shareToClipboard}
-                  className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors text-sm flex flex-col gap-1"
-                >
-                  <span className="font-bold text-red-400 flex items-center gap-2">
-                    <Share2 size={16} /> <span suppressHydrationWarning>{t('journal.share')}</span>
-                  </span>
-                  <span className="text-xs text-slate-400">Copy to clipboard</span>
-                </button>
-              </div>
-            )}
+              {showExportOptions && (
+                <div className="absolute top-full right-0 mt-2 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-50 w-56">
+                  <button
+                    onClick={exportToEnhancedCSV}
+                    className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors border-b border-slate-700 text-sm flex flex-col gap-1"
+                  >
+                    <span className="font-bold text-green-400" suppressHydrationWarning>📈 {t('journal.exportCSV')}</span>
+                    <span className="text-xs text-slate-400">Enhanced with statistics</span>
+                  </button>
+
+                  <button
+                    onClick={shareToClipboard}
+                    className="w-full text-left px-4 py-3 hover:bg-slate-800 transition-colors text-sm flex flex-col gap-1"
+                  >
+                    <span className="font-bold text-red-400 flex items-center gap-2">
+                      <Share2 size={16} /> <span suppressHydrationWarning>{t('journal.share')}</span>
+                    </span>
+                    <span className="text-xs text-slate-400">Copy to clipboard</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         <div className="h-1 bg-gradient-to-r from-blue-500 via-slate-700 to-transparent rounded-full"></div>
@@ -547,6 +603,67 @@ export default function JurnalTrading() {
           </div>
         )}
       </div>
+
+      {/* AI Analysis Modal */}
+      {aiAnalysis && (
+        <div 
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setAiAnalysis(null)}
+        >
+          <div 
+            className="bg-slate-900 border border-purple-500/30 rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-slate-900 border-b border-purple-500/30 p-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🧠</span>
+                <div>
+                  <h2 className="text-2xl font-black text-purple-400">AI Trading Analysis</h2>
+                  <p className="text-slate-400 text-sm">Powered by Gemini 1.5 Pro</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAiAnalysis(null)}
+                className="text-slate-400 hover:text-white transition-colors p-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              <div className="prose prose-invert prose-purple max-w-none">
+                <div 
+                  className="text-slate-300 leading-relaxed space-y-4"
+                  dangerouslySetInnerHTML={{ 
+                    __html: aiAnalysis
+                      .replace(/### (.*)/g, '<h3 class="text-xl font-bold text-purple-400 mt-6 mb-3">$1</h3>')
+                      .replace(/## (.*)/g, '<h2 class="text-2xl font-bold text-purple-300 mt-8 mb-4">$1</h2>')
+                      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-bold">$1</strong>')
+                      .replace(/- (.*)/g, '<li class="ml-4 text-slate-300">$1</li>')
+                      .replace(/\n\n/g, '</p><p class="my-4">')
+                      .replace(/^(?!<[h|l|p])(.*)$/gm, '<p>$1</p>')
+                  }}
+                />
+              </div>
+              
+              {/* Close Button */}
+              <div className="mt-8 pt-6 border-t border-purple-500/20 flex justify-end">
+                <button
+                  onClick={() => setAiAnalysis(null)}
+                  className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-bold transition-colors"
+                >
+                  Close Analysis
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
