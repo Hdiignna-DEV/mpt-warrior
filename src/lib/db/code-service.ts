@@ -8,61 +8,28 @@ import { InvitationCode, AuditLog } from "@/types";
 
 /**
  * Validate invitation code
+ * Note: Bulk-generated codes use UUID as id, so we must use query instead of direct read
  */
 export async function validateInvitationCode(code: string): Promise<{ valid: boolean; reason?: string; code?: InvitationCode }> {
   try {
-    // Trim whitespace and normalize code
-    const normalizedCode = code.trim().toUpperCase();
+    const normalizedCode = code.trim();
     
-    console.log('[CODE VALIDATION] Checking code:', {
-      original: code,
-      normalized: normalizedCode,
-      length: normalizedCode.length
-    });
+    console.log('[CODE VALIDATION] Validating code:', normalizedCode);
     
     const container = getCodesContainer();
     
-    // Strategy 1: Try exact match with uppercase (most codes are uppercase)
-    try {
-      const { resource } = await container.item(normalizedCode, normalizedCode).read<InvitationCode>();
-      if (resource) {
-        console.log('[CODE VALIDATION] Found via direct read (uppercase):', resource.code);
-        return validateCodeResource(resource);
-      }
-    } catch (error: any) {
-      if (error.code !== 404) throw error;
-    }
-    
-    // Strategy 2: Try exact match with original input
-    if (code.trim() !== normalizedCode) {
-      try {
-        const originalTrimmed = code.trim();
-        const { resource } = await container.item(originalTrimmed, originalTrimmed).read<InvitationCode>();
-        if (resource) {
-          console.log('[CODE VALIDATION] Found via direct read (original case):', resource.code);
-          return validateCodeResource(resource);
-        }
-      } catch (error: any) {
-        if (error.code !== 404) throw error;
-      }
-    }
-    
-    // Strategy 3: Cross-partition query for case-insensitive search
-    console.log('[CODE VALIDATION] Direct reads failed, trying cross-partition query');
-    
+    // Use query for case-insensitive exact match
+    // This works for both UUID-based ids (bulk generated) and code-based ids (manual)
     const query = {
       query: 'SELECT * FROM c WHERE UPPER(c.code) = UPPER(@code)',
-      parameters: [{ name: '@code', value: code.trim() }],
+      parameters: [{ name: '@code', value: normalizedCode }],
     };
     
     const { resources } = await container.items.query<InvitationCode>(query, {
       maxItemCount: 1,
     }).fetchAll();
     
-    console.log('[CODE VALIDATION] Query result:', {
-      found: resources.length,
-      codes: resources.map(r => r.code)
-    });
+    console.log('[CODE VALIDATION] Found:', resources.length, 'code(s)');
     
     if (resources.length === 0) {
       return { valid: false, reason: "Code tidak ditemukan" };
