@@ -6,8 +6,17 @@ import MptLogo from './MptLogo';
 import { useEffect, useState } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 import LanguageToggle from './LanguageToggle';
-import { getTrades, getInitialBalance, onTradesUpdated } from '@/utils/storage-sync';
+import { getInitialBalance } from '@/utils/storage-sync';
 import '@/utils/i18n';
+
+interface Trade {
+  id: string;
+  pair: string;
+  position: 'BUY' | 'SELL';
+  result: 'WIN' | 'LOSS';
+  pips: number;
+  tradeDate: string;
+}
 
 export default function Header() {
   const [stats, setStats] = useState({
@@ -18,6 +27,40 @@ export default function Header() {
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // Load trades from API
+  const loadStats = async () => {
+    try {
+      const token = localStorage.getItem('mpt_token');
+      if (!token) return;
+
+      const response = await fetch('/api/trades', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const balance = getInitialBalance();
+        const trades = data.trades;
+        
+        const wins = trades.filter((t: Trade) => t.result === 'WIN').length;
+        const total = trades.length;
+        const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+        const totalPips = trades.reduce((sum: number, t: Trade) => sum + t.pips, 0);
+
+        setStats({
+          totalTrades: total,
+          winRate: winRate,
+          balance: balance + (totalPips * 10),
+          weeklyPnL: 0
+        });
+      }
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
 
   // Load sidebar state from localStorage
   useEffect(() => {
@@ -68,40 +111,20 @@ export default function Header() {
 
   // Load initial data
   useEffect(() => {
-    const trades = getTrades();
-    const balance = getInitialBalance();
-    
-    const wins = trades.filter((t) => t.hasil === 'WIN').length;
-    const total = trades.length;
-    const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-    const totalPips = trades.reduce((sum, t) => sum + t.pip, 0);
-
-    setStats({
-      totalTrades: total,
-      winRate: winRate,
-      balance: balance + (totalPips * 10),
-      weeklyPnL: 0
-    });
+    loadStats();
   }, []);
 
-  // Subscribe to real-time updates
+  // Listen for custom event when trades updated
   useEffect(() => {
-    const unsubscribe = onTradesUpdated((trades) => {
-      const balance = getInitialBalance();
-      const wins = trades.filter((t) => t.hasil === 'WIN').length;
-      const total = trades.length;
-      const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
-      const totalPips = trades.reduce((sum, t) => sum + t.pip, 0);
+    const handleTradesUpdate = () => {
+      loadStats();
+    };
 
-      setStats({
-        totalTrades: total,
-        winRate: winRate,
-        balance: balance + (totalPips * 10),
-        weeklyPnL: 0
-      });
-    });
+    window.addEventListener('tradesUpdated', handleTradesUpdate);
 
-    return unsubscribe;
+    return () => {
+      window.removeEventListener('tradesUpdated', handleTradesUpdate);
+    };
   }, []);
 
   return (
@@ -192,7 +215,7 @@ export default function Header() {
                   Balance
                 </p>
                 <p className="text-base font-black text-gray-900 dark:text-zinc-100 mt-0.5">
-                  ${(stats.balance / 1000).toFixed(1)}k
+                  ${stats.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               </div>
             </div>
