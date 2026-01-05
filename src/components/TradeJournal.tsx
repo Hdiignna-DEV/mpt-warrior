@@ -351,11 +351,13 @@ export default function JurnalTrading() {
               {t('journal.pips')} (Auto-detect)
             </label>
             <input
-              type="number"
+              type="text"
+              inputMode="decimal"
               placeholder="Example: 35 (WIN) or -20 (LOSS)"
               value={pip}
               onChange={(e) => setPip(e.target.value)}
               className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:outline-none"
+              style={{ WebkitTextFillColor: '#fff', opacity: 1 }}
             />
             
             {pip && (

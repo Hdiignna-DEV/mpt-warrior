@@ -37,6 +37,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               'disabled:bg-slate-50 dark:disabled:bg-slate-900 disabled:text-slate-400 disabled:cursor-not-allowed',
               className
             )}
+            style={{ WebkitTextFillColor: 'currentColor', opacity: 1 }}
             {...props}
           />
         </div>

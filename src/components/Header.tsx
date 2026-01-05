@@ -124,7 +124,22 @@ export default function Header() {
             </button>
             
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group shrink-0">
+            <button
+              onClick={() => {
+                const user = localStorage.getItem('mpt_user');
+                if (user) {
+                  try {
+                    const userData = JSON.parse(user);
+                    window.location.href = userData.role === 'ADMIN' ? '/admin-hq' : '/dashboard';
+                  } catch {
+                    window.location.href = '/dashboard';
+                  }
+                } else {
+                  window.location.href = '/';
+                }
+              }}
+              className="flex items-center gap-2 group shrink-0 cursor-pointer"
+            >
             <div className="relative w-12 h-12 rounded-xl bg-white dark:bg-slate-900 flex items-center justify-center shadow-xl border-2 border-amber-400 dark:border-amber-500 transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl group-hover:border-amber-500 dark:group-hover:border-amber-400 overflow-hidden p-0.5">
               <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-500/0 via-amber-500/10 to-amber-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <MptLogo size={48} className="relative z-10 brightness-110 contrast-125" />
@@ -135,7 +150,7 @@ export default function Header() {
               </h1>
               <p className="text-xs text-gray-500 dark:text-zinc-500 font-bold uppercase tracking-widest">Trading Hub</p>
             </div>
-          </Link>
+          </button>
           </div>
 
           {/* Stats Grid */}
