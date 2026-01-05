@@ -234,8 +234,8 @@ export default function JurnalTrading() {
     csvContent += `Total LOSS:,${loss}\n`;
     csvContent += `Win Rate:,${winRate}%\n`;
     csvContent += `Total Pips:,${totalPips >= 0 ? '+' : ''}${totalPips}\n`;
-    csvContent += `Initial Balance:,$${customBalance.toLocaleString('en-US')}\n`;
-    csvContent += `Estimated Balance:,$${(customBalance + totalPips * 10).toLocaleString('en-US')}\n`;
+    csvContent += `Initial Balance:,Rp ${customBalance.toLocaleString('id-ID')}\n`;
+    csvContent += `Estimated Balance:,Rp ${(customBalance + totalPips * 150000).toLocaleString('id-ID')}\n`;
     csvContent += '\n';
 
     csvContent += '═══════════════════════════════════════════════════════════════\n';
@@ -286,7 +286,7 @@ export default function JurnalTrading() {
 ✅ WIN: ${win} | ❌ LOSS: ${loss}
 🎯 Win Rate: ${winRate}%
 💰 Total Pips: ${totalPips >= 0 ? '+' : ''}${totalPips}
-💎 Balance: $${(customBalance + totalPips * 10).toLocaleString('en-US')}
+💎 Balance: Rp ${(customBalance + totalPips * 150000).toLocaleString('id-ID')}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🔗 https://mpt-warrior.vercel.app`;
 

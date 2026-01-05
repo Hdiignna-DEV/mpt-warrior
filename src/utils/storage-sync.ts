@@ -114,10 +114,10 @@ export const saveJournalEntries = (entries: JournalEntry[]): void => {
 export const getInitialBalance = (): number => {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.INITIAL_BALANCE);
-    return saved ? parseFloat(saved) : 10000;
+    return saved ? parseFloat(saved) : 10000000; // Default 10 juta IDR
   } catch (error) {
     console.error('Error getting balance:', error);
-    return 10000;
+    return 10000000; // Default 10 juta IDR
   }
 };
 

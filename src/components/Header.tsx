@@ -53,7 +53,7 @@ export default function Header() {
         setStats({
           totalTrades: total,
           winRate: winRate,
-          balance: balance + (totalPips * 10),
+          balance: balance + (totalPips * 16500),
           weeklyPnL: 0
         });
       }
@@ -215,7 +215,7 @@ export default function Header() {
                   Balance
                 </p>
                 <p className="text-base font-black text-gray-900 dark:text-zinc-100 mt-0.5">
-                  ${stats.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  Rp {stats.balance.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </p>
               </div>
             </div>
