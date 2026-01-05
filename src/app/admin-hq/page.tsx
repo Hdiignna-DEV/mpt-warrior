@@ -14,6 +14,7 @@ import {
   Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/hooks/useAuth';
 
 interface User {
   id: string;
@@ -40,6 +41,7 @@ interface InvitationCode {
 
 export default function AdminHQPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth(true, true); // Require auth + admin
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [activeUsers, setActiveUsers] = useState<User[]>([]);

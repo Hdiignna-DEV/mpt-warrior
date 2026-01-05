@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   TrendingUp, Target, DollarSign, Award, Edit2, X, Check, Zap, 
   TrendingDown, Calendar, BookOpen, Calculator, Bot, BarChart3, 
@@ -19,6 +20,7 @@ import type { Trade } from '@/utils/storage-sync';
 
 export default function Dashboard() {
   const { t } = useTranslation();
+  const { loading: authLoading } = useAuth();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [customBalance, setCustomBalance] = useState<number>(10000);

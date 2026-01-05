@@ -6,6 +6,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Calculator, DollarSign, Percent, TrendingDown, AlertTriangle, Info, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/hooks/useAuth';
 
 interface HasilKalkulator {
   risikoRp: number;
@@ -17,6 +18,7 @@ interface HasilKalkulator {
 
 export default function KalkulatorRisiko() {
   const { t } = useTranslation();
+  const { loading: authLoading } = useAuth();
   const [saldo, setSaldo] = useState<string>('10000');
   const [risikoPersen, setRisikoPersen] = useState<string>('1');
   const [stopLossPips, setStopLossPips] = useState<string>('50');

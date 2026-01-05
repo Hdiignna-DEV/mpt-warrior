@@ -7,9 +7,11 @@ import { useEffect, useState } from 'react';
 import { BookOpen } from 'lucide-react';
 import TradeJournal from '@/components/TradeJournal';
 import { Card } from '@/components/ui/Card';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function JournalPage() {
   const { t } = useTranslation();
+  const { loading: authLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {

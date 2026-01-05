@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { BarChart3, TrendingUp } from 'lucide-react';
 import Statistics from '@/components/Statistics';
 import { Card } from '@/components/ui/Card';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Trade {
   id: string;
@@ -20,6 +21,7 @@ interface Trade {
 
 export default function AnalyticsPage() {
   const { t } = useTranslation();
+  const { loading: authLoading } = useAuth();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [balance, setBalance] = useState(10000);
   const [isLoading, setIsLoading] = useState(true);

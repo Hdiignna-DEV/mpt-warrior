@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { Trophy } from 'lucide-react';
 import Achievements from '@/components/Achievements';
 import { Card } from '@/components/ui/Card';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Trade {
   id: string;
@@ -20,6 +21,7 @@ interface Trade {
 
 export default function AchievementsPage() {
   const { t } = useTranslation();
+  const { loading: authLoading } = useAuth();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

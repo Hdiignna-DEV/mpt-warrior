@@ -5,6 +5,7 @@ import '@/utils/i18n';
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Bot, Send, Paperclip, X, Sparkles, Zap, Brain, TrendingUp, Shield, Target, Download, Trash2, RotateCw, MessageCircle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 // Risk Calculator Table Component
 function RiskCalculatorTable({ data }: { data: string }) {
@@ -78,6 +79,7 @@ function RiskCalculatorTable({ data }: { data: string }) {
 
 export default function AIMentor() {
   const { t, i18n } = useTranslation();
+  const { loading: authLoading } = useAuth();
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Siap, Bro! 🚀 **MPT Warrior AI** aktif. Gue ready untuk:\n\n✅ **Analisa Chart** - Struktur, key level, entry points\n✅ **Hitung Risk** - Lot size dengan manajemen risk\n✅ **Reset Mental** - Mindset, affirmation, motivasi\n✅ **Strategy Review** - Evaluasi strategi trading Anda\n\nKirim chart atau tanya strategi. Mari kita menang! 💪' }
   ]);
