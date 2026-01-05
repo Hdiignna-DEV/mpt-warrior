@@ -127,6 +127,9 @@ export default function JurnalTrading() {
         // Reload trades from API
         await loadTrades();
         
+        // Emit event to notify other components (like Dashboard)
+        window.dispatchEvent(new CustomEvent('tradesUpdated'));
+        
         // Reset form
         setPair('XAUUSD');
         setPip('');
@@ -158,6 +161,8 @@ export default function JurnalTrading() {
 
       if (response.ok) {
         await loadTrades();
+        // Emit event to notify Dashboard
+        window.dispatchEvent(new CustomEvent('tradesUpdated'));
         alert('✅ Trade dihapus');
       } else {
         alert('❌ Gagal menghapus trade');

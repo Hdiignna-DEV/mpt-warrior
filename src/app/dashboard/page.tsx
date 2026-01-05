@@ -10,13 +10,22 @@ import {
   Flame, Sparkles, ArrowUpRight, ArrowDownRight, Activity, 
   Clock, CheckCircle2, XCircle, Trophy, Rocket, Shield, Sword, Brain, FileText, Lock
 } from 'lucide-react';
-import { getTrades, getInitialBalance, saveInitialBalance, onTradesUpdated } from '@/utils/storage-sync';
+import { getInitialBalance, saveInitialBalance } from '@/utils/storage-sync';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { BentoGrid } from '@/components/Dashboard/BentoGrid';
 import { toast } from '@/utils/toast';
-import type { Trade } from '@/utils/storage-sync';
+
+interface Trade {
+  id: string;
+  pair: string;
+  posisi: 'BUY' | 'SELL';
+  hasil: 'WIN' | 'LOSS';
+  pip: number;
+  tanggal: string;
+  catatan: string;
+}
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -28,13 +37,43 @@ export default function Dashboard() {
   const [tempBalance, setTempBalance] = useState<string>('10000');
   const [isDecrypting, setIsDecrypting] = useState(false);
 
-  // Load trades dan balance dari localStorage on mount
+  // Load trades from API
+  const loadTrades = async () => {
+    try {
+      const token = localStorage.getItem('mpt_token');
+      if (!token) return;
+
+      const response = await fetch('/api/trades', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Map API response to dashboard format
+        const mappedTrades = data.trades.map((t: any) => ({
+          id: t.id,
+          pair: t.pair,
+          posisi: t.position,
+          hasil: t.result,
+          pip: t.pips,
+          tanggal: new Date(t.tradeDate).toLocaleDateString('id-ID'),
+          catatan: t.notes || '',
+        }));
+        setTrades(mappedTrades);
+      }
+    } catch (error) {
+      console.error('Error loading trades:', error);
+    }
+  };
+
+  // Load trades and balance on mount
   useEffect(() => {
     setIsLoading(true);
     
-    // Load initial trades
-    const initialTrades = getTrades();
-    setTrades(initialTrades);
+    // Load trades from API
+    loadTrades();
     
     // Load initial balance
     const initialBalance = getInitialBalance();
@@ -44,26 +83,31 @@ export default function Dashboard() {
     setIsLoading(false);
   }, []);
 
-  // Subscribe to trades updates (real-time sync)
+  // Poll for updates every 30 seconds
   useEffect(() => {
-    const unsubscribe = onTradesUpdated((updatedTrades) => {
-      setTrades(updatedTrades);
-    });
+    const interval = setInterval(() => {
+      loadTrades();
+    }, 30000);
 
-    return unsubscribe;
+    return () => clearInterval(interval);
   }, []);
 
-  // Also listen to storage changes from other tabs
+  // Listen for custom event when trades updated
+  useEffect(() => {
+    const handleTradesUpdate = () => {
+      loadTrades();
+    };
+
+    window.addEventListener('tradesUpdated', handleTradesUpdate);
+
+    return () => {
+      window.removeEventListener('tradesUpdated', handleTradesUpdate);
+    };
+  }, []);
+
+  // Also listen to storage changes for balance
   useEffect(() => {
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'trades' && event.newValue) {
-        try {
-          const updatedTrades = JSON.parse(event.newValue);
-          setTrades(updatedTrades);
-        } catch (error) {
-          console.error('Error updating trades from storage:', error);
-        }
-      }
       if (event.key === 'mpt_initial_balance' && event.newValue) {
         try {
           const balance = parseFloat(event.newValue);

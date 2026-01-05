@@ -26,21 +26,45 @@ export default function AnalyticsPage() {
   const [balance, setBalance] = useState(10000);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Load trades from API
+  const loadTrades = async () => {
+    try {
+      const token = localStorage.getItem('mpt_token');
+      if (!token) return;
+
+      const response = await fetch('/api/trades', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Map API response to analytics format
+        const mappedTrades = data.trades.map((t: any) => ({
+          id: t.id,
+          pair: t.pair,
+          posisi: t.position,
+          hasil: t.result,
+          pip: t.pips,
+          tanggal: new Date(t.tradeDate).toLocaleDateString('id-ID'),
+          catatan: t.notes || '',
+        }));
+        setTrades(mappedTrades);
+      }
+    } catch (error) {
+      console.error('Error loading trades:', error);
+    }
+  };
+
   useEffect(() => {
     setIsLoading(true);
-    const saved = localStorage.getItem('trades');
+    
+    // Load trades from API
+    loadTrades();
+    
+    // Load balance from localStorage
     const savedBalance = localStorage.getItem('mpt_initial_balance');
-
-    if (saved) {
-      try {
-        const parsedTrades = JSON.parse(saved);
-        setTrades(Array.isArray(parsedTrades) ? parsedTrades : []);
-      } catch (error) {
-        console.error('Error parsing trades:', error);
-        setTrades([]);
-      }
-    }
-
     if (savedBalance) {
       try {
         const balanceNum = parseFloat(savedBalance);
@@ -51,6 +75,19 @@ export default function AnalyticsPage() {
     }
 
     setIsLoading(false);
+  }, []);
+
+  // Listen for custom event when trades updated
+  useEffect(() => {
+    const handleTradesUpdate = () => {
+      loadTrades();
+    };
+
+    window.addEventListener('tradesUpdated', handleTradesUpdate);
+
+    return () => {
+      window.removeEventListener('tradesUpdated', handleTradesUpdate);
+    };
   }, []);
 
   if (isLoading) {
