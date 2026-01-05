@@ -41,6 +41,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if user is pending approval
+    if (user.status === 'pending') {
+      return NextResponse.json(
+        { 
+          error: 'Akun Anda masih menunggu persetujuan dari Admin. Cek kembali nanti.',
+          status: 'pending',
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            status: user.status,
+          }
+        },
+        { status: 403 }
+      );
+    }
+
     // Check if user is rejected
     if (user.status === 'rejected') {
       return NextResponse.json(

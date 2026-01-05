@@ -33,6 +33,12 @@ export function useAuth(requireAuth: boolean = true, requireAdmin: boolean = fal
           const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
 
+          // If user is pending, redirect to pending approval page
+          if (requireAuth && parsedUser.status === 'pending') {
+            window.location.href = '/pending-approval';
+            return;
+          }
+
           // If admin is required but user is not admin
           if (requireAdmin && parsedUser.role !== 'ADMIN') {
             window.location.href = '/dashboard';

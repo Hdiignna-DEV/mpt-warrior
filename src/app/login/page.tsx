@@ -30,6 +30,12 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        // If user is pending, redirect to pending page
+        if (data.status === 'pending' && data.user) {
+          localStorage.setItem('mpt_user', JSON.stringify(data.user));
+          window.location.href = '/pending-approval';
+          return;
+        }
         throw new Error(data.error || 'Login gagal');
       }
 
