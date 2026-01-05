@@ -64,12 +64,12 @@ export default function Footer() {
             </h4>
             <ul className="text-slate-500 text-[10px] md:text-xs space-y-2.5 uppercase tracking-wider">
               <li>
-                <Link href="/" className="hover:text-amber-500 transition-colors duration-300 inline-block">
+                <Link href="/journal" className="hover:text-amber-500 transition-colors duration-300 inline-block">
                   Command Center
                 </Link>
               </li>
               <li>
-                <Link href="/" className="hover:text-amber-500 transition-colors duration-300 inline-block">
+                <Link href="/analytics" className="hover:text-amber-500 transition-colors duration-300 inline-block">
                   War Zone Calendar
                 </Link>
               </li>
