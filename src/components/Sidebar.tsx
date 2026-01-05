@@ -14,6 +14,7 @@ import {
   Zap,
   ArrowRight,
   Sparkles,
+  Shield,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,11 +28,34 @@ const menuItems = [
   { href: '/achievements', label: 'nav.achievements', fallback: 'Achievements', icon: Trophy, description: 'Progress' },
 ];
 
+// Admin-only menu item
+const adminMenuItem = { 
+  href: '/admin-hq', 
+  label: 'nav.adminHQ', 
+  fallback: 'Admin HQ', 
+  icon: Shield, 
+  description: 'Commander' 
+};
+
 export default function Sidebar() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const [isDesktopOpen, setIsDesktopOpen] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  // Get user role from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem('mpt_user');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        setUserRole(user.role);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+  }, []);
 
   // Store desktop sidebar state in localStorage
   useEffect(() => {
@@ -195,6 +219,54 @@ export default function Sidebar() {
               </Link>
             );
           })}
+
+          {/* Admin HQ Menu - Only for ADMIN role */}
+          {userRole === 'ADMIN' && (
+            <>
+              {/* Divider */}
+              <div className="py-2">
+                <div className="border-t border-amber-200 dark:border-amber-800/30" />
+                <p className="text-xs font-bold text-amber-600 dark:text-amber-400 mt-3 mb-1 px-2 uppercase tracking-wider">Admin Panel</p>
+              </div>
+
+              {/* Admin HQ Link */}
+              <Link
+                href={adminMenuItem.href}
+                className={`
+                  group relative flex items-center gap-3 px-4 py-3 rounded-xl
+                  transition-all duration-300 font-semibold
+                  ${pathname === adminMenuItem.href
+                    ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/30 scale-[1.02]' 
+                    : 'text-gray-700 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 hover:bg-red-50 dark:hover:bg-red-950/20 border-2 border-red-200 dark:border-red-800/30'
+                  }
+                `}
+              >
+                {/* Icon Container */}
+                <div className={`
+                  flex-shrink-0 p-2 rounded-lg transition-all duration-300
+                  ${pathname === adminMenuItem.href
+                    ? 'bg-white/20' 
+                    : 'bg-red-100 dark:bg-red-900/30 group-hover:bg-red-200 dark:group-hover:bg-red-800/30'
+                  }
+                `}>
+                  <Shield size={20} />
+                </div>
+
+                {/* Text Content */}
+                <div className="flex-1">
+                  <p className="text-sm font-bold">{adminMenuItem.fallback}</p>
+                  <p className={`text-xs ${pathname === adminMenuItem.href ? 'text-white/80' : 'text-red-600 dark:text-red-400'}`}>
+                    {adminMenuItem.description}
+                  </p>
+                </div>
+
+                {/* Active Indicator */}
+                {pathname === adminMenuItem.href && (
+                  <ArrowRight className="w-5 h-5 text-white/80" />
+                )}
+              </Link>
+            </>
+          )}
         </nav>
 
         {/* Footer Section */}
