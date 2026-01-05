@@ -65,7 +65,7 @@ export function middleware(request: NextRequest) {
   // ============================================
   let user: any = null;
   
-  const token = request.cookies.get('mpt_token')?.value;
+  const token = request.cookies.get('token')?.value;
   
   if (!token) {
     // No token = redirect to login
