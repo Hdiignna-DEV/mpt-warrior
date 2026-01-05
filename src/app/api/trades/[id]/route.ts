@@ -8,7 +8,7 @@ import { getTradeById, updateTrade, deleteTrade } from '@/lib/db/trade-service';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const decoded = await verifyToken(request);
@@ -20,7 +20,8 @@ export async function GET(
       return NextResponse.json({ error: 'Account not active' }, { status: 403 });
     }
 
-    const trade = await getTradeById(decoded.userId, params.id);
+    const { id } = await params;
+    const trade = await getTradeById(decoded.userId, id);
     
     if (!trade) {
       return NextResponse.json({ error: 'Trade not found' }, { status: 404 });
@@ -38,7 +39,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const decoded = await verifyToken(request);
@@ -50,8 +51,9 @@ export async function PUT(
       return NextResponse.json({ error: 'Account not active' }, { status: 403 });
     }
 
+    const { id } = await params;
     const body = await request.json();
-    const updatedTrade = await updateTrade(decoded.userId, params.id, body);
+    const updatedTrade = await updateTrade(decoded.userId, id, body);
 
     return NextResponse.json({
       success: true,
@@ -69,7 +71,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const decoded = await verifyToken(request);
@@ -81,7 +83,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Account not active' }, { status: 403 });
     }
 
-    await deleteTrade(decoded.userId, params.id);
+    const { id } = await params;
+    await deleteTrade(decoded.userId, id);
 
     return NextResponse.json({
       success: true,
