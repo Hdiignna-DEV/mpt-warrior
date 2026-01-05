@@ -59,6 +59,11 @@ export default function AdminHQPage() {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'pending' | 'active' | 'codes' | 'audit'>('pending');
+  
+  // Search states
+  const [searchPending, setSearchPending] = useState('');
+  const [searchActive, setSearchActive] = useState('');
+  const [searchCodes, setSearchCodes] = useState('');
 
   useEffect(() => {
     // Check if user is admin
@@ -116,6 +121,24 @@ export default function AdminHQPage() {
       setLoading(false);
     }
   };
+
+  // Filter functions
+  const filteredPendingUsers = pendingUsers.filter(user => 
+    user.name.toLowerCase().includes(searchPending.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchPending.toLowerCase()) ||
+    user.invitation_code.toLowerCase().includes(searchPending.toLowerCase())
+  );
+
+  const filteredActiveUsers = activeUsers.filter(user =>
+    user.name.toLowerCase().includes(searchActive.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchActive.toLowerCase()) ||
+    user.role.toLowerCase().includes(searchActive.toLowerCase())
+  );
+
+  const filteredCodes = invitationCodes.filter(code =>
+    code.code.toLowerCase().includes(searchCodes.toLowerCase()) ||
+    (code.description && code.description.toLowerCase().includes(searchCodes.toLowerCase()))
+  );
 
   const handleApprove = async (userId: string) => {
     if (!confirm('Approve user ini?')) return;
@@ -191,6 +214,34 @@ export default function AdminHQPage() {
       }
     } catch (error) {
       console.error('Error suspending user:', error);
+      alert('❌ Terjadi kesalahan');
+    }
+  };
+
+  const handlePromoteToAdmin = async (email: string, userName: string) => {
+    if (!confirm(`Promote ${userName} (${email}) menjadi ADMIN?\n\n⚠️ ADMIN akan memiliki akses ke Admin HQ!`)) return;
+
+    try {
+      const token = localStorage.getItem('mpt_token');
+      const response = await fetch('/api/admin/promote-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`✅ ${userName} berhasil dipromote menjadi ${data.targetRole}!`);
+        loadData();
+      } else {
+        const data = await response.json();
+        alert(`❌ ${data.error || 'Gagal promote user'}`);
+      }
+    } catch (error) {
+      console.error('Error promoting user:', error);
       alert('❌ Terjadi kesalahan');
     }
   };
@@ -506,12 +557,25 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
         {/* Content */}
         {activeTab === 'pending' && (
           <div className="space-y-4">
-            {pendingUsers.length === 0 ? (
+            {/* Search Box */}
+            <div className="glass-premium rounded-xl p-4">
+              <input
+                type="text"
+                placeholder="🔍 Search by name, email, or invitation code..."
+                value={searchPending}
+                onChange={(e) => setSearchPending(e.target.value)}
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+              />
+            </div>
+
+            {filteredPendingUsers.length === 0 ? (
               <div className="glass-premium rounded-2xl p-12 text-center">
-                <p className="text-slate-400">Tidak ada pending users</p>
+                <p className="text-slate-400">
+                  {searchPending ? 'No users found matching your search' : 'Tidak ada pending users'}
+                </p>
               </div>
             ) : (
-              pendingUsers.map((user) => (
+              filteredPendingUsers.map((user) => (
                 <div key={user.id} className="glass-premium rounded-2xl p-4 md:p-6">
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                     <div className="flex-1">
@@ -521,6 +585,7 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
                         {user.whatsapp && <p>📱 WA: {user.whatsapp}</p>}
                         {user.telegram_id && <p>✈️ TG: {user.telegram_id}</p>}
                         <p>🔑 Code: <span className="text-amber-400 font-mono">{user.invitation_code}</span></p>
+                        <p>🎖️ Role: <span className={`font-bold ${user.role === 'ADMIN' ? 'text-red-400' : 'text-blue-400'}`}>{user.role}</span></p>
                         <p>📅 Registered: {new Date(user.createdAt).toLocaleDateString('id-ID')}</p>
                       </div>
                     </div>
@@ -537,6 +602,14 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
                       >
                         <XCircle size={18} /> REJECT
                       </button>
+                      {currentUser?.role === 'SUPER_ADMIN' && user.role !== 'ADMIN' && (
+                        <button
+                          onClick={() => handlePromoteToAdmin(user.email, user.name)}
+                          className="flex-1 md:flex-none px-3 md:px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-sm"
+                        >
+                          ⬆️ PROMOTE
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -547,32 +620,60 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
 
         {activeTab === 'active' && (
           <div className="space-y-4">
-            {activeUsers.map((user) => (
-              <div key={user.id} className="glass-premium rounded-2xl p-4 md:p-6">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg md:text-xl font-black text-white mb-2">{user.name}</h3>
-                    <div className="space-y-1 text-xs md:text-sm text-slate-400">
-                      <p className="truncate">📧 {user.email}</p>
-                      {user.whatsapp && <p>📱 WA: {user.whatsapp}</p>}
-                      {user.telegram_id && <p>✈️ TG: {user.telegram_id}</p>}
-                      <p>📅 Joined: {new Date(user.join_date).toLocaleDateString('id-ID')}</p>
+            {/* Search Box */}
+            <div className="glass-premium rounded-xl p-4">
+              <input
+                type="text"
+                placeholder="🔍 Search by name, email, or role..."
+                value={searchActive}
+                onChange={(e) => setSearchActive(e.target.value)}
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+              />
+            </div>
+
+            {filteredActiveUsers.length === 0 ? (
+              <div className="glass-premium rounded-2xl p-12 text-center">
+                <p className="text-slate-400">
+                  {searchActive ? 'No users found matching your search' : 'No active users'}
+                </p>
+              </div>
+            ) : (
+              filteredActiveUsers.map((user) => (
+                <div key={user.id} className="glass-premium rounded-2xl p-4 md:p-6">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg md:text-xl font-black text-white mb-2">{user.name}</h3>
+                      <div className="space-y-1 text-xs md:text-sm text-slate-400">
+                        <p className="truncate">📧 {user.email}</p>
+                        {user.whatsapp && <p>📱 WA: {user.whatsapp}</p>}
+                        {user.telegram_id && <p>✈️ TG: {user.telegram_id}</p>}
+                        <p>🎖️ Role: <span className={`font-bold ${user.role === 'ADMIN' ? 'text-red-400' : user.role === 'SUPER_ADMIN' ? 'text-purple-400' : 'text-blue-400'}`}>{user.role}</span></p>
+                        <p>📅 Joined: {new Date(user.join_date).toLocaleDateString('id-ID')}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex gap-2 flex-wrap items-center">
-                    <div className="px-3 md:px-4 py-2 bg-green-500/20 rounded-xl border border-green-500/30">
-                      <span className="text-green-400 font-bold text-xs md:text-sm">ACTIVE</span>
+                    <div className="flex gap-2 flex-wrap items-center">
+                      <div className="px-3 md:px-4 py-2 bg-green-500/20 rounded-xl border border-green-500/30">
+                        <span className="text-green-400 font-bold text-xs md:text-sm">ACTIVE</span>
+                      </div>
+                      <button
+                        onClick={() => handleSuspend(user.id)}
+                        className="flex-1 md:flex-none px-3 md:px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-sm"
+                      >
+                        <Ban size={18} /> SUSPEND
+                      </button>
+                      {currentUser?.role === 'SUPER_ADMIN' && user.role === 'WARRIOR' && (
+                        <button
+                          onClick={() => handlePromoteToAdmin(user.email, user.name)}
+                          className="flex-1 md:flex-none px-3 md:px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-sm"
+                        >
+                          ⬆️ PROMOTE
+                        </button>
+                      )}
                     </div>
-                    <button
-                      onClick={() => handleSuspend(user.id)}
-                      className="flex-1 md:flex-none px-3 md:px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors text-sm"
-                    >
-                      <Ban size={18} /> SUSPEND
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         )}
 
@@ -593,10 +694,28 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
               </button>
             </div>
 
-            {invitationCodes.map((code) => (
-              <div key={code.code} className="glass-premium rounded-2xl p-4 md:p-6">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                  <div className="flex-1">
+            {/* Search Box */}
+            <div className="glass-premium rounded-xl p-4">
+              <input
+                type="text"
+                placeholder="🔍 Search by code or description..."
+                value={searchCodes}
+                onChange={(e) => setSearchCodes(e.target.value)}
+                className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+              />
+            </div>
+
+            {filteredCodes.length === 0 ? (
+              <div className="glass-premium rounded-2xl p-12 text-center">
+                <p className="text-slate-400">
+                  {searchCodes ? 'No codes found matching your search' : 'No invitation codes'}
+                </p>
+              </div>
+            ) : (
+              filteredCodes.map((code) => (
+                <div key={code.code} className="glass-premium rounded-2xl p-4 md:p-6">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <div className="flex-1">
                     <h3 className="text-xl md:text-2xl font-black text-amber-400 font-mono mb-2 break-all">{code.code}</h3>
                     <div className="space-y-1 text-xs md:text-sm text-slate-400">
                       <p>📊 Usage: {code.used_count} / {code.max_uses}</p>
@@ -638,7 +757,8 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
                   </div>
                 </div>
               </div>
-            ))}
+            ))
+            )}
           </div>
         )}
 
