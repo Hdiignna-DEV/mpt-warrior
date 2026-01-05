@@ -19,14 +19,29 @@ export async function GET(request: NextRequest) {
 
     const container = getAuditLogsContainer();
 
-    // Build query
-    let query = 'SELECT * FROM c ORDER BY c.timestamp DESC';
+    // Build query based on role
+    // SUPER_ADMIN sees all logs, ADMIN only sees their own actions
+    let query = 'SELECT * FROM c';
     const parameters: any[] = [];
 
-    if (action) {
-      query = 'SELECT * FROM c WHERE c.action = @action ORDER BY c.timestamp DESC';
-      parameters.push({ name: '@action', value: action });
+    if (decoded!.role === 'ADMIN') {
+      // ADMIN only sees logs performed by themselves
+      query += ' WHERE c.performed_by = @email';
+      parameters.push({ name: '@email', value: decoded!.email });
+      
+      if (action) {
+        query += ' AND c.action = @action';
+        parameters.push({ name: '@action', value: action });
+      }
+    } else {
+      // SUPER_ADMIN sees all logs
+      if (action) {
+        query += ' WHERE c.action = @action';
+        parameters.push({ name: '@action', value: action });
+      }
     }
+
+    query += ' ORDER BY c.timestamp DESC';
 
     // Add limit
     query += ` OFFSET 0 LIMIT ${Math.min(limit, 100)}`;

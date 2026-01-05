@@ -12,8 +12,8 @@ export async function GET(request: NextRequest) {
     const { decoded, error } = validateAdmin(request);
     if (error) return error;
 
-    // Get active users
-    const users = await getActiveUsers();
+    // Get active users (filtered by admin role)
+    const users = await getActiveUsers(decoded!.role);
 
     return NextResponse.json({
       success: true,

@@ -321,12 +321,13 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
   };
 
   const handleBulkGenerate = async () => {
-    const quantity = prompt('Berapa kode yang ingin dibuat? (max 100):');
+    const maxAllowed = currentUser?.role === 'SUPER_ADMIN' ? 100 : 50;
+    const quantity = prompt(`Berapa kode yang ingin dibuat? (max ${maxAllowed}):`);
     if (!quantity) return;
 
     const qty = parseInt(quantity);
-    if (isNaN(qty) || qty < 1 || qty > 100) {
-      alert('❌ Jumlah harus antara 1-100');
+    if (isNaN(qty) || qty < 1 || qty > maxAllowed) {
+      alert(`❌ Jumlah harus antara 1-${maxAllowed}`);
       return;
     }
 
@@ -582,7 +583,7 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
                 onClick={handleBulkGenerate}
                 className="px-4 md:px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-bold flex items-center gap-2 text-sm md:text-base transition-colors"
               >
-                <Plus size={20} /> Bulk Generate (1-100)
+                <Plus size={20} /> Bulk Generate (1-{currentUser?.role === 'SUPER_ADMIN' ? '100' : '50'})
               </button>
               <button 
                 onClick={handleGenerateCode}
@@ -626,12 +627,14 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
                     >
                       ✏️ EDIT
                     </button>
-                    <button
-                      onClick={() => handleDeleteCode(code.code)}
-                      className="px-3 md:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold flex items-center gap-2 transition-colors text-xs md:text-sm"
-                    >
-                      <XCircle size={16} /> DELETE
-                    </button>
+                    {currentUser?.role === 'SUPER_ADMIN' && (
+                      <button
+                        onClick={() => handleDeleteCode(code.code)}
+                        className="px-3 md:px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold flex items-center gap-2 transition-colors text-xs md:text-sm"
+                      >
+                        <XCircle size={16} /> DELETE
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

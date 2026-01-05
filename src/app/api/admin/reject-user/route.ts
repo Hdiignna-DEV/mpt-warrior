@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User ID required' }, { status: 400 });
     }
 
-    // Reject user
-    await rejectUser(userId, decoded!.email);
+    // Reject user (with role-based permission check)
+    await rejectUser(userId, decoded!.email, decoded!.role);
 
     return NextResponse.json({
       success: true,

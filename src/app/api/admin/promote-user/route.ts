@@ -4,13 +4,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { validateAdmin } from '@/lib/middleware/auth';
+import { validateSuperAdmin } from '@/lib/middleware/auth';
 import { getUsersContainer } from '@/lib/db/cosmos-client';
 
 export async function POST(request: NextRequest) {
   try {
-    // Validate admin access
-    const { decoded, error } = validateAdmin(request);
+    // Validate SUPER_ADMIN access (only SUPER_ADMIN can promote)
+    const { decoded, error } = validateSuperAdmin(request);
     if (error) return error;
 
     const body = await request.json();

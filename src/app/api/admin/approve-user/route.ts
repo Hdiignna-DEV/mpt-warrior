@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User ID required' }, { status: 400 });
     }
 
-    // Approve user
-    const updatedUser = await approveUser(userId, decoded!.email);
+    // Approve user (with role-based permission check)
+    const updatedUser = await approveUser(userId, decoded!.email, decoded!.role);
 
     // Send approval email (non-blocking)
     if (updatedUser.email && updatedUser.name) {

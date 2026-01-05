@@ -84,8 +84,9 @@ export async function getPendingUsers(): Promise<User[]> {
 
 /**
  * Approve user (change status to active)
+ * SUPER_ADMIN can approve anyone, ADMIN can only approve WARRIOR
  */
-export async function approveUser(userId: string, approvedBy: string): Promise<User> {
+export async function approveUser(userId: string, approvedBy: string, adminRole: UserRole = 'ADMIN'): Promise<User> {
   const container = getUsersContainer();
   
   const { resource: user } = await container.item(userId, userId).read<User>();
@@ -94,10 +95,14 @@ export async function approveUser(userId: string, approvedBy: string): Promise<U
     throw new Error("User not found");
   }
 
+  // Permission check: Only SUPER_ADMIN can approve ADMIN users
+  if (user.role === 'ADMIN' && adminRole !== 'SUPER_ADMIN') {
+    throw new Error("Only SUPER_ADMIN can approve ADMIN users");
+  }
+
   const updatedUser: User = {
     ...user,
     status: 'active',
-    role: 'WARRIOR',
     approved_date: new Date(),
     approved_by: approvedBy,
     updatedAt: new Date(),
@@ -118,14 +123,20 @@ export async function approveUser(userId: string, approvedBy: string): Promise<U
 
 /**
  * Reject user (change status to rejected)
+ * SUPER_ADMIN can reject anyone, ADMIN can only reject WARRIOR
  */
-export async function rejectUser(userId: string, rejectedBy: string): Promise<void> {
+export async function rejectUser(userId: string, rejectedBy: string, adminRole: UserRole = 'ADMIN'): Promise<void> {
   const container = getUsersContainer();
   
   const { resource: user } = await container.item(userId, userId).read<User>();
   
   if (!user) {
     throw new Error("User not found");
+  }
+
+  // Permission check: Only SUPER_ADMIN can reject ADMIN users
+  if (user.role === 'ADMIN' && adminRole !== 'SUPER_ADMIN') {
+    throw new Error("Only SUPER_ADMIN can reject ADMIN users");
   }
 
   const updatedUser: User = {
@@ -147,14 +158,20 @@ export async function rejectUser(userId: string, rejectedBy: string): Promise<vo
 
 /**
  * Suspend user
+ * SUPER_ADMIN can suspend anyone, ADMIN can only suspend WARRIOR
  */
-export async function suspendUser(userId: string, suspendedBy: string): Promise<User> {
+export async function suspendUser(userId: string, suspendedBy: string, adminRole: UserRole = 'ADMIN'): Promise<User> {
   const container = getUsersContainer();
   
   const { resource: user } = await container.item(userId, userId).read<User>();
   
   if (!user) {
     throw new Error("User not found");
+  }
+
+  // Permission check: Only SUPER_ADMIN can suspend ADMIN users
+  if (user.role === 'ADMIN' && adminRole !== 'SUPER_ADMIN') {
+    throw new Error("Only SUPER_ADMIN can suspend ADMIN users");
   }
 
   const updatedUser: User = {
@@ -199,18 +216,32 @@ export async function updateUserLogin(userId: string): Promise<void> {
 }
 
 /**
- * Get all active users (WARRIOR role)
+ * Get active users
+ * SUPER_ADMIN sees all active users (including ADMINs)
+ * ADMIN only sees active WARRIORs
  */
-export async function getActiveUsers(): Promise<User[]> {
+export async function getActiveUsers(adminRole: UserRole = 'ADMIN'): Promise<User[]> {
   const container = getUsersContainer();
   
-  const query = {
-    query: "SELECT * FROM c WHERE c.status = @status AND c.role = @role ORDER BY c.join_date DESC",
-    parameters: [
-      { name: "@status", value: "active" },
-      { name: "@role", value: "WARRIOR" },
-    ],
-  };
+  let query;
+  if (adminRole === 'SUPER_ADMIN') {
+    // SUPER_ADMIN sees all active users
+    query = {
+      query: "SELECT * FROM c WHERE c.status = @status ORDER BY c.join_date DESC",
+      parameters: [
+        { name: "@status", value: "active" },
+      ],
+    };
+  } else {
+    // ADMIN only sees active WARRIORs
+    query = {
+      query: "SELECT * FROM c WHERE c.status = @status AND c.role = @role ORDER BY c.join_date DESC",
+      parameters: [
+        { name: "@status", value: "active" },
+        { name: "@role", value: "WARRIOR" },
+      ],
+    };
+  }
 
   const { resources } = await container.items.query<User>(query).fetchAll();
   return resources;

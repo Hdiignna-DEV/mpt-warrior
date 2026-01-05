@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User ID required' }, { status: 400 });
     }
 
-    // Suspend user
-    const updatedUser = await suspendUser(userId, decoded!.email);
+    // Suspend user (with role-based permission check)
+    const updatedUser = await suspendUser(userId, decoded!.email, decoded!.role);
 
     return NextResponse.json({
       success: true,

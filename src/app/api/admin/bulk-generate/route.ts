@@ -16,10 +16,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { quantity, prefix, role, description, maxUsesPerCode } = body;
 
+    // Permission-based limits: SUPER_ADMIN = unlimited, ADMIN = max 50
+    const maxAllowed = decoded!.role === 'SUPER_ADMIN' ? 100 : 50;
+
     // Validation
-    if (!quantity || quantity < 1 || quantity > 100) {
+    if (!quantity || quantity < 1 || quantity > maxAllowed) {
       return NextResponse.json(
-        { error: 'Quantity must be between 1 and 100' },
+        { error: `Quantity must be between 1 and ${maxAllowed}${decoded!.role === 'ADMIN' ? ' (ADMIN limit)' : ''}` },
         { status: 400 }
       );
     }
