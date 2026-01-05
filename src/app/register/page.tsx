@@ -49,6 +49,11 @@ export default function RegisterPage() {
       // Remove confirmPassword before sending (only used for client validation)
       const { confirmPassword, ...registrationData } = formData;
       
+      console.log('[REGISTER] Sending registration data:', {
+        ...registrationData,
+        password: '[HIDDEN]'
+      });
+      
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -56,6 +61,12 @@ export default function RegisterPage() {
       });
 
       const data = await response.json();
+      
+      console.log('[REGISTER] Response:', {
+        status: response.status,
+        ok: response.ok,
+        data
+      });
 
       if (!response.ok) {
         throw new Error(data.error || 'Registrasi gagal');
@@ -66,6 +77,7 @@ export default function RegisterPage() {
         router.push('/pending-approval');
       }, 2000);
     } catch (err: any) {
+      console.error('[REGISTER] Error:', err);
       setError(err.message || 'Terjadi kesalahan saat registrasi');
     } finally {
       setLoading(false);
