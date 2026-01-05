@@ -16,56 +16,38 @@ export async function GET(request: NextRequest) {
     const usersContainer = getUsersContainer();
     const codesContainer = getCodesContainer();
 
-    // Get user statistics
-    const usersQuery = {
-      query: `
-        SELECT 
-          c.status,
-          c.role,
-          COUNT(1) as count
-        FROM c
-        GROUP BY c.status, c.role
-      `,
-    };
+    // Get all users (simpler query, calculate in code)
+    const { resources: allUsers } = await usersContainer.items
+      .query('SELECT * FROM c')
+      .fetchAll();
 
-    const { resources: userStats } = await usersContainer.items.query(usersQuery).fetchAll();
-
-    // Calculate totals
-    const totalUsers = userStats.reduce((sum, stat) => sum + stat.count, 0);
-    const pendingUsers = userStats.filter(s => s.status === 'pending').reduce((sum, s) => sum + s.count, 0);
-    const activeUsers = userStats.filter(s => s.status === 'active').reduce((sum, s) => sum + s.count, 0);
-    const suspendedUsers = userStats.filter(s => s.status === 'suspended').reduce((sum, s) => sum + s.count, 0);
+    // Calculate statistics in code
+    const totalUsers = allUsers.length;
+    const pendingUsers = allUsers.filter(u => u.status === 'pending').length;
+    const activeUsers = allUsers.filter(u => u.status === 'active').length;
+    const suspendedUsers = allUsers.filter(u => u.status === 'suspended').length;
     
-    const activeWarriors = userStats.find(s => s.status === 'active' && s.role === 'WARRIOR')?.count || 0;
-    const activeAdmins = userStats.find(s => s.status === 'active' && s.role === 'ADMIN')?.count || 0;
-    const activeSuperAdmins = userStats.find(s => s.status === 'active' && s.role === 'SUPER_ADMIN')?.count || 0;
+    const activeWarriors = allUsers.filter(u => u.status === 'active' && u.role === 'WARRIOR').length;
+    const activeAdmins = allUsers.filter(u => u.status === 'active' && u.role === 'ADMIN').length;
+    const activeSuperAdmins = allUsers.filter(u => u.status === 'active' && u.role === 'SUPER_ADMIN').length;
 
-    // Get code statistics
-    const codesQuery = {
-      query: `
-        SELECT 
-          COUNT(1) as totalCodes,
-          SUM(CASE WHEN c.is_active = true THEN 1 ELSE 0 END) as activeCodes,
-          SUM(c.used_count) as totalUsage,
-          SUM(c.max_uses) as totalCapacity
-        FROM c
-      `,
-    };
+    // Get all codes (calculate in code)
+    const { resources: allCodes } = await codesContainer.items
+      .query('SELECT * FROM c')
+      .fetchAll();
 
-    const { resources: codeStats } = await codesContainer.items.query(codesQuery).fetchAll();
-    const codes = codeStats[0] || { totalCodes: 0, activeCodes: 0, totalUsage: 0, totalCapacity: 0 };
+    const totalCodes = allCodes.length;
+    const activeCodes = allCodes.filter(c => c.is_active === true).length;
+    const totalUsage = allCodes.reduce((sum, c) => sum + (c.used_count || 0), 0);
+    const totalCapacity = allCodes.reduce((sum, c) => sum + (c.max_uses || 0), 0);
 
-    // Get recent growth (last 7 days) - simple version
+    // Calculate recent growth (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const recentUsersQuery = {
-      query: 'SELECT COUNT(1) as count FROM c WHERE c.createdAt >= @date',
-      parameters: [{ name: '@date', value: sevenDaysAgo.toISOString() }],
-    };
-
-    const { resources: recentUsers } = await usersContainer.items.query(recentUsersQuery).fetchAll();
-    const newUsersLast7Days = recentUsers[0]?.count || 0;
+    const newUsersLast7Days = allUsers.filter(u => {
+      const createdAt = new Date(u.createdAt);
+      return createdAt >= sevenDaysAgo;
+    }).length;
 
     return NextResponse.json({
       success: true,
@@ -85,14 +67,14 @@ export async function GET(request: NextRequest) {
           },
         },
         codes: {
-          total: codes.totalCodes,
-          active: codes.activeCodes,
-          inactive: codes.totalCodes - codes.activeCodes,
+          total: totalCodes,
+          active: activeCodes,
+          inactive: totalCodes - activeCodes,
           usage: {
-            used: codes.totalUsage,
-            capacity: codes.totalCapacity,
-            usageRate: codes.totalCapacity > 0 
-              ? Math.round((codes.totalUsage / codes.totalCapacity) * 100) 
+            used: totalUsage,
+            capacity: totalCapacity,
+            usageRate: totalCapacity > 0 
+              ? Math.round((totalUsage / totalCapacity) * 100) 
               : 0,
           },
         },

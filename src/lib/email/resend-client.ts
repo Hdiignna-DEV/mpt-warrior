@@ -36,7 +36,7 @@ export async function sendApprovalEmail(
     console.log(`📧 Sending approval email to: ${to}`);
 
     // Send email via Gmail SMTP
-    await gmailTransporter.sendMail({
+    const mailOptions = {
       from: SENDER_EMAIL,
       to: to,
       subject: '🎉 Your MPT Warrior Account Has Been Approved!',
@@ -111,9 +111,12 @@ export async function sendApprovalEmail(
 </body>
 </html>
       `,
-    });
+    };
 
+    const info = await gmailTransporter.sendMail(mailOptions);
+    
     console.log('✅ Approval email sent successfully to:', to);
+    console.log('Message ID:', info.messageId);
     return { success: true };
   } catch (error: any) {
     console.error('❌ Error sending approval email:', error);
