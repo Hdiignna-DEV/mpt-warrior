@@ -87,8 +87,8 @@ Sebagai MPT Warrior AI Mentor, analisis performa trading ini dengan format:
 
 Gunakan emoji dan bahasa yang engaging tapi tetap profesional. Berikan feedback yang spesifik berdasarkan data aktual.`;
 
-    // Call Gemini API - using correct model name without 'models/' prefix
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro-latest' });
+    // Call Gemini API - using gemini-1.5-flash (more stable and widely available)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const result = await model.generateContent(prompt);
     const analysis = result.response.text();
 
