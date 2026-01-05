@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Sparkles,
   Shield,
+  LogOut,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -271,6 +272,30 @@ export default function Sidebar() {
 
         {/* Footer Section */}
         <div className="p-4 border-t border-gray-200 dark:border-zinc-800 flex-shrink-0 space-y-4 bg-gradient-to-t from-gray-50 to-transparent dark:from-zinc-950 dark:to-transparent">
+          {/* Logout Button */}
+          <button
+            onClick={() => {
+              localStorage.removeItem('mpt_user');
+              localStorage.removeItem('mpt_token');
+              window.location.href = '/login';
+            }}
+            className="w-full group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-semibold text-gray-700 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 border-2 border-gray-200 dark:border-zinc-800 hover:border-red-300 dark:hover:border-red-800/50"
+          >
+            {/* Icon Container */}
+            <div className="flex-shrink-0 p-2 rounded-lg transition-all duration-300 bg-gray-100 dark:bg-zinc-800 group-hover:bg-red-100 dark:group-hover:bg-red-900/30">
+              <LogOut size={20} />
+            </div>
+
+            {/* Text Content */}
+            <div className="flex-1 text-left">
+              <p className="text-sm font-bold">Logout</p>
+              <p className="text-xs text-gray-500 dark:text-zinc-500 group-hover:text-red-600 dark:group-hover:text-red-400">Exit System</p>
+            </div>
+
+            {/* Arrow */}
+            <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
+
           {/* Premium Info Card */}
           <div className="relative p-4 rounded-xl border border-sky-200 dark:border-sky-800 bg-gradient-to-br from-sky-50 to-orange-50 dark:from-sky-950/20 dark:to-orange-950/20">
             <div className="text-center space-y-2">
