@@ -11,7 +11,8 @@ import {
   Activity, 
   Clock,
   Ban,
-  Plus
+  Plus,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/hooks/useAuth';
@@ -301,9 +302,19 @@ export default function AdminHQPage() {
               <h1 className="text-3xl md:text-4xl font-black text-red-400">ADMIN HQ</h1>
               <p className="text-slate-300 text-sm md:text-base">Commander Control Panel</p>
             </div>
-            <div className="text-left md:text-right text-sm text-slate-400 w-full md:w-auto">
-              <p className="font-bold text-white truncate">{currentUser?.name}</p>
-              <p className="truncate">{currentUser?.email}</p>
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={loadData}
+                disabled={loading}
+                className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                Refresh Data
+              </Button>
+              <div className="text-left md:text-right text-sm text-slate-400">
+                <p className="font-bold text-white truncate">{currentUser?.name}</p>
+                <p className="truncate">{currentUser?.email}</p>
+              </div>
             </div>
           </div>
           <div className="h-1 bg-gradient-to-r from-red-500 via-amber-500 to-transparent rounded-full"></div>

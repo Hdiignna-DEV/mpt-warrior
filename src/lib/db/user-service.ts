@@ -75,7 +75,10 @@ export async function getPendingUsers(): Promise<User[]> {
     parameters: [{ name: "@status", value: "pending" }],
   };
 
+  console.log('Querying pending users with status: pending');
   const { resources } = await container.items.query<User>(query).fetchAll();
+  console.log('Pending users found:', resources.length);
+  console.log('Users:', resources.map(u => ({ email: u.email, status: u.status, role: u.role })));
   return resources;
 }
 
