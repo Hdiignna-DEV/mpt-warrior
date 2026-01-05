@@ -303,6 +303,70 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
     });
   };
 
+  const handleBulkGenerate = async () => {
+    const quantity = prompt('Berapa kode yang ingin dibuat? (max 100):');
+    if (!quantity) return;
+
+    const qty = parseInt(quantity);
+    if (isNaN(qty) || qty < 1 || qty > 100) {
+      alert('❌ Jumlah harus antara 1-100');
+      return;
+    }
+
+    const prefix = prompt('Prefix kode (contoh: MPT-2026-BATCH):');
+    if (!prefix || prefix.length < 3) {
+      alert('❌ Prefix minimal 3 karakter');
+      return;
+    }
+
+    const roleChoice = confirm('Kode-kode ini untuk ADMIN?\n\nOK = ADMIN\nCancel = WARRIOR (member biasa)');
+    const role = roleChoice ? 'ADMIN' : 'WARRIOR';
+
+    const description = prompt('Deskripsi batch (opsional):') || 'Bulk generated';
+
+    const maxUsesInput = prompt('Berapa user per code? (default: 1):', '1');
+    const maxUsesPerCode = parseInt(maxUsesInput || '1');
+
+    if (isNaN(maxUsesPerCode) || maxUsesPerCode < 1) {
+      alert('❌ Max uses harus minimal 1');
+      return;
+    }
+
+    if (!confirm(`Generate ${qty} codes dengan prefix "${prefix}"?\n\nRole: ${role}\nMax uses per code: ${maxUsesPerCode}`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('mpt_token');
+      const response = await fetch('/api/admin/bulk-generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          quantity: qty,
+          prefix,
+          role,
+          description,
+          maxUsesPerCode,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(`✅ Berhasil generate ${data.quantity} kode invitation!`);
+        loadData();
+      } else {
+        const data = await response.json();
+        alert(`❌ ${data.error || 'Gagal generate codes'}`);
+      }
+    } catch (error) {
+      console.error('Error bulk generating:', error);
+      alert('❌ Terjadi kesalahan');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 flex items-center justify-center">
@@ -486,12 +550,18 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
 
         {activeTab === 'codes' && (
           <div className="space-y-4">
-            <div className="flex justify-end mb-4">
+            <div className="flex gap-2 justify-end mb-4 flex-wrap">
+              <button 
+                onClick={handleBulkGenerate}
+                className="px-4 md:px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-bold flex items-center gap-2 text-sm md:text-base transition-colors"
+              >
+                <Plus size={20} /> Bulk Generate (1-100)
+              </button>
               <button 
                 onClick={handleGenerateCode}
                 className="px-4 md:px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold flex items-center gap-2 text-sm md:text-base transition-colors"
               >
-                <Plus size={20} /> Generate New Code
+                <Plus size={20} /> Generate Single Code
               </button>
             </div>
 
