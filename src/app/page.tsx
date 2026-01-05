@@ -43,14 +43,14 @@ export default function LandingPage() {
         >
           <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-amber-500/30 bg-amber-500/5 mb-4 sm:mb-6">
             <Lock size={14} className="text-amber-400 sm:w-4 sm:h-4" />
-            <span className="text-xs sm:text-sm font-mono text-amber-400">KEANGGOTAAN EKSKLUSIF</span>
+            <span className="text-xs sm:text-sm font-mono text-amber-400">EXCLUSIVE MEMBERSHIP</span>
           </div>
           
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-black text-white mb-4 sm:mb-6 leading-tight">
             MINDSET PLAN TRADER
           </h1>
           <p className="text-base sm:text-xl md:text-2xl text-amber-400 font-bold mb-3 sm:mb-4">
-            "Fokus pada Rencana, Bukan Panik."
+            "Focus on the Plan, Not the Panic."
           </p>
           <p className="text-sm sm:text-lg text-slate-400 max-w-3xl mx-auto mb-8 sm:mb-12 px-2">
             Platform eksklusif untuk 50+ trader elite dengan sistem manajemen trading terpadu, 
