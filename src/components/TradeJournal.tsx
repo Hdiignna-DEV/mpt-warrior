@@ -625,7 +625,7 @@ export default function JurnalTrading() {
                 <span className="text-3xl">🧠</span>
                 <div>
                   <h2 className="text-2xl font-black text-purple-400">AI Trading Analysis</h2>
-                  <p className="text-slate-400 text-sm">Powered by Gemini 1.5 Pro</p>
+                  <p className="text-slate-400 text-sm">Powered by Groq AI - Llama 3.3 70B</p>
                 </div>
               </div>
               <button
