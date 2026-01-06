@@ -332,15 +332,6 @@ export default function Dashboard() {
                   </div>
                 </>
               )}
-                    ) : (
-                      <ArrowDownRight className="w-4 h-4" />
-                    )}
-                    <span>
-                      {profitLoss >= 0 ? '+' : ''}Rp {Math.abs(profitLoss).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ({profitLoss >= 0 ? '+' : ''}{profitLossPercentage}%)
-                    </span>
-                  </div>
-                </>
-              )}
             </motion.div>
           </div>
         </motion.div>

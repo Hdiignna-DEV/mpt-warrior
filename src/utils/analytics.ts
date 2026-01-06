@@ -210,14 +210,7 @@ export const getDrawdown = (
   return {
     peak,
     drawdown: maxDrawdown,
-    drawdownPercent: peak > 0 ? (maxDrawdown / peak) * 100 : 
-    maxDrawdown = Math.max(maxDrawdown, drawdown);
-  });
-
-  return {
-    peak,
-    drawdown: maxDrawdown,
-    drawdownPercent: (maxDrawdown / initialBalance) * 100,
+    drawdownPercent: peak > 0 ? (maxDrawdown / peak) * 100 : 0,
   };
 };
 
