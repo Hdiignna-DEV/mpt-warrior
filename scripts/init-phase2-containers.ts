@@ -30,17 +30,6 @@ async function initPhase2Containers() {
       partitionKey: {
         paths: ['/level'], // Partition by level: RECRUIT, WARRIOR, VETERAN
       },
-      throughputPolicy: {
-        incrementPercent: 0,
-      },
-    });
-
-    // Set throughput to shared 1000 RU/s
-    await modulesContainer.replace({
-      id: 'educational-modules',
-      partitionKey: {
-        paths: ['/level'],
-      },
     });
 
     console.log('✅ Container: educational-modules');
@@ -53,16 +42,6 @@ async function initPhase2Containers() {
       id: 'user-progress',
       partitionKey: {
         paths: ['/userId'], // Partition by userId
-      },
-      throughputPolicy: {
-        incrementPercent: 0,
-      },
-    });
-
-    await progressContainer.replace({
-      id: 'user-progress',
-      partitionKey: {
-        paths: ['/userId'],
       },
     });
 
