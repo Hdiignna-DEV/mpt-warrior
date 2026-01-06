@@ -75,7 +75,7 @@ export async function getModulesByLevel(level: Level): Promise<EducationalModule
   
   const { resources } = await container.items
     .query({
-      query: 'SELECT * FROM c WHERE c.level = @level ORDER BY c.order ASC',
+      query: 'SELECT * FROM c WHERE c.level = @level ORDER BY c["order"] ASC',
       parameters: [{ name: '@level', value: level }],
     })
     .fetchAll();
@@ -91,7 +91,7 @@ export async function getAllModules(): Promise<EducationalModule[]> {
   
   const { resources } = await container.items
     .query({
-      query: 'SELECT * FROM c ORDER BY c.level ASC, c.order ASC',
+      query: 'SELECT * FROM c ORDER BY c.level ASC, c["order"] ASC',
     })
     .fetchAll();
 
