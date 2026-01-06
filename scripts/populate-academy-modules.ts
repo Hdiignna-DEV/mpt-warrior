@@ -259,12 +259,11 @@ Tidak selalu! Yang penting adalah **expectancy** (ekspektasi profit).
 - Sistem B: Win rate rendah tapi RRR excellent (risk 100, profit 300)
 
 **Formula Expectancy:**
-```
+
 Expectancy = (Win Rate × Avg Win) - (Loss Rate × Avg Loss)
 
 Sistem A: (0.9 × 50) - (0.1 × 100) = 45 - 10 = +35
 Sistem B: (0.4 × 300) - (0.6 × 100) = 120 - 60 = +60
-```
 
 Sistem B lebih profitable meski win rate lebih rendah!
 
@@ -469,14 +468,13 @@ Dengan RPT 1%, Anda bisa loss **100 kali berturut-turut** baru MC (secara teori)
 
 ## Formula Dasar Risk Per Trade
 
-\`\`\`
+**Formula:**
 Risk Amount = Equity × RPT%
 
-Contoh:
-Equity = $10,000
-RPT = 1%
-Risk Amount = $10,000 × 1% = $100 per trade
-\`\`\`
+**Contoh:**
+- Equity = $10,000
+- RPT = 1%
+- Risk Amount = $10,000 × 1% = $100 per trade
 
 Artinya, **maksimal loss yang boleh Anda terima per trade adalah $100**, tidak peduli berapa kali entry atau berapa lot yang digunakan.
 
@@ -589,9 +587,8 @@ Banyak trader fokus pada margin level tapi lupa hitung actual risk!
 
 ## Formula Master Kalkulasi Lot
 
-\`\`\`
+**Formula:**
 Lot Size = (Equity × RPT%) / (SL Distance in Pips × Pip Value)
-\`\`\`
 
 **Variabel:**
 - **Equity:** Saldo akun Anda
@@ -621,11 +618,10 @@ Lot Size = (Equity × RPT%) / (SL Distance in Pips × Pip Value)
 - SL Distance: 50 pips
 
 **Kalkulasi:**
-\`\`\`
+
 Lot Size = ($10,000 × 1%) / (50 pips × $10/pip)
          = $100 / $500
          = 0.20 Lot
-\`\`\`
 
 **Validasi:**
 - Jika SL tersentuh: 50 pips × 0.20 lot × $10 = $100 ✓
@@ -668,14 +664,13 @@ Lot Size = ($10,000 × 1%) / (50 pips × $10/pip)
 **Risk to Reward Ratio (RRR)** adalah perbandingan antara risiko yang Anda ambil dengan target profit yang Anda inginkan.
 
 **Formula:**
-\`\`\`
+
 RRR = Target Profit / Risk
 
-Contoh:
-Risk (SL): $100
-Target (TP): $200
-RRR = $200 / $100 = 1:2
-\`\`\`
+**Contoh:**
+- Risk (SL): $100
+- Target (TP): $200
+- RRR = $200 / $100 = 1:2
 
 ## Standar RRR MPT
 
@@ -689,9 +684,8 @@ Dengan RRR 1:3, Anda cukup **win 26%** untuk break even!
 ## Break-Even Win Rate
 
 **Formula:**
-\`\`\`
+
 Break-Even Win Rate = 1 / (1 + RRR)
-\`\`\`
 
 **Tabel:**
 
@@ -754,9 +748,8 @@ Dengan RRR 1:3, bahkan jika Anda hanya win 40% dari trade, Anda masih **profit s
 **Drawdown** = Penurunan equity dari peak (titik tertinggi) ke valley (titik terendah).
 
 **Formula:**
-\`\`\`
+
 Drawdown % = [(Peak - Valley) / Peak] × 100%
-\`\`\`
 
 **Contoh:**
 - Peak equity: $10,000
