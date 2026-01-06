@@ -27,6 +27,7 @@ import {
 interface ModuleConfig {
   id: string;
   moduleNumber: number;
+  level: 'RECRUIT' | 'WARRIOR' | 'VETERAN';
   icon: any;
   title: string;
   subtitle: string;
@@ -44,6 +45,7 @@ const MODULE_CONFIGS: ModuleConfig[] = [
   {
     id: 'module-1',
     moduleNumber: 1,
+    level: 'RECRUIT',
     icon: Brain,
     title: 'THE WARRIOR MINDSET',
     subtitle: 'Psychology & Mental Framework',
@@ -63,6 +65,7 @@ const MODULE_CONFIGS: ModuleConfig[] = [
   {
     id: 'module-2',
     moduleNumber: 2,
+    level: 'RECRUIT',
     icon: Shield,
     title: 'THE SHIELD',
     subtitle: 'Risk Management & Protection',
@@ -83,6 +86,7 @@ const MODULE_CONFIGS: ModuleConfig[] = [
   {
     id: 'module-3',
     moduleNumber: 3,
+    level: 'RECRUIT',
     icon: Map,
     title: 'THE MAP',
     subtitle: 'Technical Analysis Fundamentals',
@@ -103,6 +107,7 @@ const MODULE_CONFIGS: ModuleConfig[] = [
   {
     id: 'module-4',
     moduleNumber: 4,
+    level: 'WARRIOR',
     icon: Sword,
     title: 'THE SWORD',
     subtitle: 'Execution Strategy',
@@ -123,6 +128,7 @@ const MODULE_CONFIGS: ModuleConfig[] = [
   {
     id: 'module-5',
     moduleNumber: 5,
+    level: 'WARRIOR',
     icon: ScrollText,
     title: 'THE CHRONICLE',
     subtitle: 'Evaluation & Journaling',
@@ -141,6 +147,7 @@ const MODULE_CONFIGS: ModuleConfig[] = [
   {
     id: 'module-6',
     moduleNumber: 6,
+    level: 'VETERAN',
     icon: HeartPulse,
     title: 'THE MED-KIT',
     subtitle: 'Recovery & Resilience',
@@ -161,6 +168,7 @@ const MODULE_CONFIGS: ModuleConfig[] = [
 export default function AcademyPage() {
   const router = useRouter();
   const [userProgress, setUserProgress] = useState<Record<string, number>>({});
+  const [completedModules, setCompletedModules] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -171,18 +179,50 @@ export default function AcademyPage() {
       return;
     }
 
-    // TODO: Fetch user progress from API
-    // For now, simulate loading
-    setTimeout(() => {
-      setLoading(false);
-      // Mock progress data
-      setUserProgress({
-        'module-1': 0,
-        'module-2': 0,
-        'module-3': 0,
-      });
-    }, 500);
+    fetchUserProgress(token);
   }, [router]);
+
+  const fetchUserProgress = async (token: string) => {
+    try {
+      // Fetch module summary
+      const summaryRes = await fetch('/api/academy/progress?summary=true', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (summaryRes.ok) {
+        const { summary } = await summaryRes.json();
+        const progressMap: Record<string, number> = {};
+        const completed = new Set<string>();
+
+        summary.forEach((item: any) => {
+          progressMap[item.moduleId] = item.progress;
+          // Module completed if 100% progress
+          if (item.progress === 100) {
+            completed.add(item.moduleId);
+          }
+        });
+
+        setUserProgress(progressMap);
+        setCompletedModules(completed);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to fetch progress:', error);
+      setLoading(false);
+    }
+  };
+
+  const isModuleUnlocked = (module: ModuleConfig): boolean => {
+    // Module 1 always unlocked
+    if (module.moduleNumber === 1) {
+      return true;
+    }
+
+    // Check if previous module is completed
+    const previousModuleId = `module-${module.moduleNumber - 1}`;
+    return completedModules.has(previousModuleId);
+  };
 
   const getColorClasses = (color: string, isAvailable: boolean) => {
     if (!isAvailable) {
@@ -321,7 +361,9 @@ export default function AcademyPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {MODULE_CONFIGS.map((module) => {
             const ModuleIcon = module.icon;
-            const colors = getColorClasses(module.color, module.isAvailable);
+            const isUnlocked = isModuleUnlocked(module);
+            const isCurrentlyAvailable = module.isAvailable && isUnlocked;
+            const colors = getColorClasses(module.color, isCurrentlyAvailable);
             const progress = userProgress[module.id] || 0;
 
             return (
@@ -329,10 +371,10 @@ export default function AcademyPage() {
                 key={module.id}
                 className={`bg-white/5 backdrop-blur-sm border transition-all ${
                   colors.border
-                } ${module.isAvailable ? `${colors.hover} cursor-pointer` : 'cursor-not-allowed opacity-70'}`}
+                } ${isCurrentlyAvailable ? `${colors.hover} cursor-pointer` : 'cursor-not-allowed opacity-70'}`}
                 onClick={() => {
-                  if (module.isAvailable) {
-                    router.push(`/academy/${module.id}`);
+                  if (isCurrentlyAvailable) {
+                    router.push(`/academy/${module.id}?level=${module.level}`);
                   }
                 }}
               >
@@ -356,8 +398,10 @@ export default function AcademyPage() {
                       </div>
                     </div>
                     
-                    {!module.isAvailable && (
-                      <Lock className="w-6 h-6 text-gray-500" />
+                    {!isCurrentlyAvailable && (
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-6 h-6 text-gray-500" />
+                      </div>
                     )}
                   </div>
 
@@ -393,7 +437,7 @@ export default function AcademyPage() {
                   </div>
 
                   {/* Progress Bar */}
-                  {module.isAvailable && (
+                  {isCurrentlyAvailable && (
                     <div>
                       <div className="flex items-center justify-between text-sm mb-2">
                         <span className="text-gray-400">Your Progress:</span>
@@ -404,6 +448,18 @@ export default function AcademyPage() {
                           className={`bg-gradient-to-r ${module.gradient} h-2 rounded-full transition-all duration-500`}
                           style={{ width: `${progress}%` }}
                         />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Locked Message */}
+                  {!isCurrentlyAvailable && module.isAvailable && (
+                    <div className="bg-amber-900/30 border border-amber-700/50 rounded-lg p-3">
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-4 h-4 text-amber-400" />
+                        <p className="text-amber-400 text-sm font-medium">
+                          Complete Module {module.moduleNumber - 1} to unlock
+                        </p>
                       </div>
                     </div>
                   )}
