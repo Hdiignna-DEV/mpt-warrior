@@ -49,14 +49,22 @@ export default function AcademyPage() {
   const [selectedLevel, setSelectedLevel] = useState<'ALL' | 'RECRUIT' | 'WARRIOR' | 'VETERAN'>('ALL');
 
   useEffect(() => {
-    fetchData();
+    // Fallback: jika token tidak ada di localStorage, coba ambil dari cookie
+    let token = localStorage.getItem('token');
+    if (!token) {
+      const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
+      if (match) {
+        token = match[1];
+        localStorage.setItem('token', token);
+      }
+    }
+    fetchData(token);
   }, [selectedLevel]);
 
-  const fetchData = async () => {
+  const fetchData = async (tokenParam?: string) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      
+      const token = tokenParam || localStorage.getItem('token');
       if (!token) {
         router.push('/');
         return;

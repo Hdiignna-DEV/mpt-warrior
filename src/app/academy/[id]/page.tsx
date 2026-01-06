@@ -61,18 +61,26 @@ export default function ModuleDetailPage({
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Fallback: jika token tidak ada di localStorage, coba ambil dari cookie
+    let token = localStorage.getItem('token');
+    if (!token) {
+      const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
+      if (match) {
+        token = match[1];
+        localStorage.setItem('token', token);
+      }
+    }
     if (!level) {
       setError('Missing level parameter');
       setLoading(false);
       return;
     }
-    fetchModuleData();
+    fetchModuleData(token);
   }, [resolvedParams.id, level]);
 
-  const fetchModuleData = async () => {
+  const fetchModuleData = async (tokenParam?: string) => {
     try {
-      const token = localStorage.getItem('token');
-      
+      const token = tokenParam || localStorage.getItem('token');
       if (!token) {
         router.push('/');
         return;

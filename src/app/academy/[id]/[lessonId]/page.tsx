@@ -45,17 +45,26 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Fallback: jika token tidak ada di localStorage, coba ambil dari cookie
+    let token = localStorage.getItem('token');
+    if (!token) {
+      const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
+      if (match) {
+        token = match[1];
+        localStorage.setItem('token', token);
+      }
+    }
     if (!level) {
       setError('Missing level parameter');
       setLoading(false);
       return;
     }
-    fetchLessonData();
+    fetchLessonData(token);
   }, [resolvedParams.id, resolvedParams.lessonId, level]);
 
-  const fetchLessonData = async () => {
+  const fetchLessonData = async (tokenParam?: string) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = tokenParam || localStorage.getItem('token');
       if (!token) {
         router.push('/');
         return;
