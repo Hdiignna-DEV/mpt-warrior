@@ -79,14 +79,23 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
     const start = Date.now();
     setStartTime(start);
 
+    // Calculate dynamic minimum time based on lesson length
+    const getMinimumSeconds = (estimatedMinutes: number): number => {
+      if (estimatedMinutes <= 10) return 60;        // Lesson ≤10 min → minimal 1 menit
+      if (estimatedMinutes <= 20) return 120;       // Lesson 11-20 min → minimal 2 menit
+      if (estimatedMinutes <= 30) return 180;       // Lesson 21-30 min → minimal 3 menit
+      if (estimatedMinutes <= 45) return 240;       // Lesson 31-45 min → minimal 4 menit
+      return 300;                                   // Lesson >45 min → minimal 5 menit
+    };
+
+    const minRequired = getMinimumSeconds(lesson.estimatedMinutes);
+
     // Update elapsed time every second
     const timer = setInterval(() => {
       const elapsed = Math.floor((Date.now() - start) / 1000);
       setElapsedSeconds(elapsed);
 
-      // Check if minimum time reached (use 30% of estimated time as minimum)
-      const minSeconds = Math.floor((lesson.estimatedMinutes * 60) * 0.3);
-      if (elapsed >= minSeconds) {
+      if (elapsed >= minRequired) {
         setCanComplete(true);
       }
     }, 1000);
@@ -179,8 +188,16 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
   const prevLesson = idx > 0 ? sortedLessons[idx - 1] : null;
   const nextLesson = idx < sortedLessons.length - 1 ? sortedLessons[idx + 1] : null;
 
-  // Calculate minimum time (30% of estimated time)
-  const minSeconds = Math.floor((lesson.estimatedMinutes * 60) * 0.3);
+  // Calculate dynamic minimum time based on lesson length
+  const getMinimumSeconds = (estimatedMinutes: number): number => {
+    if (estimatedMinutes <= 10) return 60;        // ≤10 min → 1 min
+    if (estimatedMinutes <= 20) return 120;       // 11-20 min → 2 min
+    if (estimatedMinutes <= 30) return 180;       // 21-30 min → 3 min
+    if (estimatedMinutes <= 45) return 240;       // 31-45 min → 4 min
+    return 300;                                   // >45 min → 5 min
+  };
+  
+  const minSeconds = getMinimumSeconds(lesson.estimatedMinutes);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
@@ -264,7 +281,7 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
                     {canComplete ? '✅ Ready to complete' : '⏱️ Please read the content...'}
                   </span>
                   <span className="text-white font-medium">
-                    {Math.floor(elapsedSeconds / 60)}:{(elapsedSeconds % 60).toString().padStart(2, '0')} / {lesson.estimatedMinutes}:00
+                    {Math.floor(elapsedSeconds / 60)}:{(elapsedSeconds % 60).toString().padStart(2, '0')} / {Math.floor(minSeconds / 60)}:{(minSeconds % 60).toString().padStart(2, '0')} min
                   </span>
                 </div>
                 <div className="w-full bg-white/10 rounded-full h-2">
@@ -273,13 +290,13 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
                       canComplete ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-amber-500 to-orange-500'
                     }`}
                     style={{ 
-                      width: `${Math.min(100, (elapsedSeconds / (lesson.estimatedMinutes * 60 * 0.3)) * 100)}%` 
+                      width: `${Math.min(100, (elapsedSeconds / minSeconds) * 100)}%` 
                     }}
                   />
                 </div>
                 {!canComplete && (
                   <p className="text-xs text-amber-400 mt-2">
-                    ⚠️ Minimum {Math.floor(lesson.estimatedMinutes * 0.3)} minutes required before completing this lesson
+                    ⚠️ Minimum {Math.floor(minSeconds / 60)} minute{minSeconds >= 120 ? 's' : ''} required before completing this lesson
                   </p>
                 )}
               </div>

@@ -261,13 +261,22 @@ export default function ModuleDetailPage({
             .sort((a, b) => a.order - b.order)
             .map((lesson, index) => {
               const completed = isLessonCompleted(lesson.id);
-              const locked = !canAccess;
+              
+              // Check if previous lesson is completed (sequential unlocking)
+              const prevLessonCompleted = index === 0 ? true : isLessonCompleted(
+                module.lessons.sort((a, b) => a.order - b.order)[index - 1].id
+              );
+              
+              // Lesson is locked if module can't be accessed OR previous lesson not completed
+              const locked = !canAccess || !prevLessonCompleted;
 
               return (
                 <Card
                   key={lesson.id}
-                  className={`bg-white/5 backdrop-blur-sm border-white/10 hover:border-purple-500/50 transition-all ${
-                    locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                  className={`bg-white/5 backdrop-blur-sm border-white/10 transition-all ${
+                    locked 
+                      ? 'opacity-50 cursor-not-allowed' 
+                      : 'hover:border-purple-500/50 cursor-pointer'
                   }`}
                   onClick={() =>
                     !locked &&
@@ -300,6 +309,11 @@ export default function ModuleDetailPage({
                           {completed && (
                             <span className="text-green-400 font-medium">
                               ✅ Completed
+                            </span>
+                          )}
+                          {locked && !completed && index > 0 && (
+                            <span className="text-amber-400 font-medium text-xs">
+                              🔒 Complete previous lesson first
                             </span>
                           )}
                         </div>
