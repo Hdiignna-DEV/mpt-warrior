@@ -4,15 +4,15 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireSuperAdminRole } from '@/lib/middleware/auth';
+import { validateSuperAdmin } from '@/lib/middleware/auth';
 import { getUngradedEssays } from '@/lib/db/education-service';
 
 export async function GET(request: NextRequest) {
   try {
     // Verify SUPER_ADMIN role
-    const authResult = await requireSuperAdminRole(request);
-    if (authResult instanceof Response) {
-      return authResult;
+    const { decoded, error } = validateSuperAdmin(request);
+    if (error) {
+      return error;
     }
 
     // Get all ungraded essays
