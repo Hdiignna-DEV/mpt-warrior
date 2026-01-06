@@ -59,7 +59,7 @@ export async function GET(
     }
 
     // Check if user can access this module
-    const canAccess = await canAccessModule(decoded.username, id, level);
+    const canAccess = await canAccessModule(decoded.userId, id, level);
 
     return NextResponse.json({
       success: true,
