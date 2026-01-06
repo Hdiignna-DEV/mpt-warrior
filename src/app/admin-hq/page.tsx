@@ -625,6 +625,43 @@ Gunakan kode di atas untuk registrasi. See you on the battlefield! 🔥`;
           </div>
         </div>
 
+        {/* Quick Actions - SUPER_ADMIN Only */}
+        {currentUser?.role === 'SUPER_ADMIN' && (
+          <div className="mb-8 glass-premium rounded-2xl p-6">
+            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-amber-400" />
+              Quick Actions (SUPER_ADMIN)
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={() => router.push('/admin-hq/quiz-grading')}
+                className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl hover:from-purple-500/30 hover:to-pink-500/30 transition-all group"
+              >
+                <div className="p-2 bg-purple-500/20 rounded-lg group-hover:bg-purple-500/30 transition-all">
+                  📝
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-white">Quiz Grading</p>
+                  <p className="text-sm text-gray-400">Review & grade student essays</p>
+                </div>
+              </button>
+              
+              <button
+                onClick={() => alert('Coming soon: More admin features')}
+                className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30 rounded-xl hover:from-blue-500/30 hover:to-cyan-500/30 transition-all group opacity-50 cursor-not-allowed"
+              >
+                <div className="p-2 bg-blue-500/20 rounded-lg group-hover:bg-blue-500/30 transition-all">
+                  🔧
+                </div>
+                <div className="text-left">
+                  <p className="font-bold text-white">System Settings</p>
+                  <p className="text-sm text-gray-400">Coming soon</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
           <button
