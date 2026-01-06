@@ -39,9 +39,10 @@ export default function LoginPage() {
         throw new Error(data.error || 'Login gagal');
       }
 
-      // Store user data in localStorage
+      // Store user data and token in localStorage (for compatibility with Academy pages)
       localStorage.setItem('mpt_user', JSON.stringify(data.user));
       localStorage.setItem('mpt_token', data.token);
+      localStorage.setItem('token', data.token); // <-- Tambahkan baris ini
 
       // Force page reload to trigger middleware with new token
       window.location.href = data.user.role === 'ADMIN' ? '/admin-hq' : '/dashboard';
