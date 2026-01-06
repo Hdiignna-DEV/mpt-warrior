@@ -22,14 +22,21 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const menuItems = [
+  // Dashboard & Overview
   { href: '/dashboard', label: 'nav.dashboard', fallback: 'Dashboard', icon: LayoutDashboard, description: 'Overview' },
-  { href: '/analytics', label: 'nav.analytics', fallback: 'Analytics', icon: BarChart3, description: 'Data Insights' },
-  { href: '/journal', label: 'nav.journal', fallback: 'Journal', icon: BookOpen, description: 'History' },
+  
+  // Learning & Growth
   { href: '/academy', label: 'Warrior Academy', fallback: 'Warrior Academy', icon: Sparkles, description: 'Training Path' },
-  { href: '/about', label: 'About Founder', fallback: 'About Founder', icon: User, description: 'Instructor' },
-  { href: '/calculator', label: 'nav.calculator', fallback: 'Calculator', icon: Calculator, description: 'Calculate' },
-  { href: '/ai-mentor', label: 'nav.aiMentor', fallback: 'AI Mentor', icon: Bot, description: 'Coach' },
   { href: '/achievements', label: 'nav.achievements', fallback: 'Achievements', icon: Trophy, description: 'Progress' },
+  { href: '/about', label: 'About Founder', fallback: 'About Founder', icon: User, description: 'Instructor' },
+  
+  // Trading Tools
+  { href: '/journal', label: 'nav.journal', fallback: 'Journal', icon: BookOpen, description: 'Trade Log' },
+  { href: '/calculator', label: 'nav.calculator', fallback: 'Calculator', icon: Calculator, description: 'Risk Tools' },
+  { href: '/analytics', label: 'nav.analytics', fallback: 'Analytics', icon: BarChart3, description: 'Performance' },
+  
+  // AI Assistant
+  { href: '/ai-mentor', label: 'nav.aiMentor', fallback: 'AI Mentor', icon: Bot, description: 'AI Coach' },
 ];
 
 // Admin-only menu item
