@@ -57,21 +57,23 @@ export default function QuizGradingPage() {
     try {
       const user = JSON.parse(userData);
       if (user.role !== 'SUPER_ADMIN') {
-        router.push('/admin-hq');
+        router.push('/access-denied');
         return;
       }
+      
+      // User is SUPER_ADMIN, proceed to fetch data
+      fetchUngradedEssays();
     } catch (err) {
+      console.error('Error parsing user data:', err);
       router.push('/login');
       return;
     }
-
-    fetchUngradedEssays();
   }, [router]);
 
   const fetchUngradedEssays = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mpt_token');
       
       const response = await fetch('/api/admin/quiz/ungraded', {
         headers: {
@@ -106,7 +108,7 @@ export default function QuizGradingPage() {
   const handleGradeSubmit = async (essay: UngradedEssay) => {
     try {
       setSubmitting(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mpt_token');
       const grading = gradingData[essay.id];
 
       if (!grading || grading.score === undefined) {
