@@ -432,8 +432,8 @@ export async function submitQuizAnswer(
     submittedAt: new Date().toISOString(),
   };
 
-  const { resource } = await container.items.upsert(userAnswer);
-  return resource as UserQuizAnswer;
+  await container.items.upsert(userAnswer);
+  return userAnswer;
 }
 
 /**
@@ -478,8 +478,8 @@ export async function gradeEssayAnswer(
     gradedAt: new Date().toISOString(),
   };
 
-  const { resource } = await container.item(answerId, userId).replace(updatedAnswer);
-  return resource as UserQuizAnswer;
+  await container.item(answerId, userId).replace(updatedAnswer);
+  return updatedAnswer;
 }
 
 /**
