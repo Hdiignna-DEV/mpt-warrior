@@ -5,8 +5,12 @@
 
 import { BlobServiceClient, BlockBlobClient } from '@azure/storage-blob';
 
+
 const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING || '';
 const CONTAINER_NAME = process.env.AZURE_BLOB_CONTAINER || 'educational-assets';
+
+// DEBUG LOG: cek apakah env var terbaca (jangan log value aslinya)
+console.log('DEBUG: AZURE_STORAGE_CONNECTION_STRING is', AZURE_STORAGE_CONNECTION_STRING ? 'SET' : 'NOT SET');
 
 if (!AZURE_STORAGE_CONNECTION_STRING) {
   throw new Error('Missing AZURE_STORAGE_CONNECTION_STRING env variable');
