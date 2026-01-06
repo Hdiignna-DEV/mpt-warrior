@@ -568,21 +568,6 @@ export async function getUngradedEssays(): Promise<Array<{ question: QuizQuestio
   );
 
   return result;
-} 
-          new Date(b.lastAccessedAt).getTime() - new Date(a.lastAccessedAt).getTime()
-        )[0].lastAccessedAt
-      : '';
-    
-    return {
-      moduleId: module.id,
-      totalLessons,
-      completedLessons,
-      progress,
-      lastAccessedAt: lastAccessed,
-    };
-  });
-
-  return summary;
 }
 
 /**
