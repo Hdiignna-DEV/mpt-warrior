@@ -44,14 +44,14 @@ export async function GET(request: NextRequest) {
     const summaryOnly = searchParams.get('summary') === 'true';
 
     if (summaryOnly) {
-      const summary = await getUserModuleSummary(decoded.username);
+      const summary = await getUserModuleSummary(decoded.userId);
       return NextResponse.json({
         success: true,
         summary,
       });
     }
 
-    const progress = await getUserProgress(decoded.username);
+    const progress = await getUserProgress(decoded.userId);
     return NextResponse.json({
       success: true,
       progress,
