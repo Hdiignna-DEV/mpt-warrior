@@ -1,11 +1,23 @@
 // Utility functions untuk berbagai keperluan
 
-export function formatCurrency(value: number, currency = "USD"): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: currency === "USD" ? "USD" : "IDR",
-    minimumFractionDigits: 2,
-  }).format(value);
+export type Currency = 'USD' | 'IDR';
+
+export function formatCurrency(value: number, currency: Currency = "IDR"): string {
+  if (currency === "USD") {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } else {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  }
 }
 
 export function formatPercent(value: number, decimals = 2): string {
@@ -43,10 +55,47 @@ export function calculatePositionSize(
   accountBalance: number,
   riskPercent: number,
   stopLossPips: number,
-  pipValue = 10
+  pipValue = 10,
+  currency: Currency = 'IDR'
 ): number {
   const riskAmount = (accountBalance * riskPercent) / 100;
-  return riskAmount / (stopLossPips * pipValue);
+  const lotSize = riskAmount / (stopLossPips * pipValue);
+  
+  // For IDR accounts, adjust pip value calculation
+  // Standard lot (100k units): 1 pip = $10 for USD pairs
+  // For IDR equivalent, multiply by exchange rate (handled in pipValue param)
+  return lotSize;
+}
+
+/**
+ * Calculate lot size with currency-aware pip value
+ * @param accountBalance - Account balance in selected currency
+ * @param riskPercent - Risk percentage (e.g., 1 for 1%)
+ * @param stopLossPips - Stop loss in pips
+ * @param currency - Account currency (USD or IDR)
+ * @param exchangeRate - USD to IDR exchange rate (only needed if currency is IDR)
+ */
+export function calculateLotSize(
+  accountBalance: number,
+  riskPercent: number,
+  stopLossPips: number,
+  currency: Currency = 'IDR',
+  exchangeRate: number = 15750
+): number {
+  const riskAmount = (accountBalance * riskPercent) / 100;
+  
+  // Standard: 1 standard lot (100,000 units) = $10 per pip for USD pairs
+  let pipValue = 10;
+  
+  // If account is in IDR, adjust pip value
+  if (currency === 'IDR') {
+    pipValue = 10 * exchangeRate; // Convert $10 to IDR
+  }
+  
+  const lotSize = riskAmount / (stopLossPips * pipValue);
+  
+  // Round to 2 decimal places
+  return Math.round(lotSize * 100) / 100;
 }
 
 export function calculateDrawdown(peakBalance: number, currentBalance: number): number {

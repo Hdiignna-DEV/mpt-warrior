@@ -16,6 +16,9 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { BentoGrid } from '@/components/Dashboard/BentoGrid';
 import { toast } from '@/utils/toast';
+import { CurrencySelector, useCurrency } from '@/components/CurrencySelector';
+import { formatCurrency, type Currency } from '@/utils/helpers';
+import { getExchangeRate, initializeExchangeRate } from '@/utils/exchange-rate';
 
 interface Trade {
   id: string;
@@ -30,12 +33,21 @@ interface Trade {
 export default function Dashboard() {
   const { t } = useTranslation();
   const { loading: authLoading } = useAuth();
+  const { currency, setCurrency } = useCurrency();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [customBalance, setCustomBalance] = useState<number>(10000);
+  const [customBalance, setCustomBalance] = useState<number>(10000000); // Default 10 juta IDR
   const [isEditingBalance, setIsEditingBalance] = useState(false);
-  const [tempBalance, setTempBalance] = useState<string>('10000');
+  const [tempBalance, setTempBalance] = useState<string>('10000000');
   const [isDecrypting, setIsDecrypting] = useState(false);
+  const [exchangeRate, setExchangeRate] = useState<number>(15750);
+
+  // Initialize exchange rate on mount
+  useEffect(() => {
+    initializeExchangeRate().then(() => {
+      getExchangeRate().then(rate => setExchangeRate(rate));
+    });
+  }, []);
 
   // Load trades from API
   const loadTrades = async () => {
@@ -130,6 +142,8 @@ export default function Dashboard() {
   const handleSaveBalance = () => {
     const newBalance = parseFloat(tempBalance);
     
+    const formattedBalance = formatCurrency(newBalance, currency);
+    toast.success('Balance updated!', `New balance: ${formattedBalance
     if (isNaN(newBalance) || newBalance <= 0) {
       toast.error('Invalid balance', 'Balance must be a positive number');
       return;
@@ -254,7 +268,7 @@ export default function Dashboard() {
               transition={{ delay: 0.2 }}
               className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-2xl min-w-[280px]"
             >
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-semibold text-gray-600 dark:text-zinc-400" suppressHydrationWarning>{t('dashboard.portfolioValue')}</span>
                 {!isEditingBalance && (
                   <button
@@ -265,23 +279,28 @@ export default function Dashboard() {
                   </button>
                 )}
               </div>
+              
+              {/* Currency Selector */}
+              <div className="mb-4">
+                <CurrencySelector value={currency} onChange={setCurrency} className="scale-90 origin-left" />
+              </div>
 
               {isEditingBalance ? (
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                      Initial Balance (IDR)
+                      Initial Balance ({currency})
                     </label>
                     <input
                       type="number"
                       value={tempBalance}
                       onChange={(e) => setTempBalance(e.target.value)}
-                      placeholder="10000000"
+                      placeholder={currency === 'IDR' ? '10000000' : '1000'}
                       className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100"
                       autoFocus
                     />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Contoh: 10000000 (10 juta), 5000000 (5 juta)
+                      {currency === 'IDR' ? 'Contoh: 10000000 (10 juta), 5000000 (5 juta)' : 'Example: 1000, 5000, 10000'}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -296,7 +315,7 @@ export default function Dashboard() {
               ) : (
                 <>
                   <div className="text-3xl font-black text-gray-900 dark:text-zinc-100 mb-2">
-                    Rp {currentBalance.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    {formatCurrency(currentBalance, currency)}
                   </div>
                   
                   <div className={`flex items-center gap-2 text-sm font-semibold ${
@@ -304,6 +323,15 @@ export default function Dashboard() {
                   }`}>
                     {profitLoss >= 0 ? (
                       <ArrowUpRight className="w-4 h-4" />
+                    ) : (
+                      <ArrowDownRight className="w-4 h-4" />
+                    )}
+                    <span>
+                      {profitLoss >= 0 ? '+' : ''}{formatCurrency(Math.abs(profitLoss), currency)} ({profitLoss >= 0 ? '+' : ''}{profitLossPercentage}%)
+                    </span>
+                  </div>
+                </>
+              )}
                     ) : (
                       <ArrowDownRight className="w-4 h-4" />
                     )}

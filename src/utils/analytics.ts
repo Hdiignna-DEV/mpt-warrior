@@ -1,5 +1,7 @@
 'use client';
 
+export type Currency = 'USD' | 'IDR';
+
 interface Trade {
   id: string;
   pair: string;
@@ -22,6 +24,7 @@ interface Analytics {
   consecutiveLosses: number;
   largestWin: number;
   largestLoss: number;
+  averageRRR: number; // Average Risk/Reward Ratio
   trades: Trade[];
 }
 
@@ -39,6 +42,7 @@ export const calculateAnalytics = (trades: Trade[]): Analytics => {
       consecutiveLosses: 0,
       largestWin: 0,
       largestLoss: 0,
+      averageRRR: 0,
       trades: [],
     };
   }
@@ -60,6 +64,11 @@ export const calculateAnalytics = (trades: Trade[]): Analytics => {
 
   // Profit Factor = Gross Profit / Gross Loss
   const profitFactor = lossPips > 0 ? winPips / lossPips : winPips > 0 ? Infinity : 0;
+
+  // Calculate Average RRR (Risk/Reward Ratio)
+  const avgWinSize = wins > 0 ? winPips / wins : 0;
+  const avgLossSize = losses > 0 ? lossPips / losses : 0;
+  const averageRRR = avgLossSize > 0 ? avgWinSize / avgLossSize : 0;
 
   // Calculate consecutive wins/losses
   let consecutiveWins = 0;
@@ -101,6 +110,7 @@ export const calculateAnalytics = (trades: Trade[]): Analytics => {
     consecutiveLosses: maxConsecutiveLosses,
     largestWin,
     largestLoss,
+    averageRRR,
     trades,
   };
 };
@@ -143,14 +153,9 @@ export const getPairStats = (
   const pairStats: Record<string, Analytics> = {};
   for (const [pair, pTrades] of Object.entries(pairTrades)) {
     pairStats[pair] = calculateAnalytics(pTrades);
-  }
-
-  return pairStats;
-};
-
-export const getEquityCurve = (
-  trades: Trade[],
-  initialBalance: number
+  },
+  currency: Currency = 'IDR',
+  pipValuePerLot: number = 10
 ): Array<{ date: string; equity: number }> => {
   let currentEquity = initialBalance;
   const curve: Array<{ date: string; equity: number }> = [
@@ -158,7 +163,8 @@ export const getEquityCurve = (
   ];
 
   trades.forEach((trade) => {
-    const pipValue = 10; // Default value, dapat disesuaikan
+    // For IDR accounts, pip value is higher (multiply by exchange rate)
+    const pipValue = currency === 'IDR' ? pipValuePerLot * 15750 : pipValuePerLot;
     const tradeProfit = trade.hasil === 'WIN' ? trade.pip * pipValue : -Math.abs(trade.pip * pipValue);
     currentEquity += tradeProfit;
 
@@ -171,13 +177,18 @@ export const getEquityCurve = (
   return curve;
 };
 
-export const getDrawdown = (trades: Trade[], initialBalance: number): { peak: number; drawdown: number; drawdownPercent: number } => {
+export const getDrawdown = (
+  trades: Trade[], 
+  initialBalance: number,
+  currency: Currency = 'IDR',
+  pipValuePerLot: number = 10
+): { peak: number; drawdown: number; drawdownPercent: number } => {
   let currentEquity = initialBalance;
   let peak = initialBalance;
   let maxDrawdown = 0;
 
   trades.forEach((trade) => {
-    const pipValue = 10;
+    const pipValue = currency === 'IDR' ? pipValuePerLot * 15750 : pipValuePerLot;
     const tradeProfit = trade.hasil === 'WIN' ? trade.pip * pipValue : -Math.abs(trade.pip * pipValue);
     currentEquity += tradeProfit;
 
@@ -186,6 +197,13 @@ export const getDrawdown = (trades: Trade[], initialBalance: number): { peak: nu
     }
 
     const drawdown = peak - currentEquity;
+    maxDrawdown = Math.max(maxDrawdown, drawdown);
+  });
+
+  return {
+    peak,
+    drawdown: maxDrawdown,
+    drawdownPercent: peak > 0 ? (maxDrawdown / peak) * 100 : 
     maxDrawdown = Math.max(maxDrawdown, drawdown);
   });
 
