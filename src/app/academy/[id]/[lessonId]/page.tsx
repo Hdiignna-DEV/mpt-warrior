@@ -44,6 +44,9 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
   const [completed, setCompleted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [startTime, setStartTime] = useState<number>(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
+  const [canComplete, setCanComplete] = useState(false);
 
   useEffect(() => {
     // Fallback: jika token tidak ada di localStorage, coba ambil dari cookie
@@ -67,6 +70,29 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
     }
     fetchLessonData(token);
   }, [resolvedParams.id, resolvedParams.lessonId, level]);
+
+  // Timer for minimum lesson time
+  useEffect(() => {
+    if (!lesson || completed) return;
+
+    // Set start time when lesson loads
+    const start = Date.now();
+    setStartTime(start);
+
+    // Update elapsed time every second
+    const timer = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - start) / 1000);
+      setElapsedSeconds(elapsed);
+
+      // Check if minimum time reached (use 30% of estimated time as minimum)
+      const minSeconds = Math.floor((lesson.estimatedMinutes * 60) * 0.3);
+      if (elapsed >= minSeconds) {
+        setCanComplete(true);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lesson, completed]);
 
   const fetchLessonData = async (tokenParam?: string) => {
     try {
@@ -153,6 +179,9 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
   const prevLesson = idx > 0 ? sortedLessons[idx - 1] : null;
   const nextLesson = idx < sortedLessons.length - 1 ? sortedLessons[idx + 1] : null;
 
+  // Calculate minimum time (30% of estimated time)
+  const minSeconds = Math.floor((lesson.estimatedMinutes * 60) * 0.3);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
       <div className="max-w-3xl mx-auto">
@@ -226,11 +255,51 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
                 {lesson.content}
               </ReactMarkdown>
             </div>
+            
+            {/* Timer Progress Bar */}
+            {!completed && lesson && (
+              <div className="mb-6">
+                <div className="flex items-center justify-between text-sm mb-2">
+                  <span className="text-gray-400">
+                    {canComplete ? '✅ Ready to complete' : '⏱️ Please read the content...'}
+                  </span>
+                  <span className="text-white font-medium">
+                    {Math.floor(elapsedSeconds / 60)}:{(elapsedSeconds % 60).toString().padStart(2, '0')} / {lesson.estimatedMinutes}:00
+                  </span>
+                </div>
+                <div className="w-full bg-white/10 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-500 ${
+                      canComplete ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-amber-500 to-orange-500'
+                    }`}
+                    style={{ 
+                      width: `${Math.min(100, (elapsedSeconds / (lesson.estimatedMinutes * 60 * 0.3)) * 100)}%` 
+                    }}
+                  />
+                </div>
+                {!canComplete && (
+                  <p className="text-xs text-amber-400 mt-2">
+                    ⚠️ Minimum {Math.floor(lesson.estimatedMinutes * 0.3)} minutes required before completing this lesson
+                  </p>
+                )}
+              </div>
+            )}
+            
             {/* Mark as Complete */}
             {!completed && (
-              <Button onClick={markAsComplete} className="bg-green-600 hover:bg-green-700">
-                Mark as Complete
-              </Button>
+              <div className="relative">
+                <Button 
+                  onClick={markAsComplete} 
+                  disabled={!canComplete}
+                  className={`w-full ${
+                    canComplete 
+                      ? 'bg-green-600 hover:bg-green-700 cursor-pointer' 
+                      : 'bg-gray-600 cursor-not-allowed opacity-50'
+                  }`}
+                >
+                  {canComplete ? '✓ Mark as Complete' : '🔒 Complete lesson to unlock'}
+                </Button>
+              </div>
             )}
           </div>
         </Card>
@@ -242,7 +311,15 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
             </Button>
           ) : <div />}
           {nextLesson ? (
-            <Button onClick={() => goToLesson(nextLesson.id)} className="bg-white/10 hover:bg-white/20">
+            <Button 
+              onClick={() => goToLesson(nextLesson.id)} 
+              disabled={!completed && !canComplete}
+              className={`${
+                completed || canComplete
+                  ? 'bg-white/10 hover:bg-white/20 cursor-pointer'
+                  : 'bg-gray-600 cursor-not-allowed opacity-50'
+              }`}
+            >
               Next →
             </Button>
           ) : <div />}
