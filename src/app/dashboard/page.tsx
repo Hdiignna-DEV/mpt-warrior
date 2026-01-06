@@ -142,8 +142,6 @@ export default function Dashboard() {
   const handleSaveBalance = () => {
     const newBalance = parseFloat(tempBalance);
     
-    const formattedBalance = formatCurrency(newBalance, currency);
-    toast.success('Balance updated!', `New balance: ${formattedBalance
     if (isNaN(newBalance) || newBalance <= 0) {
       toast.error('Invalid balance', 'Balance must be a positive number');
       return;
@@ -152,7 +150,9 @@ export default function Dashboard() {
     setCustomBalance(newBalance);
     saveInitialBalance(newBalance);
     setIsEditingBalance(false);
-    toast.success('Balance updated!', `New balance: Rp ${newBalance.toLocaleString('id-ID')}`);
+    
+    const formattedBalance = formatCurrency(newBalance, currency);
+    toast.success('Balance updated!', `New balance: ${formattedBalance}`);
   };
 
   const handleCancelEdit = () => {

@@ -153,7 +153,14 @@ export const getPairStats = (
   const pairStats: Record<string, Analytics> = {};
   for (const [pair, pTrades] of Object.entries(pairTrades)) {
     pairStats[pair] = calculateAnalytics(pTrades);
-  },
+  }
+
+  return pairStats;
+};
+
+export const getEquityCurve = (
+  trades: Trade[],
+  initialBalance: number,
   currency: Currency = 'IDR',
   pipValuePerLot: number = 10
 ): Array<{ date: string; equity: number }> => {
