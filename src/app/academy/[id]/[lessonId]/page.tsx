@@ -186,8 +186,33 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
               </div>
             )}
             {/* Markdown Content */}
-            <div className="prose prose-invert max-w-none mb-6">
-              <ReactMarkdown>{lesson.content}</ReactMarkdown>
+            <div className="prose prose-invert prose-lg max-w-none mb-6 text-gray-200">
+              <ReactMarkdown
+                components={{
+                  h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-white mb-4 mt-8" {...props} />,
+                  h2: ({ node, ...props }) => <h2 className="text-2xl font-bold text-white mb-3 mt-6" {...props} />,
+                  h3: ({ node, ...props }) => <h3 className="text-xl font-semibold text-purple-300 mb-3 mt-5" {...props} />,
+                  p: ({ node, ...props }) => <p className="text-gray-300 leading-relaxed mb-4" {...props} />,
+                  strong: ({ node, ...props }) => <strong className="text-white font-bold" {...props} />,
+                  em: ({ node, ...props }) => <em className="text-purple-300 italic" {...props} />,
+                  ul: ({ node, ...props }) => <ul className="list-disc list-inside space-y-2 mb-4 ml-4" {...props} />,
+                  ol: ({ node, ...props }) => <ol className="list-decimal list-inside space-y-2 mb-4 ml-4" {...props} />,
+                  li: ({ node, ...props }) => <li className="text-gray-300 leading-relaxed" {...props} />,
+                  blockquote: ({ node, ...props }) => (
+                    <blockquote className="border-l-4 border-purple-500 pl-4 py-2 my-4 bg-purple-900/20 italic text-purple-200" {...props} />
+                  ),
+                  code: ({ node, inline, ...props }: any) => 
+                    inline ? (
+                      <code className="bg-slate-800 text-purple-300 px-2 py-1 rounded text-sm font-mono" {...props} />
+                    ) : (
+                      <code className="block bg-slate-800 text-purple-300 p-4 rounded-lg mb-4 overflow-x-auto text-sm font-mono" {...props} />
+                    ),
+                  a: ({ node, ...props }) => <a className="text-purple-400 hover:text-purple-300 underline" {...props} />,
+                  hr: ({ node, ...props }) => <hr className="border-white/20 my-6" {...props} />,
+                }}
+              >
+                {lesson.content}
+              </ReactMarkdown>
             </div>
             {/* Mark as Complete */}
             {!completed && (
