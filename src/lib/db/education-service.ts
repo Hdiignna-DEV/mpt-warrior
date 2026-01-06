@@ -433,7 +433,7 @@ export async function submitQuizAnswer(
   };
 
   const { resource } = await container.items.upsert(userAnswer);
-  return resource!;
+  return resource as UserQuizAnswer;
 }
 
 /**
@@ -479,7 +479,7 @@ export async function gradeEssayAnswer(
   };
 
   const { resource } = await container.item(answerId, userId).replace(updatedAnswer);
-  return resource!;
+  return resource as UserQuizAnswer;
 }
 
 /**
