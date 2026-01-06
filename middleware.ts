@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET || '33bd8a08f87cbebc4c4d39cbf23de954420f59374d024eda9cf574db20fab4b0';
 
 // ==========================================
 // FULL GATEKEEPING SYSTEM
@@ -42,6 +42,7 @@ const PROTECTED_ROUTES = [
 ];
 
 // Middleware untuk auth dan security
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -79,20 +80,18 @@ export function middleware(request: NextRequest) {
   // LAYER 3: GATEKEEPING - Get User Token
   // ============================================
   let user: any = null;
-  
   const token = request.cookies.get('token')?.value;
-  
   if (!token) {
-    // No token = redirect to login
+    console.log('[MPT-MW] NO TOKEN, redirect to /login. Path:', pathname);
     return NextResponse.redirect(new URL('/login', request.url));
   }
-
   try {
     user = jwt.verify(token, JWT_SECRET);
   } catch (error) {
-    // Invalid token = redirect to login
+    console.log('[MPT-MW] INVALID TOKEN, redirect to /login. Path:', pathname, 'Token:', token, 'Error:', error);
     return NextResponse.redirect(new URL('/login', request.url));
   }
+  console.log('[MPT-MW] TOKEN OK. Path:', pathname, 'User:', user);
 
   // ============================================
   // LAYER 4: Admin Routes Protection
