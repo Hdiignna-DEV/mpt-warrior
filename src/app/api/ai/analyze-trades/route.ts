@@ -1,24 +1,24 @@
 /**
  * AI Analyze Trades API
- * Uses Groq AI (FREE) to analyze user's trading history
+ * Uses Claude Sonnet 4.5 to analyze user's trading history
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateActiveUser } from '@/lib/middleware/auth';
 import { getUserTrades, getUserTradeStats } from '@/lib/db/trade-service';
-import Groq from 'groq-sdk';
+import Anthropic from '@anthropic-ai/sdk';
 
 export async function POST(request: NextRequest) {
   try {
     // Check if API key exists
-    if (!process.env.GROQ_API_KEY) {
+    if (!process.env.CLAUDE_API_KEY) {
       return NextResponse.json({ 
-        error: 'GROQ_API_KEY is not configured. Please contact admin.' 
+        error: 'CLAUDE_API_KEY is not configured. Please contact admin.' 
       }, { status: 500 });
     }
 
-    const groq = new Groq({
-      apiKey: process.env.GROQ_API_KEY,
+    const anthropic = new Anthropic({
+      apiKey: process.env.CLAUDE_API_KEY,
     });
 
     // Validate auth + active status
@@ -128,24 +128,21 @@ Sebagai MPT Warrior AI Mentor, analisis performa trading ini dengan format:
 
 Gunakan emoji dan bahasa yang engaging tapi tetap profesional. Berikan feedback yang spesifik berdasarkan data aktual, bukan generic advice.`;
 
-    // Call Groq API (FREE & FAST)
-    const completion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+    // Call Claude Sonnet 4.5 API
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-5-20250514',
+      max_tokens: 4096,
+      system: 'Anda adalah MPT Warrior AI Mentor, seorang expert trading analyst yang memberikan feedback konstruktif dan actionable untuk trader.',
       messages: [
-        {
-          role: 'system',
-          content: 'Anda adalah MPT Warrior AI Mentor, seorang expert trading analyst yang memberikan feedback konstruktif dan actionable untuk trader.'
-        },
         {
           role: 'user',
           content: prompt
         }
       ],
       temperature: 0.7,
-      max_tokens: 2048,
     });
 
-    const analysis = completion.choices[0]?.message?.content || 'No analysis generated';
+    const analysis = response.content[0].type === 'text' ? response.content[0].text : 'No analysis generated';
 
     return NextResponse.json({
       success: true,

@@ -12,6 +12,7 @@
     "db:phase2": "tsx scripts/init-phase2-containers.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@azure/cosmos": "^4.2.0",
     "@azure/identity": "^4.5.0",
     "@azure/msal-browser": "^4.27.0",

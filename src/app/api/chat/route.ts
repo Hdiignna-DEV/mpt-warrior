@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Anthropic from '@anthropic-ai/sdk';
 
 const SYSTEM_INSTRUCTION = `
 ROLE: Anda adalah "MPT Bot", asisten mentor Mindset Plan Trader (MPT).
@@ -14,14 +14,12 @@ RULES:
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    // Use the public API key (available on server in Next.js)
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+    const apiKey = process.env.CLAUDE_API_KEY;
     if (!apiKey) return NextResponse.json({ error: 'API Key hilang' }, { status: 500 });
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    
-    // 🔥 PERBAIKAN DISINI: Balik ke "gemini-flash-latest" (Jalur Aman & Gratis)
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" }); 
+    const anthropic = new Anthropic({
+      apiKey: apiKey,
+    });
 
     const { messages, image, language } = await req.json() as { messages: Array<{ role: string; content: string }>, image?: string, language?: string };
     const lastMessage = messages[messages.length - 1].content;
@@ -46,37 +44,44 @@ RULES:
       `${m.role === 'user' ? 'User' : 'MPT Bot'}: ${m.content}`
     ).join('\n');
 
-    const finalPrompt = `
-    ${systemPrompt}
-    ${languageInstruction}
-    --------------------------------------------------
-    HISTORY CHAT:
-    ${conversationHistory}
-    --------------------------------------------------
-    PERTANYAAN USER SAAT INI: ${lastMessage}
-    JAWABAN MPT BOT:
-    `;
-
-    let result;
+    // Prepare messages for Claude
+    const claudeMessages: any[] = [];
     
     if (image) {
       console.log("Menerima Gambar Chart...");
-      result = await model.generateContent([
-        finalPrompt,
-        {
-          inlineData: {
-            data: image, 
-            mimeType: "image/png",
+      claudeMessages.push({
+        role: 'user',
+        content: [
+          {
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: 'image/png',
+              data: image,
+            },
           },
-        },
-      ]);
+          {
+            type: 'text',
+            text: lastMessage,
+          },
+        ],
+      });
     } else {
       console.log("Menerima Teks Biasa...");
-      result = await model.generateContent(finalPrompt);
+      claudeMessages.push({
+        role: 'user',
+        content: lastMessage,
+      });
     }
 
-    const response = await result.response;
-    const text = response.text();
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-5-20250514',
+      max_tokens: 2048,
+      system: `${systemPrompt}\n${languageInstruction}\n\nHISTORY CHAT:\n${conversationHistory}`,
+      messages: claudeMessages,
+    });
+
+    const text = response.content[0].type === 'text' ? response.content[0].text : '';
 
     return NextResponse.json({ 
         choices: [{ message: { role: 'assistant', content: text } }] 
