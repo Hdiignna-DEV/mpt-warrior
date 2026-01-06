@@ -318,8 +318,16 @@ export default function AcademyPage() {
         <Card className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 backdrop-blur-sm border-purple-500/30 mb-8">
           <div className="p-6">
             <div className="flex flex-col md:flex-row gap-6 items-center">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-4xl">👨‍🏫</span>
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img 
+                  src="/images/founder-photo.jpg" 
+                  alt="Deden Hadiguna" 
+                  className="w-full h-full object-cover"
+                  onError={(e: any) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement!.innerHTML = '<span class="text-4xl">👨‍🏫</span>';
+                  }}
+                />
               </div>
               <div className="flex-1 text-center md:text-left">
                 <h3 className="text-xl font-bold text-white mb-2">

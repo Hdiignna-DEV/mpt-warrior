@@ -259,8 +259,16 @@ export default function ModuleDetailPage({
         <Card className="bg-white/5 backdrop-blur-sm border-white/10 mb-6">
           <div className="p-5">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                <span className="text-3xl">👨‍🏫</span>
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img 
+                  src="/images/founder-photo.jpg" 
+                  alt="Deden Hadiguna" 
+                  className="w-full h-full object-cover"
+                  onError={(e: any) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.parentElement!.innerHTML = '<span class="text-3xl">👨‍🏫</span>';
+                  }}
+                />
               </div>
               <div className="flex-1">
                 <div className="text-gray-400 text-xs mb-1">Taught by</div>

@@ -153,7 +153,7 @@ export default function AboutPage() {
 
               <p>
                 Dari pengalaman jatuh-bangun inilah lahir <strong className="text-purple-300">MPT Academy</strong> (Mindset Plan Trader). 
-                Modul ini adalah kristalisasi dari pengalaman, air mata, dan disiplin yang kami bangun.
+                Komunitas ini didirikan atas kristalisasi dari pengalaman, air mata, dan disiplin yang kami bangun.
               </p>
 
               <blockquote className="border-l-4 border-purple-500 pl-4 py-2 my-4 bg-purple-900/20 italic text-purple-200">
