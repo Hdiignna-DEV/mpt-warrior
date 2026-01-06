@@ -437,15 +437,22 @@ export async function submitQuizAnswer(
 }
 
 /**
- * Grade essay question (Admin only)
+ * Grade essay question (SUPER ADMIN ONLY)
+ * Only users with SUPER_ADMIN role can grade quiz answers
  */
 export async function gradeEssayAnswer(
   userId: string,
   questionId: string,
   score: number,
   feedback: string,
-  gradedBy: string
+  gradedBy: string,
+  graderRole: string
 ): Promise<UserQuizAnswer> {
+  // Permission check: Only SUPER_ADMIN can grade
+  if (graderRole !== 'SUPER_ADMIN') {
+    throw new Error('Only SUPER_ADMIN can grade quiz answers');
+  }
+
   const container = getQuizAnswersContainer();
   const answerId = `${userId}-${questionId}`;
   
