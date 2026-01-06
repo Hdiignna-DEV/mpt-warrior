@@ -130,7 +130,7 @@ Gunakan emoji dan bahasa yang engaging tapi tetap profesional. Berikan feedback 
 
     // Call Claude Sonnet 4.5 API
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250514',
+      model: 'claude-sonnet-4-20250514',
       max_tokens: 4096,
       system: 'Anda adalah MPT Warrior AI Mentor, seorang expert trading analyst yang memberikan feedback konstruktif dan actionable untuk trader.',
       messages: [
