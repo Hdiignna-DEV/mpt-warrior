@@ -1321,13 +1321,72 @@ Jika konflik, prioritaskan timeframe yang lebih besar
   updatedAt: new Date().toISOString()
 };
 
+// Module 4-6: Coming Soon
+const MODULE_4_CONTENT = {
+  id: 'module-4',
+  moduleNumber: 4,
+  title: 'THE SWORD',
+  subtitle: 'Execution Strategy',
+  description: 'Master setup execution with SOP Pre-Market Ritual, Rejection & Breakout strategies, Price Action triggers, and Trade Management techniques.',
+  level: 'WARRIOR',
+  order: 4,
+  isAvailable: false,
+  totalPoints: 0,
+  estimatedHours: 4,
+  lessons: [],
+  prerequisites: ['module-1', 'module-2', 'module-3'],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+};
+
+const MODULE_5_CONTENT = {
+  id: 'module-5',
+  moduleNumber: 5,
+  title: 'THE CHRONICLE',
+  subtitle: 'Evaluation & Journaling',
+  description: 'Professional journaling techniques, weekly audit process, and scaling up plan to grow your trading account safely.',
+  level: 'WARRIOR',
+  order: 5,
+  isAvailable: false,
+  totalPoints: 0,
+  estimatedHours: 3,
+  lessons: [],
+  prerequisites: ['module-1', 'module-2', 'module-3', 'module-4'],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+};
+
+const MODULE_6_CONTENT = {
+  id: 'module-6',
+  moduleNumber: 6,
+  title: 'THE MED-KIT',
+  subtitle: 'Recovery & Resilience',
+  description: 'Post-Margin Call recovery protocol, trauma management techniques, and roadmap to rebuild from zero with proper psychology.',
+  level: 'VETERAN',
+  order: 6,
+  isAvailable: false,
+  totalPoints: 0,
+  estimatedHours: 3,
+  lessons: [],
+  prerequisites: ['module-1', 'module-2', 'module-3', 'module-4', 'module-5'],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+};
+
 async function populateModules() {
   console.log('🚀 Starting Academy Module Population...\n');
 
   const database = client.database(databaseId);
   const container = database.container(containerId);
 
-  const modules = [MODULE_1_CONTENT, MODULE_2_CONTENT, MODULE_3_CONTENT];
+  const modules = [
+    MODULE_1_CONTENT, 
+    MODULE_2_CONTENT, 
+    MODULE_3_CONTENT,
+    MODULE_4_CONTENT,
+    MODULE_5_CONTENT,
+    MODULE_6_CONTENT
+  ];
   let successCount = 0;
 
   for (const module of modules) {
@@ -1349,7 +1408,9 @@ async function populateModules() {
   console.log('\n' + '='.repeat(60));
   console.log(`✅ Population Complete!`);
   console.log(`📊 Summary:`);
-  console.log(`   - Modules Created: ${successCount}/3`);
+  console.log(`   - Modules Created: ${successCount}/${modules.length}`);
+  console.log(`   - Available Now: 3 modules (1-3)`);
+  console.log(`   - Coming Soon: 3 modules (4-6)`);
   console.log(`   - Total Lessons: ${modules.reduce((sum, m) => sum + m.lessons.length, 0)}`);
   console.log(`   - Total Points: ${modules.reduce((sum, m) => sum + m.totalPoints, 0)}`);
   console.log(`   - Total Hours: ${modules.reduce((sum, m) => sum + m.estimatedHours, 0)}`);
