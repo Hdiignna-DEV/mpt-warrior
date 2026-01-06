@@ -314,6 +314,33 @@ export default function AcademyPage() {
           </div>
         </div>
 
+        {/* Welcome from Founder */}
+        <Card className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 backdrop-blur-sm border-purple-500/30 mb-8">
+          <div className="p-6">
+            <div className="flex flex-col md:flex-row gap-6 items-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                <span className="text-4xl">👨‍🏫</span>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="text-xl font-bold text-white mb-2">
+                  Welcome to MPT Academy!
+                </h3>
+                <p className="text-gray-300 leading-relaxed mb-3">
+                  Saya <strong className="text-purple-300">Deden Hadiguna</strong>, founder MPT Academy. 
+                  Selamat datang di perjalanan transformasi dari spekulan menjadi <strong className="text-white">Plan Warrior</strong>. 
+                  Kurikulum ini dirancang sistematis untuk membangun fondasi mindset, plan, dan risk management yang solid.
+                </p>
+                <a 
+                  href="/about" 
+                  className="text-purple-400 hover:text-purple-300 font-medium text-sm transition-colors"
+                >
+                  Learn more about the founder →
+                </a>
+              </div>
+            </div>
+          </div>
+        </Card>
+
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-white/5 border-white/10 p-4">

@@ -255,6 +255,28 @@ export default function ModuleDetailPage({
           </div>
         </Card>
 
+        {/* Instructor Card */}
+        <Card className="bg-white/5 backdrop-blur-sm border-white/10 mb-6">
+          <div className="p-5">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+                <span className="text-3xl">👨‍🏫</span>
+              </div>
+              <div className="flex-1">
+                <div className="text-gray-400 text-xs mb-1">Taught by</div>
+                <h3 className="text-white font-bold text-lg">Deden Hadiguna</h3>
+                <p className="text-purple-300 text-sm">Founder & Head Educator</p>
+              </div>
+              <a 
+                href="/about" 
+                className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors"
+              >
+                View Profile →
+              </a>
+            </div>
+          </div>
+        </Card>
+
         {/* Lessons List */}
         <div className="space-y-4">
           {module.lessons
