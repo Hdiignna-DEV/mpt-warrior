@@ -209,6 +209,16 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
                     ),
                   a: ({ node, ...props }) => <a className="text-purple-400 hover:text-purple-300 underline" {...props} />,
                   hr: ({ node, ...props }) => <hr className="border-white/20 my-6" {...props} />,
+                  table: ({ node, ...props }) => (
+                    <div className="overflow-x-auto mb-6">
+                      <table className="min-w-full border-collapse border border-purple-500/30 rounded-lg" {...props} />
+                    </div>
+                  ),
+                  thead: ({ node, ...props }) => <thead className="bg-purple-900/40" {...props} />,
+                  tbody: ({ node, ...props }) => <tbody className="bg-slate-800/30" {...props} />,
+                  tr: ({ node, ...props }) => <tr className="border-b border-purple-500/20 hover:bg-purple-900/20 transition-colors" {...props} />,
+                  th: ({ node, ...props }) => <th className="px-4 py-3 text-left text-white font-bold border border-purple-500/30" {...props} />,
+                  td: ({ node, ...props }) => <td className="px-4 py-3 text-gray-300 border border-purple-500/20" {...props} />,
                 }}
               >
                 {lesson.content}
