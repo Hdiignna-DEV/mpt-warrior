@@ -52,6 +52,43 @@ export interface UserModuleProgress {
   lastAccessedAt: string;
 }
 
+// Quiz Types
+export type QuizQuestionType = 'multiple-choice' | 'essay' | 'true-false';
+
+export interface QuizQuestion {
+  id: string;
+  moduleId: string;
+  type: QuizQuestionType;
+  question: string;
+  options?: string[]; // For multiple-choice and true-false
+  correctAnswer?: number | null; // Index for MC/TF, null for essay
+  points: number;
+  order: number;
+}
+
+export interface UserQuizAnswer {
+  id: string;
+  userId: string;
+  moduleId: string;
+  questionId: string;
+  answer: string; // User's answer (text or option index as string)
+  score: number | null; // null = not graded yet
+  feedback: string | null; // Admin feedback
+  gradedBy: string | null; // Admin userId
+  gradedAt: string | null;
+  submittedAt: string;
+}
+
+export interface QuizScore {
+  moduleId: string;
+  totalPoints: number;
+  earnedPoints: number;
+  percentage: number;
+  gradedQuestions: number;
+  totalQuestions: number;
+  isPassed: boolean; // >= 70%
+}
+
 // Get containers
 function getModulesContainer(): Container {
   const client = getCosmosClient();
@@ -61,6 +98,16 @@ function getModulesContainer(): Container {
 function getProgressContainer(): Container {
   const client = getCosmosClient();
   return client.database('mpt-warrior').container('user-progress');
+}
+
+function getQuizQuestionsContainer(): Container {
+  const client = getCosmosClient();
+  return client.database('mpt-warrior').container('quiz-questions');
+}
+
+function getQuizAnswersContainer(): Container {
+  const client = getCosmosClient();
+  return client.database('mpt-warrior').container('quiz-answers');
 }
 
 // ============================================
@@ -312,6 +359,209 @@ export async function getUserModuleSummary(userId: string): Promise<UserModulePr
     
     const lastAccessed = moduleProgressItems.length > 0
       ? moduleProgressItems.sort((a, b) => 
+          new Date(b.lastAccessedAt).getTime() - new Date(a.lastAccessedAt).getTime()
+        )[0].lastAccessedAt
+      : new Date().toISOString();
+    
+    return {
+      moduleId: module.id,
+      totalLessons,
+      completedLessons,
+      progress,
+      lastAccessedAt: lastAccessed,
+    };
+  });
+
+  return summary;
+}
+
+// ============================================
+// QUIZ OPERATIONS
+// ============================================
+
+/**
+ * Get all questions for a module
+ */
+export async function getQuizQuestions(moduleId: string): Promise<QuizQuestion[]> {
+  const container = getQuizQuestionsContainer();
+  
+  const { resources } = await container.items
+    .query({
+      query: 'SELECT * FROM c WHERE c.moduleId = @moduleId ORDER BY c["order"] ASC',
+      parameters: [{ name: '@moduleId', value: moduleId }],
+    })
+    .fetchAll();
+
+  return resources;
+}
+
+/**
+ * Submit quiz answer (auto-grade for MC/TF, manual for essay)
+ */
+export async function submitQuizAnswer(
+  userId: string,
+  moduleId: string,
+  questionId: string,
+  answer: string
+): Promise<UserQuizAnswer> {
+  const container = getQuizAnswersContainer();
+  const questionsContainer = getQuizQuestionsContainer();
+  
+  // Get question details
+  const { resource: question } = await questionsContainer.item(questionId, moduleId).read<QuizQuestion>();
+  if (!question) throw new Error('Question not found');
+  
+  // Auto-grade for multiple-choice and true-false
+  let score: number | null = null;
+  if (question.type !== 'essay' && question.correctAnswer !== null && question.correctAnswer !== undefined) {
+    const userAnswerIndex = parseInt(answer);
+    score = userAnswerIndex === question.correctAnswer ? question.points : 0;
+  }
+  
+  const answerId = `${userId}-${questionId}`;
+  const userAnswer: UserQuizAnswer = {
+    id: answerId,
+    userId,
+    moduleId,
+    questionId,
+    answer,
+    score,
+    feedback: null,
+    gradedBy: score !== null ? 'auto' : null,
+    gradedAt: score !== null ? new Date().toISOString() : null,
+    submittedAt: new Date().toISOString(),
+  };
+
+  const { resource } = await container.items.upsert(userAnswer);
+  return resource!;
+}
+
+/**
+ * Grade essay question (Admin only)
+ */
+export async function gradeEssayAnswer(
+  userId: string,
+  questionId: string,
+  score: number,
+  feedback: string,
+  gradedBy: string
+): Promise<UserQuizAnswer> {
+  const container = getQuizAnswersContainer();
+  const answerId = `${userId}-${questionId}`;
+  
+  // Find existing answer
+  const { resources } = await container.items
+    .query({
+      query: 'SELECT * FROM c WHERE c.id = @id AND c.userId = @userId',
+      parameters: [
+        { name: '@id', value: answerId },
+        { name: '@userId', value: userId },
+      ],
+    })
+    .fetchAll();
+
+  if (resources.length === 0) throw new Error('Answer not found');
+  
+  const existingAnswer = resources[0];
+  const updatedAnswer: UserQuizAnswer = {
+    ...existingAnswer,
+    score,
+    feedback,
+    gradedBy,
+    gradedAt: new Date().toISOString(),
+  };
+
+  const { resource } = await container.item(answerId, userId).replace(updatedAnswer);
+  return resource!;
+}
+
+/**
+ * Get user's quiz score for a module
+ */
+export async function getUserQuizScore(userId: string, moduleId: string): Promise<QuizScore> {
+  const container = getQuizAnswersContainer();
+  const questions = await getQuizQuestions(moduleId);
+  
+  const { resources: answers } = await container.items
+    .query({
+      query: 'SELECT * FROM c WHERE c.userId = @userId AND c.moduleId = @moduleId',
+      parameters: [
+        { name: '@userId', value: userId },
+        { name: '@moduleId', value: moduleId },
+      ],
+    })
+    .fetchAll();
+
+  const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
+  const gradedAnswers = answers.filter(a => a.score !== null);
+  const earnedPoints = gradedAnswers.reduce((sum, a) => sum + (a.score || 0), 0);
+  const percentage = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0;
+  
+  return {
+    moduleId,
+    totalPoints,
+    earnedPoints,
+    percentage,
+    gradedQuestions: gradedAnswers.length,
+    totalQuestions: questions.length,
+    isPassed: percentage >= 70,
+  };
+}
+
+/**
+ * Get user's answers for a module (with questions)
+ */
+export async function getUserQuizAnswers(userId: string, moduleId: string) {
+  const container = getQuizAnswersContainer();
+  const questions = await getQuizQuestions(moduleId);
+  
+  const { resources: answers } = await container.items
+    .query({
+      query: 'SELECT * FROM c WHERE c.userId = @userId AND c.moduleId = @moduleId',
+      parameters: [
+        { name: '@userId', value: userId },
+        { name: '@moduleId', value: moduleId },
+      ],
+    })
+    .fetchAll();
+
+  return questions.map(question => {
+    const answer = answers.find(a => a.questionId === question.id);
+    return {
+      question,
+      answer: answer || null,
+    };
+  });
+}
+
+/**
+ * Get all ungraded essay answers (Admin)
+ */
+export async function getUngradedEssays(): Promise<Array<{ question: QuizQuestion; answer: UserQuizAnswer }>> {
+  const container = getQuizAnswersContainer();
+  
+  const { resources: ungradedAnswers } = await container.items
+    .query({
+      query: 'SELECT * FROM c WHERE c.score = null',
+    })
+    .fetchAll();
+
+  const result = await Promise.all(
+    ungradedAnswers.map(async (answer) => {
+      const questionsContainer = getQuizQuestionsContainer();
+      const { resource: question } = await questionsContainer
+        .item(answer.questionId, answer.moduleId)
+        .read<QuizQuestion>();
+      
+      return {
+        question: question!,
+        answer,
+      };
+    })
+  );
+
+  return result;
+} 
           new Date(b.lastAccessedAt).getTime() - new Date(a.lastAccessedAt).getTime()
         )[0].lastAccessedAt
       : '';
