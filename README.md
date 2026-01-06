@@ -71,6 +71,14 @@
 - Timezone support
 - Calendar export
 
+#### 🛡️ Admin HQ (SUPER_ADMIN)
+- User management (approve/reject registrations)
+- Quiz grading dashboard for essay questions
+- System analytics and monitoring
+- Invitation code management
+- Audit log tracking
+- Real-time statistics
+
 ### Technical Features
 
 - **Dark/Light Theme** with persistent preference
