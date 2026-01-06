@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 
 const JWT_SECRET = process.env.JWT_SECRET || '33bd8a08f87cbebc4c4d39cbf23de954420f59374d024eda9cf574db20fab4b0';
 
@@ -43,7 +43,7 @@ const PROTECTED_ROUTES = [
 
 // Middleware untuk auth dan security
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ============================================
@@ -86,12 +86,14 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
   try {
-    user = jwt.verify(token, JWT_SECRET);
+    const secret = new TextEncoder().encode(JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret);
+    user = payload;
   } catch (error) {
-    console.log('[MPT-MW] INVALID TOKEN, redirect to /login. Path:', pathname, 'Token:', token, 'Error:', error);
+    console.log('[MPT-MW] INVALID TOKEN (jose), redirect to /login. Path:', pathname, 'Token:', token, 'Error:', error);
     return NextResponse.redirect(new URL('/login', request.url));
   }
-  console.log('[MPT-MW] TOKEN OK. Path:', pathname, 'User:', user);
+  console.log('[MPT-MW] TOKEN OK (jose). Path:', pathname, 'User:', user);
 
   // ============================================
   // LAYER 4: Admin Routes Protection
