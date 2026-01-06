@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import Quiz from '@/components/Quiz';
 
 interface Lesson {
   id: string;
@@ -59,6 +60,7 @@ export default function ModuleDetailPage({
   const [canAccess, setCanAccess] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showQuiz, setShowQuiz] = useState(false);
 
   useEffect(() => {
     // Fallback: jika token tidak ada di localStorage, coba ambil dari cookie
@@ -315,6 +317,40 @@ export default function ModuleDetailPage({
               );
             })}
         </div>
+
+        {/* Quiz Section */}
+        {completedLessons === module.lessons.length && !canAccess === false && (
+          <Card className="bg-white/5 backdrop-blur-sm border-white/10 mt-6 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  📝 Module Quiz
+                </h3>
+                <p className="text-gray-400 text-sm">
+                  Complete the quiz to test your knowledge (Passing score: 70%)
+                </p>
+              </div>
+              {!showQuiz && (
+                <Button
+                  onClick={() => setShowQuiz(true)}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  Start Quiz
+                </Button>
+              )}
+            </div>
+
+            {showQuiz && (
+              <Quiz 
+                moduleId={resolvedParams.id} 
+                onComplete={() => {
+                  // Refresh progress
+                  fetchModuleData();
+                }}
+              />
+            )}
+          </Card>
+        )}
       </div>
     </div>
   );
