@@ -50,10 +50,10 @@ export default function AcademyPage() {
 
   useEffect(() => {
     // Fallback: jika token tidak ada di localStorage, coba ambil dari cookie
-    let token = localStorage.getItem('token');
+    let token: string | undefined = localStorage.getItem('token') || undefined;
     if (!token) {
       const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
-      if (match) {
+      if (match && match[1]) {
         token = match[1];
         localStorage.setItem('token', token);
       }
