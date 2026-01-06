@@ -21,22 +21,35 @@ import {
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const menuItems = [
-  // Dashboard & Overview
-  { href: '/dashboard', label: 'nav.dashboard', fallback: 'Dashboard', icon: LayoutDashboard, description: 'Overview' },
-  
-  // Learning & Growth
-  { href: '/academy', label: 'Warrior Academy', fallback: 'Warrior Academy', icon: Sparkles, description: 'Training Path' },
-  { href: '/achievements', label: 'nav.achievements', fallback: 'Achievements', icon: Trophy, description: 'Progress' },
-  { href: '/about', label: 'About Founder', fallback: 'About Founder', icon: User, description: 'Instructor' },
-  
-  // Trading Tools
-  { href: '/journal', label: 'nav.journal', fallback: 'Journal', icon: BookOpen, description: 'Trade Log' },
-  { href: '/calculator', label: 'nav.calculator', fallback: 'Calculator', icon: Calculator, description: 'Risk Tools' },
-  { href: '/analytics', label: 'nav.analytics', fallback: 'Analytics', icon: BarChart3, description: 'Performance' },
-  
-  // AI Assistant
-  { href: '/ai-mentor', label: 'nav.aiMentor', fallback: 'AI Mentor', icon: Bot, description: 'AI Coach' },
+// Menu structure with sections
+const menuSections = [
+  {
+    items: [
+      { href: '/dashboard', label: 'nav.dashboard', fallback: 'Dashboard', icon: LayoutDashboard, description: 'Overview' },
+    ]
+  },
+  {
+    title: '🎓 Learning & Growth',
+    items: [
+      { href: '/academy', label: 'Warrior Academy', fallback: 'Warrior Academy', icon: Sparkles, description: 'Training Path' },
+      { href: '/achievements', label: 'nav.achievements', fallback: 'Achievements', icon: Trophy, description: 'Progress' },
+      { href: '/about', label: 'About Founder', fallback: 'About Founder', icon: User, description: 'Instructor' },
+    ]
+  },
+  {
+    title: '💼 Trading Tools',
+    items: [
+      { href: '/journal', label: 'nav.journal', fallback: 'Journal', icon: BookOpen, description: 'Trade Log' },
+      { href: '/calculator', label: 'nav.calculator', fallback: 'Calculator', icon: Calculator, description: 'Risk Tools' },
+      { href: '/analytics', label: 'nav.analytics', fallback: 'Analytics', icon: BarChart3, description: 'Performance' },
+    ]
+  },
+  {
+    title: '🤖 AI Assistant',
+    items: [
+      { href: '/ai-mentor', label: 'nav.aiMentor', fallback: 'AI Mentor', icon: Bot, description: 'AI Coach' },
+    ]
+  },
 ];
 
 // Admin-only menu item
@@ -186,50 +199,64 @@ export default function Sidebar() {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {menuItems.map((item, index) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
-            
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`
-                  group relative flex items-center gap-3 px-4 py-3 rounded-xl
-                  transition-all duration-300 font-semibold
-                  ${isActive 
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30 scale-[1.02]' 
-                    : 'text-gray-700 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 hover:bg-gray-100 dark:hover:bg-zinc-900'
-                  }
-                `}
-              >
-                {/* Icon Container */}
-                <div className={`
-                  flex-shrink-0 p-2 rounded-lg transition-all duration-300
-                  ${isActive 
-                    ? 'bg-white/20' 
-                    : 'bg-gray-100 dark:bg-zinc-800 group-hover:bg-gray-200 dark:group-hover:bg-zinc-700'
-                  }
-                `}>
-                  <Icon size={20} />
-                </div>
-
-                {/* Text Content */}
-                <div className="flex-1">
-                  <p className="text-sm font-bold" suppressHydrationWarning>{t(item.label)}</p>
-                  <p className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500 dark:text-zinc-500'}`}>
-                    {item.description}
+        <nav className="flex-1 p-4 space-y-4 overflow-y-auto">
+          {menuSections.map((section, sectionIndex) => (
+            <div key={sectionIndex} className="space-y-2">
+              {/* Section Title (if exists) */}
+              {section.title && (
+                <div className="px-2 py-1">
+                  <p className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-wider">
+                    {section.title}
                   </p>
                 </div>
+              )}
+              
+              {/* Section Items */}
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`
+                      group relative flex items-center gap-3 px-4 py-3 rounded-xl
+                      transition-all duration-300 font-semibold
+                      ${isActive 
+                        ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30 scale-[1.02]' 
+                        : 'text-gray-700 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 hover:bg-gray-100 dark:hover:bg-zinc-900'
+                      }
+                    `}
+                  >
+                    {/* Icon Container */}
+                    <div className={`
+                      flex-shrink-0 p-2 rounded-lg transition-all duration-300
+                      ${isActive 
+                        ? 'bg-white/20' 
+                        : 'bg-gray-100 dark:bg-zinc-800 group-hover:bg-gray-200 dark:group-hover:bg-zinc-700'
+                      }
+                    `}>
+                      <Icon size={20} />
+                    </div>
 
-                {/* Active Indicator */}
-                {isActive && (
-                  <ArrowRight className="w-5 h-5 text-white/80" />
-                )}
-              </Link>
-            );
-          })}
+                    {/* Text Content */}
+                    <div className="flex-1">
+                      <p className="text-sm font-bold" suppressHydrationWarning>{t(item.label)}</p>
+                      <p className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500 dark:text-zinc-500'}`}>
+                        {item.description}
+                      </p>
+                    </div>
+
+                    {/* Active Indicator */}
+                    {isActive && (
+                      <ArrowRight className="w-5 h-5 text-white/80" />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
 
           {/* Admin HQ Menu - Only for ADMIN and SUPER_ADMIN roles */}
           {(userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') && (
@@ -265,7 +292,7 @@ export default function Sidebar() {
 
                 {/* Text Content */}
                 <div className="flex-1">
-                  <p className="text-sm font-bold">{adminMenuItem.fallback}</p>
+                  <p className="text-sm font-bold" suppressHydrationWarning>{t(adminMenuItem.label)}</p>
                   <p className={`text-xs ${pathname === adminMenuItem.href ? 'text-white/80' : 'text-red-600 dark:text-red-400'}`}>
                     {adminMenuItem.description}
                   </p>

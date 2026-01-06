@@ -19,6 +19,7 @@ const resources = {
       "nav.aiMentor": "AI Mentor",
       "nav.calculator": "Calculator",
       "nav.achievements": "Achievements",
+      "nav.adminHQ": "Admin HQ",
       
       // AI Mentor
       "ai.title": "AI Mentor",
@@ -217,6 +218,7 @@ const resources = {
       "nav.aiMentor": "AI Mentor",
       "nav.calculator": "Kalkulator",
       "nav.achievements": "Pencapaian",
+      "nav.adminHQ": "Admin HQ",
       
       // AI Mentor
       "ai.title": "AI Mentor",

@@ -64,23 +64,28 @@ export default function Footer() {
             </h4>
             <ul className="text-slate-500 text-[10px] md:text-xs space-y-2.5 uppercase tracking-wider">
               <li>
-                <Link href="/journal" className="hover:text-amber-500 transition-colors duration-300 inline-block">
-                  Command Center
+                <Link href="/dashboard" className="hover:text-amber-500 transition-colors duration-300 inline-block">
+                  Dashboard
                 </Link>
               </li>
               <li>
-                <Link href="/analytics" className="hover:text-amber-500 transition-colors duration-300 inline-block">
-                  War Zone Calendar
-                </Link>
-              </li>
-              <li>
-                <Link href="/ai-mentor" className="hover:text-amber-500 transition-colors duration-300 inline-block">
-                  AI Mentor (Intelligence)
+                <Link href="/academy" className="hover:text-amber-500 transition-colors duration-300 inline-block">
+                  Warrior Academy
                 </Link>
               </li>
               <li>
                 <Link href="/journal" className="hover:text-amber-500 transition-colors duration-300 inline-block">
                   Trade Journal
+                </Link>
+              </li>
+              <li>
+                <Link href="/analytics" className="hover:text-amber-500 transition-colors duration-300 inline-block">
+                  Analytics
+                </Link>
+              </li>
+              <li>
+                <Link href="/ai-mentor" className="hover:text-amber-500 transition-colors duration-300 inline-block">
+                  AI Mentor
                 </Link>
               </li>
             </ul>
