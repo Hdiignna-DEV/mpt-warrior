@@ -4,13 +4,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { requireSuperAdmin } from '@/lib/middleware/auth';
+import { requireSuperAdminRole } from '@/lib/middleware/auth';
 import { gradeEssayAnswer } from '@/lib/db/education-service';
 
 export async function POST(request: NextRequest) {
   try {
     // Verify SUPER_ADMIN role
-    const authResult = await requireSuperAdmin(request);
+    const authResult = await requireSuperAdminRole(request);
     if (authResult instanceof Response) {
       return authResult;
     }
