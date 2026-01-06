@@ -24,7 +24,7 @@ const menuItems = [
   { href: '/dashboard', label: 'nav.dashboard', fallback: 'Dashboard', icon: LayoutDashboard, description: 'Overview' },
   { href: '/analytics', label: 'nav.analytics', fallback: 'Analytics', icon: BarChart3, description: 'Data Insights' },
   { href: '/journal', label: 'nav.journal', fallback: 'Journal', icon: BookOpen, description: 'History' },
-  { href: '/academy', label: 'nav.warriorAcademy', fallback: 'Warrior Academy', icon: Sparkles, description: 'Training Path' },
+  { href: '/academy', label: 'Warrior Academy', fallback: 'Warrior Academy', icon: Sparkles, description: 'Training Path' },
   { href: '/calculator', label: 'nav.calculator', fallback: 'Calculator', icon: Calculator, description: 'Calculate' },
   { href: '/ai-mentor', label: 'nav.aiMentor', fallback: 'AI Mentor', icon: Bot, description: 'Coach' },
   { href: '/achievements', label: 'nav.achievements', fallback: 'Achievements', icon: Trophy, description: 'Progress' },
