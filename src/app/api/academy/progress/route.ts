@@ -78,9 +78,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const token = authHeader.substring(7);
-    const decoded = verifyToken(token);
-    
+    const decoded = await verifyToken(request);
     if (!decoded) {
       return NextResponse.json(
         { error: 'Unauthorized - Invalid token' },
@@ -108,12 +106,11 @@ export async function POST(request: NextRequest) {
 
     if (action === 'complete') {
       const progress = await markLessonComplete(
-        decoded.username,
+        decoded.userId,
         moduleId,
         lessonId,
         timeSpent || 0
       );
-
       return NextResponse.json({
         success: true,
         message: 'Lesson marked as completed',
@@ -121,11 +118,10 @@ export async function POST(request: NextRequest) {
       });
     } else if (action === 'access') {
       const progress = await updateLessonAccess(
-        decoded.username,
+        decoded.userId,
         moduleId,
         lessonId
       );
-
       return NextResponse.json({
         success: true,
         message: 'Lesson access updated',
