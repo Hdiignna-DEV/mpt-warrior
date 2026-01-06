@@ -99,7 +99,7 @@ export async function middleware(request: NextRequest) {
   // LAYER 4: Admin Routes Protection
   // ============================================
   if (ADMIN_ROUTES.some(route => pathname.startsWith(route))) {
-    if (user.role !== 'ADMIN') {
+    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
       return NextResponse.redirect(new URL('/access-denied', request.url));
     }
     return response;
