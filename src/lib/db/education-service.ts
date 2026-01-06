@@ -174,7 +174,7 @@ export async function getUserProgress(userId: string): Promise<UserProgress[]> {
   
   const { resources } = await container.items
     .query({
-      query: 'SELECT * FROM c WHERE c.userId = @userId ORDER BY c.lastAccessedAt DESC',
+      query: 'SELECT * FROM c WHERE c.userId = @userId ORDER BY c["lastAccessedAt"] DESC',
       parameters: [{ name: '@userId', value: userId }],
     })
     .fetchAll();
