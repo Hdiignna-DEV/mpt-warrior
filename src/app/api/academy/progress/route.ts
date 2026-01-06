@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/utils/auth';
+import { verifyToken } from '@/lib/auth';
 import {
   getUserProgress,
   getUserModuleSummary,

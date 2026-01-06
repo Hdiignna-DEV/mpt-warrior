@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/utils/auth';
+import { verifyToken } from '@/lib/auth';
 import { getModuleById, canAccessModule, Level } from '@/lib/db/education-service';
 
 export async function GET(
