@@ -14,6 +14,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Lesson {
   id: string;
@@ -188,6 +189,7 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
             {/* Markdown Content */}
             <div className="prose prose-invert prose-lg max-w-none mb-6 text-gray-200">
               <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
                 components={{
                   h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-white mb-4 mt-8" {...props} />,
                   h2: ({ node, ...props }) => <h2 className="text-2xl font-bold text-white mb-3 mt-6" {...props} />,
