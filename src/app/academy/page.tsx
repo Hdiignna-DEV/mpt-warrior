@@ -56,7 +56,12 @@ export default function AcademyPage() {
       if (match && match[1]) {
         token = match[1];
         localStorage.setItem('token', token);
+        console.log('[Academy] Token diambil dari cookie:', token);
+      } else {
+        console.log('[Academy] Token tidak ditemukan di cookie.');
       }
+    } else {
+      console.log('[Academy] Token ditemukan di localStorage:', token);
     }
     fetchData(token);
   }, [selectedLevel]);

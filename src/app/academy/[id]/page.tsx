@@ -68,7 +68,12 @@ export default function ModuleDetailPage({
       if (match && match[1]) {
         token = match[1];
         localStorage.setItem('token', token);
+        console.log('[Academy Module] Token diambil dari cookie:', token);
+      } else {
+        console.log('[Academy Module] Token tidak ditemukan di cookie.');
       }
+    } else {
+      console.log('[Academy Module] Token ditemukan di localStorage:', token);
     }
     if (!level) {
       setError('Missing level parameter');

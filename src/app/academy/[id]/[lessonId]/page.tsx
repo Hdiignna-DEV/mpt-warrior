@@ -52,7 +52,12 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
       if (match && match[1]) {
         token = match[1];
         localStorage.setItem('token', token);
+        console.log('[Academy Lesson] Token diambil dari cookie:', token);
+      } else {
+        console.log('[Academy Lesson] Token tidak ditemukan di cookie.');
       }
+    } else {
+      console.log('[Academy Lesson] Token ditemukan di localStorage:', token);
     }
     if (!level) {
       setError('Missing level parameter');
