@@ -24,11 +24,15 @@ const PUBLIC_ROUTES = [
   '/achievements',     // Client-side protected
   '/analytics',        // Client-side protected
   '/tutorial',         // Client-side protected
-  '/admin-hq',         // Client-side protected
+  '/profile',          // Warrior profile (client-side protected)
+  '/profile/edit',     // Profile edit (client-side protected)
 ];
 
-// Admin-only routes (checked client-side)
+// Admin-only routes (Server-side role check)
 const ADMIN_ROUTES = ['/admin-hq'];
+
+// Super Admin-only routes (Server-side role check)
+const SUPER_ADMIN_ROUTES = ['/admin-hq/settings'];
 
 // Protected routes - ALL FEATURES LOCKED (members only)
 const PROTECTED_ROUTES = [
@@ -96,12 +100,26 @@ export async function middleware(request: NextRequest) {
   console.log('[MPT-MW] TOKEN OK (jose). Path:', pathname, 'User:', user);
 
   // ============================================
-  // LAYER 4: Admin Routes Protection
+  // LAYER 4: Role-Based Access Control
   // ============================================
-  if (ADMIN_ROUTES.some(route => pathname.startsWith(route))) {
-    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+  
+  // Check Super Admin routes first (most restrictive)
+  if (SUPER_ADMIN_ROUTES.some(route => pathname.startsWith(route))) {
+    if (user.role !== 'SUPER_ADMIN') {
+      console.log('[MPT-MW] SUPER_ADMIN route blocked. User role:', user.role, 'Path:', pathname);
       return NextResponse.redirect(new URL('/access-denied', request.url));
     }
+    console.log('[MPT-MW] SUPER_ADMIN access granted. Path:', pathname);
+    return response;
+  }
+
+  // Check Admin routes (ADMIN or SUPER_ADMIN)
+  if (ADMIN_ROUTES.some(route => pathname.startsWith(route))) {
+    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+      console.log('[MPT-MW] ADMIN route blocked. User role:', user.role, 'Path:', pathname);
+      return NextResponse.redirect(new URL('/access-denied', request.url));
+    }
+    console.log('[MPT-MW] ADMIN access granted. Role:', user.role, 'Path:', pathname);
     return response;
   }
 

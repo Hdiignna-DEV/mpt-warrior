@@ -14,6 +14,10 @@ export interface User {
   password: string; // Hashed password (bcrypt)
   avatar?: string;
   
+  // Warrior Identity
+  warriorId: string; // Format: MPT-YYYY-XXXXX (e.g., MPT-2026-00001)
+  displayName?: string; // Custom display name (optional)
+  
   // Contact Information
   whatsapp?: string;
   telegram_id?: string;
@@ -22,9 +26,19 @@ export interface User {
   role: UserRole;
   status: UserStatus;
   
+  // Warrior Profile System
+  badges: BadgeType[]; // Array of earned badges
+  disciplineScore: number; // Score based on trading discipline (0-1000)
+  currentBadgeLevel: BadgeLevel; // Current badge level
+  
   // Invitation & Referral
   invitation_code: string;
   invited_by?: string;
+  referralCode?: string; // Only for Veteran level warriors
+  referralStats?: ReferralStats; // Referral statistics
+  
+  // Profile Settings
+  profileSettings: ProfileSettings;
   
   // Timestamps
   createdAt: Date;
@@ -62,6 +76,85 @@ export interface AuditLog {
   ip_address?: string;
   user_agent?: string;
   metadata?: Record<string, any>;
+}
+
+export interface UserSettings {
+  theme: 'light' | 'dark' | 'auto';
+  currency: string;
+  timezone: string;
+  notifications: boolean;
+  language: string;
+  riskPercent: number;
+}
+
+// ============================================
+// WARRIOR PROFILE SYSTEM
+// ============================================
+
+export type BadgeLevel = 'RECRUIT' | 'WARRIOR' | 'VETERAN';
+export type BadgeType = 
+  | 'FIRST_TRADE' 
+  | 'CONSISTENT_5' 
+  | 'DISCIPLINED_WARRIOR'
+  | 'PROFIT_MASTER'
+  | 'EDUCATOR'
+  | 'LEGACY_BUILDER';
+
+export interface Badge {
+  type: BadgeType;
+  level: BadgeLevel;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  gradient: string;
+  earnedAt?: Date;
+  progress?: number; // 0-100
+}
+
+export interface ProfileSettings {
+  personalGoal?: string; // User's trading goal/motivation
+  tradingStrategy?: 'SCALPING' | 'DAY_TRADING' | 'SWING_TRADING' | 'POSITION_TRADING';
+  preferredTimeframe?: string;
+  bio?: string;
+  showEmail?: boolean;
+  showStats?: boolean;
+  allowReferrals?: boolean; // Only for Veterans
+}
+
+export interface ReferralStats {
+  totalReferrals: number;
+  activeReferrals: number;
+  totalEarnings: number; // From referral discount
+  conversionRate: number; // Percentage
+}
+
+export interface Referral {
+  id: string;
+  code: string; // Format: LEGACY-XXXXXX
+  referrerId: string; // Warrior ID of the referrer
+  referredUserId?: string; // User who used the code
+  discountPercent: number; // Flat discount %
+  status: 'ACTIVE' | 'USED' | 'EXPIRED';
+  createdAt: Date;
+  usedAt?: Date;
+  expiresAt?: Date;
+}
+
+export interface DisciplineLog {
+  id: string;
+  userId: string;
+  action: 
+    | 'FOLLOWED_STRATEGY' 
+    | 'JOURNAL_ENTRY' 
+    | 'REVENGE_TRADE' 
+    | 'OVERTRADING'
+    | 'RISK_MANAGEMENT'
+    | 'EMOTIONAL_TRADE';
+  points: number; // Can be positive or negative
+  reason?: string;
+  tradeId?: string;
+  timestamp: Date;
 }
 
 export interface UserSettings {

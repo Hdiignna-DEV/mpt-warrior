@@ -1,12 +1,14 @@
 'use client';
 
-import { Zap, TrendingUp, Target, BarChart3, DollarSign, Menu, X } from 'lucide-react';
+import { Zap, TrendingUp, Target, BarChart3, DollarSign, Menu, X, User } from 'lucide-react';
 import Link from 'next/link';
 import MptLogo from './MptLogo';
 import { useEffect, useState } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 import LanguageToggle from './LanguageToggle';
 import { getInitialBalance } from '@/utils/storage-sync';
+import { useUser } from '@/contexts/UserContext';
+import { BadgeLevelDisplay } from './BadgeSystem';
 import '@/utils/i18n';
 
 interface Trade {
@@ -19,6 +21,7 @@ interface Trade {
 }
 
 export default function Header() {
+  const { user } = useUser();
   const [stats, setStats] = useState({
     totalTrades: 0,
     winRate: 0,
@@ -237,6 +240,42 @@ export default function Header() {
 
           {/* Right Controls */}
           <div className="flex items-center gap-2 ml-auto">
+            {/* User Profile Button */}
+            {user && (
+              <Link
+                href="/profile"
+                className="group relative flex items-center gap-2 px-3 py-2 rounded-xl backdrop-blur-lg bg-white/60 dark:bg-zinc-900/60 border border-gray-200/50 dark:border-zinc-800/50 hover:border-sky-300 dark:hover:border-sky-700 transition-all duration-300 hover:-translate-y-0.5"
+              >
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-sky-500/0 via-sky-500/10 to-sky-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                {/* Avatar */}
+                <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-sky-400 to-purple-400 p-0.5 shrink-0">
+                  <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center overflow-hidden">
+                    {user.avatar ? (
+                      <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-4 h-4 text-gray-400" />
+                    )}
+                  </div>
+                </div>
+
+                {/* User Info (hidden on mobile) */}
+                <div className="hidden md:block relative z-10">
+                  <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">
+                    {user.displayName || user.name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+                    {user.warriorId}
+                  </p>
+                </div>
+
+                {/* Badge Level (hidden on small screens) */}
+                <div className="hidden lg:block relative z-10">
+                  <BadgeLevelDisplay level={user.currentBadgeLevel} size="sm" />
+                </div>
+              </Link>
+            )}
+
             <LanguageToggle />
             <ThemeToggle />
 

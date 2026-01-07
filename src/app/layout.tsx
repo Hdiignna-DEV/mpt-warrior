@@ -5,6 +5,7 @@ import LayoutWrapper from "@/components/LayoutWrapper";
 import { ThemeProviderWrapper } from "@/components/ThemeProvider";
 import { ThemeScript } from "@/components/ThemeScript";
 import I18nProvider from "@/components/I18nProvider";
+import { UserProvider } from "@/contexts/UserContext";
 import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -32,25 +33,27 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className}`} suppressHydrationWarning>
         <I18nProvider>
-          {/* Toast Notifications */}
-          <Toaster 
-            position="top-right"
-            toastOptions={{
-              style: {
-                background: 'var(--glass-bg)',
-                color: 'rgb(var(--text-primary))',
-                border: '1px solid var(--glass-border)',
-                backdropFilter: 'blur(20px)',
-              },
-              className: 'sonner-toast',
-            }}
-            richColors
-            closeButton
-          />
-          <ThemeProviderWrapper>
-            {/* Conditional Layout: Landing vs Dashboard */}
-            <LayoutWrapper>{children}</LayoutWrapper>
-          </ThemeProviderWrapper>
+          <UserProvider>
+            {/* Toast Notifications */}
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                style: {
+                  background: 'var(--glass-bg)',
+                  color: 'rgb(var(--text-primary))',
+                  border: '1px solid var(--glass-border)',
+                  backdropFilter: 'blur(20px)',
+                },
+                className: 'sonner-toast',
+              }}
+              richColors
+              closeButton
+            />
+            <ThemeProviderWrapper>
+              {/* Conditional Layout: Landing vs Dashboard */}
+              <LayoutWrapper>{children}</LayoutWrapper>
+            </ThemeProviderWrapper>
+          </UserProvider>
         </I18nProvider>
       </body>
     </html>
