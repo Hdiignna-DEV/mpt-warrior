@@ -9,11 +9,12 @@ import { getDatabase } from '@/utils/cosmosdb';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   return requireAdmin(request, async (req: AuthenticatedRequest) => {
     try {
-      const codeId = params.id;
+      const { id } = await params;
+      const codeId = id;
       const body = await request.json();
       const { isActive } = body;
 
