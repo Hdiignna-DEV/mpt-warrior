@@ -481,43 +481,6 @@ export async function sendModuleCompletionEmail(
 </html>
       `,
     };
-      ` : `
-      <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 15px; margin: 20px 0; border-radius: 4px;">
-        <h3 style="margin-top: 0; color: #065f46;">🎖️ All Modules Completed!</h3>
-        <p style="margin: 0; color: #047857;">
-          Amazing! Anda telah menyelesaikan seluruh Warrior Academy. Saatnya apply ilmu dan jadi Plan Warrior sejati! 💪
-        </p>
-      </div>
-      `}
-
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="https://mpt-community.vercel.app/academy" class="button">
-          ${nextModuleTitle ? '📚 Continue Learning' : '🎓 View Certificate'}
-        </a>
-      </div>
-
-      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px;">
-        <p style="margin: 0; color: #92400e;">
-          <strong>💡 Pro Tip:</strong> Review materi yang sudah dipelajari dan mulai apply di trading journal Anda untuk hasil maksimal!
-        </p>
-      </div>
-
-      <p style="color: #374151; margin-top: 30px;">
-        Keep crushing it, Warrior! 🔥<br>
-        <strong>Team MPT Warrior</strong>
-      </p>
-    </div>
-    <div class="footer">
-      <p>© 2026 MPT Community. All rights reserved.</p>
-      <p style="color: #9ca3af;">
-        "Focus on the Plan, Not the Panic."
-      </p>
-    </div>
-  </div>
-</body>
-</html>
-      `,
-    };
 
     const info = await gmailTransporter.sendMail(mailOptions);
     
