@@ -42,12 +42,6 @@ export function getCosmosClient(): CosmosClient {
     if (endpoint && key && typeof endpoint === 'string' && typeof key === 'string' && endpoint.length > 0 && key.length > 0) {
       console.log('[COSMOS CLIENT] Initializing with endpoint + key');
       
-      // Validate endpoint and key are not empty
-      if (endpoint.length === 0 || key.length === 0) {
-        console.error('Endpoint or key is empty');
-        throw new Error("Empty Cosmos DB endpoint or key");
-      }
-      
       cosmosClient = new CosmosClient({
         endpoint,
         key,
@@ -61,24 +55,24 @@ export function getCosmosClient(): CosmosClient {
     else if (connectionString && typeof connectionString === 'string' && connectionString.length > 0) {
       console.log('[COSMOS CLIENT] Initializing with connection string');
       
-      // Validate connection string is actually a string
-      if (connectionString.length === 0) {
-        console.error('Connection string is empty');
-        throw new Error("Empty Cosmos DB connection string");
-      }
-      
       // Parse connection string to extract endpoint and key
       const endpointMatch = connectionString.match(/AccountEndpoint=([^;]+)/);
       const keyMatch = connectionString.match(/AccountKey=([^;]+)/);
       
       if (!endpointMatch || !keyMatch) {
-        console.error('Invalid connection string format. Expected: AccountEndpoint=...;AccountKey=...');
+        console.error('[COSMOS CLIENT] Invalid connection string format');
         throw new Error("Invalid Cosmos DB connection string format");
       }
 
+      const parsedEndpoint = endpointMatch[1];
+      const parsedKey = keyMatch[1];
+
+      console.log('[COSMOS CLIENT] Parsed endpoint length:', parsedEndpoint?.length);
+      console.log('[COSMOS CLIENT] Parsed key length:', parsedKey?.length);
+
       cosmosClient = new CosmosClient({
-        endpoint: endpointMatch[1],
-        key: keyMatch[1],
+        endpoint: parsedEndpoint,
+        key: parsedKey,
         connectionPolicy: {
           requestTimeout: 10000,
           enableEndpointDiscovery: false,
