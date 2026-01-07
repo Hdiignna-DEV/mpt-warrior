@@ -172,6 +172,10 @@ export interface UserStats {
   losses: number;
   winRate: number;
   totalProfit: number;
+  totalProfitLoss?: number; // Total P/L percentage from all trades
+  averageRisk?: number; // Average risk per trade
+  bestTrade?: number; // Best trade P/L
+  worstTrade?: number; // Worst trade P/L
   bestWin: number;
   worstLoss: number;
   streakWins: number;
