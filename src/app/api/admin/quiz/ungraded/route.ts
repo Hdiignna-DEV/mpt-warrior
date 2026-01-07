@@ -18,10 +18,23 @@ export async function GET(request: NextRequest) {
     // Get all ungraded essays
     const ungradedEssays = await getUngradedEssays();
 
+    // Transform data for frontend
+    const transformedEssays = ungradedEssays.map(({ question, answer }) => ({
+      id: `${answer.userId}-${answer.questionId}`, // Unique ID per user-question combination
+      userId: answer.userId,
+      userName: answer.userId, // Will be replaced with actual name in future
+      questionId: answer.questionId,
+      moduleId: answer.moduleId,
+      questionText: question.question,
+      questionPoints: question.points,
+      userAnswer: answer.answer,
+      submittedAt: answer.answeredAt,
+    }));
+
     return NextResponse.json({
       success: true,
-      count: ungradedEssays.length,
-      essays: ungradedEssays,
+      count: transformedEssays.length,
+      essays: transformedEssays,
     });
 
   } catch (error: any) {
