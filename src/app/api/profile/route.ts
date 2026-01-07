@@ -15,6 +15,15 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
+      // Check if Cosmos DB is configured
+      if (!process.env.AZURE_COSMOS_ENDPOINT || !process.env.AZURE_COSMOS_KEY) {
+        console.error('Cosmos DB credentials not configured');
+        return NextResponse.json({ 
+          error: 'Database not configured',
+          details: 'Azure Cosmos DB credentials missing'
+        }, { status: 503 });
+      }
+
       const usersContainer = getUsersContainer();
 
       // Get user profile
@@ -69,11 +78,19 @@ export async function GET(request: NextRequest) {
       console.error('Error loading profile:', error);
       // Log detailed error for debugging
       if (error instanceof Error) {
+        console.error('Error name:', error.name);
         console.error('Error message:', error.message);
         console.error('Error stack:', error.stack);
       }
+      
+      // Return more specific error for debugging in production
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load profile';
       return NextResponse.json(
-        { error: 'Failed to load profile' },
+        { 
+          error: 'Failed to load profile',
+          details: errorMessage,
+          timestamp: new Date().toISOString()
+        },
         { status: 500 }
       );
     }

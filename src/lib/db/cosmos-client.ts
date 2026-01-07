@@ -24,8 +24,16 @@ export function getCosmosClient(): CosmosClient {
     const key = process.env.AZURE_COSMOS_KEY;
 
     if (!endpoint || !key) {
+      console.error('Missing Cosmos DB credentials:', {
+        hasEndpoint: !!endpoint,
+        hasKey: !!key,
+        endpoint: endpoint ? 'SET' : 'NOT SET',
+        key: key ? 'SET' : 'NOT SET'
+      });
       throw new Error("Azure Cosmos DB credentials not found in environment variables");
     }
+
+    console.log('Initializing Cosmos DB client with endpoint:', endpoint);
 
     cosmosClient = new CosmosClient({
       endpoint,
