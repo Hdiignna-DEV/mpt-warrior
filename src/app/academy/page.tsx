@@ -490,11 +490,17 @@ export default function AcademyPage() {
                   {/* Locked Message */}
                   {!isCurrentlyAvailable && module.isAvailable && (
                     <div className="bg-amber-900/30 border border-amber-700/50 rounded-lg p-3">
-                      <div className="flex items-center gap-2">
-                        <Lock className="w-4 h-4 text-amber-400" />
-                        <p className="text-amber-400 text-sm font-medium">
-                          Complete Module {module.moduleNumber - 1} to unlock
-                        </p>
+                      <div className="flex items-start gap-2">
+                        <Lock className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-amber-400 text-sm font-medium">
+                            Complete Module {module.moduleNumber - 1} to unlock
+                          </p>
+                          <p className="text-amber-300/70 text-xs mt-1">
+                            ✓ Finish all lessons<br/>
+                            ✓ Pass quiz with minimum 70% score
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -518,11 +524,11 @@ export default function AcademyPage() {
           <div className="flex items-start gap-3">
             <Shield className="w-6 h-6 text-amber-400 mt-1 flex-shrink-0" />
             <div>
-              <h4 className="text-white font-semibold mb-2">📚 Learning Path</h4>
+              <h4 className="text-white font-semibold mb-2">📚 Learning Path Requirements</h4>
               <p className="text-gray-400 text-sm leading-relaxed">
                 Complete modules 1-3 to unlock advanced trading strategies. Each module includes interactive quizzes 
                 with automatic grading for multiple choice questions and manual review by instructors for essay questions.
-                Earn points and track your progress as you transform into a disciplined Plan Warrior.
+                <span className="text-amber-400 font-medium"> You must achieve a minimum score of 70% on each module quiz to unlock the next module.</span> Earn points and track your progress as you transform into a disciplined Plan Warrior.
               </p>
             </div>
           </div>

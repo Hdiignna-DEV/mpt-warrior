@@ -590,11 +590,18 @@ export async function canAccessModule(userId: string, moduleId: string, level: L
     
     if (!prereqModule) continue;
     
+    // Check if all lessons are completed
     const prereqProgress = userProgress.filter(p => p.moduleId === prereqId && p.completed);
     const totalLessons = prereqModule.lessons.length;
     
     if (prereqProgress.length < totalLessons) {
-      return false; // Prerequisite not fully completed
+      return false; // Prerequisite lessons not fully completed
+    }
+    
+    // Check if quiz is passed (>= 70%)
+    const quizScore = await getUserQuizScore(userId, prereqId);
+    if (!quizScore.isPassed) {
+      return false; // Quiz not passed
     }
   }
   
