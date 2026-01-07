@@ -11,22 +11,14 @@ import { analyzeTrade } from '@/lib/db/discipline-service';
 import { checkBadgeUpgrade, checkDisciplineMilestone, checkOverallLevelUpgrade } from '@/lib/notifications';
 
 export async function POST(req: NextRequest) {
-  try {
-    // Verify authentication
-    const authResult = await requireAuth(req);
-    if (authResult.error) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      );
-    }
+  return requireAuth(req, async (authenticatedReq) => {
+    try {
+      const userId = authenticatedReq.user!.id;
+      const body = await req.json();
+      const { tradeId } = body;
 
-    const userId = authResult.userId;
-    const body = await req.json();
-    const { tradeId } = body;
-
-    // Get Cosmos client
-    const { client } = getCosmosClient();
+      // Get Cosmos client
+      const client = getCosmosClient();
     const database = client.database('MPT');
     const usersContainer = database.container('users');
     const tradesContainer = database.container('trades');
@@ -50,11 +42,22 @@ export async function POST(req: NextRequest) {
     }
 
     // Analyze trade for discipline violations
-    const analysis = await analyzeTrade(trade, userId);
+    const analysis = await analyzeTrade({
+      userId: userId,
+      tradeId: trade.id,
+      hasStopLoss: !!trade.stopLoss,
+      hasJournalEntry: !!trade.notes,
+      followedStrategy: trade.followedStrategy || false,
+      riskPercent: trade.riskPercent || 1,
+      maxRiskPercent: user.settings?.riskPercent || 2,
+      timeSinceLastTrade: 0, // Calculate if needed
+      result: trade.result,
+      previousResult: trade.previousResult
+    });
     
     // Calculate new discipline score
     const previousScore = user.disciplineScore || 500;
-    const scoreChange = analysis.pointsAwarded || 0;
+    const scoreChange = analysis.totalPoints || 0;
     const newScore = Math.max(0, Math.min(1000, previousScore + scoreChange));
 
     // Check for discipline milestone
@@ -169,11 +172,12 @@ export async function POST(req: NextRequest) {
       newOverallLevel: levelUpgrade ? newOverallLevel : undefined
     });
 
-  } catch (error: any) {
-    console.error('Error analyzing trade:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+    } catch (error: any) {
+      console.error('Error analyzing trade:', error);
+      return NextResponse.json(
+        { error: 'Internal server error' },
+        { status: 500 }
+      );
+    }
+  });
 }

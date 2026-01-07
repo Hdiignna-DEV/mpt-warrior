@@ -9,22 +9,14 @@ import { requireAuth } from '@/lib/middleware/role-check';
 import { getCosmosClient } from '@/utils/cosmosdb';
 
 export async function POST(req: NextRequest) {
-  try {
-    // Verify authentication
-    const authResult = await requireAuth(req);
-    if (authResult.error) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      );
-    }
+  return requireAuth(req, async (authenticatedReq) => {
+    try {
+      const userId = authenticatedReq.user!.id;
+      const body = await req.json();
+      const { avatar, personalGoal, tradingStrategy, preferredTimeframe } = body;
 
-    const userId = authResult.userId;
-    const body = await req.json();
-    const { avatar, personalGoal, tradingStrategy, preferredTimeframe } = body;
-
-    // Get Cosmos client
-    const { client } = getCosmosClient();
+      // Get Cosmos client
+      const client = getCosmosClient();
     const database = client.database('MPT');
     const usersContainer = database.container('users');
 
@@ -88,11 +80,12 @@ export async function POST(req: NextRequest) {
       message: 'Onboarding completed successfully'
     });
 
-  } catch (error: any) {
-    console.error('Error completing onboarding:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+    } catch (error: any) {
+      console.error('Error completing onboarding:', error);
+      return NextResponse.json(
+        { error: 'Internal server error' },
+        { status: 500 }
+      );
+    }
+  });
 }

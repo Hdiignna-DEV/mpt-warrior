@@ -8,22 +8,14 @@ import { requireAuth } from '@/lib/middleware/role-check';
 import { getCosmosClient } from '@/utils/cosmosdb';
 
 export async function PUT(req: NextRequest) {
-  try {
-    // Verify authentication
-    const authResult = await requireAuth(req);
-    if (authResult.error) {
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: authResult.status }
-      );
-    }
+  return requireAuth(req, async (authenticatedReq) => {
+    try {
+      const userId = authenticatedReq.user!.id;
+      const body = await req.json();
+      const { displayName, avatar, profileSettings } = body;
 
-    const userId = authResult.userId;
-    const body = await req.json();
-    const { displayName, avatar, profileSettings } = body;
-
-    // Get Cosmos client
-    const { client } = getCosmosClient();
+      // Get Cosmos client
+      const client = getCosmosClient();
     const database = client.database('MPT');
     const container = database.container('users');
 
@@ -67,11 +59,12 @@ export async function PUT(req: NextRequest) {
       user: updatedUser
     });
 
-  } catch (error: any) {
-    console.error('Error updating profile:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      return NextResponse.json(
+        { error: 'Internal server error' },
+        { status: 500 }
+      );
+    }
+  });
 }

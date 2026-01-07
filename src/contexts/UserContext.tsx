@@ -19,6 +19,12 @@ interface UserProfile {
   currentBadgeLevel: BadgeLevel;
   badges: Badge[];
   disciplineScore: number;
+  profileSettings?: {
+    personalGoal?: string;
+    tradingStrategy?: 'SCALPING' | 'DAY_TRADING' | 'SWING_TRADING' | 'POSITION_TRADING';
+    preferredTimeframe?: string;
+    bio?: string;
+  };
   stats: {
     totalTrades: number;
     wins: number;
