@@ -39,6 +39,8 @@
   "platform": {
     "apiRuntime": "node:20"
   },
+  "appBuildCommand": "npm run build",
+  "apiBuildCommand": "",
   "networking": {
     "allowedIpRanges": []
   }
