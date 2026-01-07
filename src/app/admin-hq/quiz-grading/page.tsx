@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { StatCardSkeleton, EssayCardSkeleton } from '@/components/ui/Skeleton';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -186,8 +187,29 @@ export default function QuizGradingPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center text-white py-20">
-            <div className="animate-pulse">Loading ungraded essays...</div>
+          {/* Header Skeleton */}
+          <div className="mb-8 animate-pulse">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-14 h-14 bg-slate-700 rounded-xl"></div>
+              <div className="flex-1">
+                <div className="h-10 bg-slate-700 rounded w-1/2 mb-2"></div>
+                <div className="h-4 bg-slate-700 rounded w-1/3"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+            <StatCardSkeleton />
+          </div>
+
+          {/* Essays Skeleton */}
+          <div className="space-y-6">
+            <EssayCardSkeleton />
+            <EssayCardSkeleton />
+            <EssayCardSkeleton />
           </div>
         </div>
       </div>
