@@ -79,6 +79,13 @@
 - Audit log tracking
 - Real-time statistics
 
+#### 📧 Email Notifications
+- Welcome email on user approval
+- Essay grading result notifications
+- Module completion celebration emails
+- Powered by Gmail SMTP (setup required)
+- Beautiful HTML templates with MPT branding
+
 ### Technical Features
 
 - **Dark/Light Theme** with persistent preference

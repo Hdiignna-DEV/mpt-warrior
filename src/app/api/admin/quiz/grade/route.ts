@@ -6,6 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateSuperAdmin } from '@/lib/middleware/auth';
 import { gradeEssayAnswer } from '@/lib/db/education-service';
+import { sendEssayGradedEmail } from '@/lib/email/resend-client';
+import { getCosmosClient } from '@/lib/db/cosmosClient';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,6 +43,39 @@ export async function POST(request: NextRequest) {
       decoded!.userId,
       decoded!.role
     );
+
+    // Send email notification to user
+    try {
+      const { database } = await getCosmosClient();
+      const usersContainer = database.container('users');
+      const questionsContainer = database.container('quiz-questions');
+      
+      // Get user details
+      const { resource: user } = await usersContainer.item(userId, userId).read();
+      
+      // Get question details for module info
+      const { resource: question } = await questionsContainer.item(questionId, questionId).read();
+      
+      if (user && user.email && question) {
+        const moduleTitle = question.moduleId === 'module-1' ? 'The Warrior Mindset' :
+                           question.moduleId === 'module-2' ? 'The Shield (Risk Management)' :
+                           question.moduleId === 'module-3' ? 'The Map (Technical Analysis)' :
+                           'Module';
+        
+        await sendEssayGradedEmail(
+          user.email,
+          user.name,
+          moduleTitle,
+          score,
+          question.points || 10,
+          feedback || ''
+        );
+        console.log('📧 Essay graded email sent to:', user.email);
+      }
+    } catch (emailError) {
+      // Don't fail the grading if email fails
+      console.error('Failed to send email notification:', emailError);
+    }
 
     return NextResponse.json({
       success: true,
