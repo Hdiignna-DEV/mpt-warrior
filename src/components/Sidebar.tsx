@@ -17,6 +17,8 @@ import {
   Shield,
   LogOut,
   User,
+  UserCircle,
+  Info,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -26,6 +28,7 @@ const menuSections = [
   {
     items: [
       { href: '/dashboard', label: 'nav.dashboard', fallback: 'Dashboard', icon: LayoutDashboard, description: 'Overview' },
+      { href: '/profile', label: 'nav.profile', fallback: 'Warrior Profile', icon: User, description: 'Your Profile' },
     ]
   },
   {
@@ -33,7 +36,7 @@ const menuSections = [
     items: [
       { href: '/academy', label: 'Warrior Academy', fallback: 'Warrior Academy', icon: Sparkles, description: 'Training Path' },
       { href: '/achievements', label: 'nav.achievements', fallback: 'Achievements', icon: Trophy, description: 'Progress' },
-      { href: '/about', label: 'About Founder', fallback: 'About Founder', icon: User, description: 'Instructor' },
+      { href: '/about', label: 'About Founder', fallback: 'About Founder', icon: Info, description: 'Instructor' },
     ]
   },
   {

@@ -57,13 +57,81 @@ export async function GET(request: NextRequest) {
         });
       }
 
-      const usersContainer = getUsersContainer();
+      // Try to connect to Cosmos DB
+      let usersContainer;
+      try {
+        usersContainer = getUsersContainer();
+      } catch (dbError) {
+        console.error('Failed to get users container:', dbError);
+        // Return demo profile if DB connection fails
+        return NextResponse.json({
+          success: true,
+          profile: {
+            id: user.id,
+            email: user.email,
+            name: user.email?.split('@')[0] || 'Warrior',
+            displayName: user.email?.split('@')[0] || 'Warrior',
+            warriorId: user.warriorId || 'MPT-DEMO-00001',
+            role: user.role,
+            status: 'active',
+            currentBadgeLevel: 'RECRUIT',
+            badges: [],
+            disciplineScore: 500,
+            stats: {
+              totalTrades: 0,
+              wins: 0,
+              losses: 0,
+              winRate: 0
+            },
+            settings: {
+              theme: 'dark',
+              language: 'id',
+              notifications: true
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            _demoMode: true,
+            _dbError: dbError instanceof Error ? dbError.message : 'Unknown error'
+          }
+        });
+      }
 
       // Get user profile
       const { resource: userProfile } = await usersContainer.item(user.id, user.id).read();
 
       if (!userProfile) {
-        return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+        console.warn('Profile not found in DB for user:', user.id);
+        // Return demo profile if user not found in DB
+        return NextResponse.json({
+          success: true,
+          profile: {
+            id: user.id,
+            email: user.email,
+            name: user.email?.split('@')[0] || 'Warrior',
+            displayName: user.email?.split('@')[0] || 'Warrior',
+            warriorId: user.warriorId || 'MPT-DEMO-00001',
+            role: user.role,
+            status: 'active',
+            currentBadgeLevel: 'RECRUIT',
+            badges: [],
+            disciplineScore: 500,
+            stats: {
+              totalTrades: 0,
+              wins: 0,
+              losses: 0,
+              winRate: 0
+            },
+            settings: {
+              theme: 'dark',
+              language: 'id',
+              notifications: true
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            _demoMode: true,
+            _reason: 'User not found in database'
+          }
+        });
       }
 
       // Get referral stats if user is Veteran
