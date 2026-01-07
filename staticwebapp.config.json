@@ -1,47 +1,8 @@
 {
-  "routes": [
-    {
-      "route": "/api/*",
-      "allowedRoles": ["anonymous"]
-    },
-    {
-      "route": "/admin-hq/*",
-      "allowedRoles": ["admin"]
-    },
-    {
-      "route": "/*",
-      "allowedRoles": ["anonymous"]
-    }
-  ],
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/images/*", "/api/*", "/*.{css,scss,js,json,ico,svg,png,jpg,jpeg,webp,gif,woff,woff2,ttf,eot}"]
-  },
-  "responseOverrides": {
-    "404": {
-      "rewrite": "/index.html"
-    }
-  },
-  "globalHeaders": {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY",
-    "X-XSS-Protection": "1; mode=block",
-    "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
-  },
-  "mimeTypes": {
-    ".json": "application/json",
-    ".webmanifest": "application/manifest+json"
-  },
   "platform": {
     "apiRuntime": "node:20"
   },
-  "appBuildCommand": "npm run build",
-  "apiBuildCommand": "",
-  "networking": {
-    "allowedIpRanges": []
+  "navigationFallback": {
+    "rewrite": "/index.html"
   }
 }

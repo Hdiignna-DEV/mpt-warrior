@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [],
-    unoptimized: false,
+    unoptimized: true,
   },
   experimental: {
     optimizePackageImports: ['lucide-react'],
