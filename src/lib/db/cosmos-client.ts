@@ -25,9 +25,21 @@ export function getCosmosClient(): CosmosClient {
     const key = process.env.AZURE_COSMOS_KEY;
     const connectionString = process.env.AZURE_COSMOS_CONNECTION_STRING;
 
+    console.log('[COSMOS CLIENT] Environment check:', {
+      hasEndpoint: !!endpoint,
+      hasKey: !!key,
+      hasConnectionString: !!connectionString,
+      endpointType: typeof endpoint,
+      keyType: typeof key,
+      connectionStringType: typeof connectionString,
+      endpointLength: endpoint?.length || 0,
+      keyLength: key?.length || 0,
+      connectionStringLength: connectionString?.length || 0
+    });
+
     // Method 1: Use endpoint + key (PREFERRED - more stable)
     if (endpoint && key && typeof endpoint === 'string' && typeof key === 'string') {
-      console.log('Initializing Cosmos DB with endpoint + key');
+      console.log('[COSMOS CLIENT] Initializing with endpoint + key');
       
       // Validate endpoint and key are not empty
       if (endpoint.length === 0 || key.length === 0) {
@@ -46,7 +58,7 @@ export function getCosmosClient(): CosmosClient {
     }
     // Method 2: Use connection string if endpoint+key not available
     else if (connectionString && typeof connectionString === 'string') {
-      console.log('Initializing Cosmos DB with connection string');
+      console.log('[COSMOS CLIENT] Initializing with connection string');
       
       // Validate connection string is actually a string
       if (connectionString.length === 0) {
@@ -74,13 +86,18 @@ export function getCosmosClient(): CosmosClient {
     }
     // Method 3: No credentials found
     else {
-      console.error('Missing Cosmos DB credentials:', {
+      console.error('[COSMOS CLIENT] Missing Cosmos DB credentials!');
+      console.error('[COSMOS CLIENT] All environment variables:', Object.keys(process.env).filter(k => k.includes('COSMOS')));
+      console.error('[COSMOS CLIENT] Credential check:', {
         hasConnectionString: !!connectionString,
         connectionStringType: typeof connectionString,
+        connectionStringValue: connectionString ? `${connectionString.substring(0, 30)}...` : 'undefined',
         hasEndpoint: !!endpoint,
         endpointType: typeof endpoint,
+        endpointValue: endpoint || 'undefined',
         hasKey: !!key,
-        keyType: typeof key
+        keyType: typeof key,
+        keyValue: key ? `${key.substring(0, 10)}...` : 'undefined'
       });
       throw new Error("Azure Cosmos DB credentials not found or invalid in environment variables");
     }
