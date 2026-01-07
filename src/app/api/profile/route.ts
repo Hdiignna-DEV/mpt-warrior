@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthenticatedRequest } from '@/lib/middleware/role-check';
-import { getUsersContainer, getDatabase } from '@/lib/db/cosmos-client';
+import { getUsersContainer, checkCosmosDBHealth } from '@/lib/db/cosmos-client';
 
 export async function GET(request: NextRequest) {
   // Wrap everything in try-catch to prevent any 500 errors
@@ -17,154 +17,135 @@ export async function GET(request: NextRequest) {
           return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-      // Check if Cosmos DB is configured - if not, return demo profile
-      const hasCosmosConfig = 
-        process.env.NEXT_PUBLIC_COSMOS_CONNECTION_STRING || 
-        process.env.AZURE_COSMOS_CONNECTION_STRING ||
-        (process.env.AZURE_COSMOS_ENDPOINT && process.env.AZURE_COSMOS_KEY);
-
-      console.log('Cosmos DB config check:', {
-        hasConnectionString: !!(process.env.NEXT_PUBLIC_COSMOS_CONNECTION_STRING || process.env.AZURE_COSMOS_CONNECTION_STRING),
-        hasEndpoint: !!process.env.AZURE_COSMOS_ENDPOINT,
-        hasKey: !!process.env.AZURE_COSMOS_KEY,
-        hasCosmosConfig
-      });
-
-      if (!hasCosmosConfig) {
-        console.warn('Cosmos DB not configured - returning demo profile for:', user.email);
-        
-        // Return demo profile based on JWT user data
-        return NextResponse.json({
-          success: true,
-          profile: {
-            id: user.id,
-            email: user.email,
-            name: user.email?.split('@')[0] || 'Warrior',
-            displayName: user.email?.split('@')[0] || 'Warrior',
-            warriorId: user.warriorId || 'MPT-DEMO-00001',
-            role: user.role,
-            status: 'active',
-            currentBadgeLevel: 'RECRUIT',
-            badges: [],
-            disciplineScore: 500,
-            stats: {
-              totalTrades: 0,
-              wins: 0,
-              losses: 0,
-              winRate: 0
+        // Check Cosmos DB health
+        try {
+          const health = await checkCosmosDBHealth();
+          
+          if (!health.isHealthy || !health.containers.users) {
+            console.warn('Cosmos DB not healthy - returning demo profile:', health.error);
+            
+            // Return demo profile based on JWT user data
+            return NextResponse.json({
+              success: true,
+              isDemoMode: true,
+              profile: {
+                id: user.id,
+                email: user.email,
+                name: user.email?.split('@')[0] || 'Warrior',
+                displayName: user.email?.split('@')[0] || 'Warrior',
+                warriorId: user.warriorId || 'MPT-DEMO-00001',
+                role: user.role,
+                status: 'active',
+                currentBadgeLevel: 'RECRUIT',
+                badges: [],
+                disciplineScore: 500,
+                stats: {
+                  totalTrades: 0,
+                  wins: 0,
+                  losses: 0,
+                  winRate: 0
+                },
+                settings: {
+                  theme: 'dark',
+                  language: 'id',
+                  notifications: true
+                },
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              },
+              message: 'Database not configured. Using demo mode. ' + (health.error || '')
+            });
+          }
+        } catch (healthError) {
+          console.error('Health check failed:', healthError);
+          
+          // Return demo profile on health check failure
+          return NextResponse.json({
+            success: true,
+            isDemoMode: true,
+            profile: {
+              id: user.id,
+              email: user.email,
+              name: user.email?.split('@')[0] || 'Warrior',
+              displayName: user.email?.split('@')[0] || 'Warrior',
+              warriorId: user.warriorId || 'MPT-DEMO-00001',
+              role: user.role,
+              status: 'active',
+              currentBadgeLevel: 'RECRUIT',
+              badges: [],
+              disciplineScore: 500,
+              stats: {
+                totalTrades: 0,
+                wins: 0,
+                losses: 0,
+                winRate: 0
+              },
+              settings: {
+                theme: 'dark',
+                language: 'id',
+                notifications: true
+              },
+              profileSettings: {
+                personalGoal: '',
+                tradingStrategy: 'DAY_TRADING',
+                preferredTimeframe: '',
+                bio: ''
+              },
+            createdAt: new Date().toISOString(),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
             },
-            settings: {
-              theme: 'dark',
-              language: 'id',
-              notifications: true
-            },
-            profileSettings: {
-              personalGoal: '',
-              tradingStrategy: 'DAY_TRADING',
-              preferredTimeframe: '',
+            message: 'Database connection failed. Using demo mode.'
+          });
+        }
+
+        // Database is healthy, proceed with user lookup
+        const usersContainer = getUsersContainer();
+        // Database is healthy, proceed with user lookup
+        const usersContainer = getUsersContainer();
+
+        // Get user profile
+        const { resource: userProfile } = await usersContainer.item(user.id, user.id).read();
+
+        if (!userProfile) {
+          console.warn('Profile not found in DB for user:', user.id);
+          // Return demo profile if user not found in DB
+          return NextResponse.json({
+            success: true,
+            isDemoMode: true,
+            profile: {
+              id: user.id,
+              email: user.email,
+              name: user.email?.split('@')[0] || 'Warrior',
+              displayName: user.email?.split('@')[0] || 'Warrior',
+              warriorId: user.warriorId || 'MPT-DEMO-00001',
+              role: user.role,
+              status: 'active',
+              currentBadgeLevel: 'RECRUIT',
+              badges: [],
+              disciplineScore: 500,
+              stats: {
+                totalTrades: 0,
+                wins: 0,
+                losses: 0,
+                winRate: 0
+              },
+              settings: {
+                theme: 'dark',
+                language: 'id',
+                notifications: true
+              },
+              profileSettings: {
+                personalGoal: '',
+                tradingStrategy: 'DAY_TRADING',
+                preferredTimeframe: '',
               bio: ''
             },
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            // Demo mode indicator
-            _demoMode: true
-          }
-        });
-      }
-
-      // Try to connect to Cosmos DB
-      let usersContainer;
-      try {
-        console.log('Attempting to get users container...');
-        usersContainer = getUsersContainer();
-        console.log('Successfully got users container');
-      } catch (dbError) {
-        console.error('Failed to get users container:', dbError);
-        console.error('Error details:', {
-          name: dbError instanceof Error ? dbError.name : 'unknown',
-          message: dbError instanceof Error ? dbError.message : 'unknown',
-          stack: dbError instanceof Error ? dbError.stack : 'unknown'
-        });
-        // Return demo profile if DB connection fails
-        return NextResponse.json({
-          success: true,
-          profile: {
-            id: user.id,
-            email: user.email,
-            name: user.email?.split('@')[0] || 'Warrior',
-            displayName: user.email?.split('@')[0] || 'Warrior',
-            warriorId: user.warriorId || 'MPT-DEMO-00001',
-            role: user.role,
-            status: 'active',
-            currentBadgeLevel: 'RECRUIT',
-            badges: [],
-            disciplineScore: 500,
-            stats: {
-              totalTrades: 0,
-              wins: 0,
-              losses: 0,
-              winRate: 0
-            },
-            settings: {
-              theme: 'dark',
-              language: 'id',
-              notifications: true
-            },
-            profileSettings: {
-              personalGoal: '',
-              tradingStrategy: 'DAY_TRADING',
-              preferredTimeframe: '',
-              bio: ''
-            },
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            _demoMode: true,
-            _dbError: dbError instanceof Error ? dbError.message : 'Unknown error'
-          }
-        });
-      }
-
-      // Get user profile
-      const { resource: userProfile } = await usersContainer.item(user.id, user.id).read();
-
-      if (!userProfile) {
-        console.warn('Profile not found in DB for user:', user.id);
-        // Return demo profile if user not found in DB
-        return NextResponse.json({
-          success: true,
-          profile: {
-            id: user.id,
-            email: user.email,
-            name: user.email?.split('@')[0] || 'Warrior',
-            displayName: user.email?.split('@')[0] || 'Warrior',
-            warriorId: user.warriorId || 'MPT-DEMO-00001',
-            role: user.role,
-            status: 'active',
-            currentBadgeLevel: 'RECRUIT',
-            badges: [],
-            disciplineScore: 500,
-            stats: {
-              totalTrades: 0,
-              wins: 0,
-              losses: 0,
-              winRate: 0
-            },
-            settings: {
-              theme: 'dark',
-              language: 'id',
-              notifications: true
-            },
-            profileSettings: {
-              personalGoal: '',
-              tradingStrategy: 'DAY_TRADING',
-              preferredTimeframe: '',
-              bio: ''
-            },
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            _demoMode: true,
-            _reason: 'User not found in database'
-          }
+            updatedAt: new Date().toISOString()
+          },
+          message: 'User not found in database. Using demo mode.'
         });
       }
 
@@ -172,6 +153,7 @@ export async function GET(request: NextRequest) {
       let referralStats = null;
       if (userProfile.currentBadgeLevel === 'VETERAN' && userProfile.referralCode) {
         try {
+          const { getDatabase } = await import('@/lib/db/cosmos-client');
           const database = getDatabase();
           const referralsContainer = database.container('referrals');
           const { resources: referrals } = await referralsContainer.items

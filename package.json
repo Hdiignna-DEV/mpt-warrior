@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:init": "tsx scripts/init-cosmos.ts",
+    "db:check": "tsx scripts/check-cosmos-health.ts",
     "db:generate-codes": "tsx scripts/generate-codes.ts",
     "db:phase2": "tsx scripts/init-phase2-containers.ts",
     "db:init-profile": "tsx scripts/init-profile-system.ts"
