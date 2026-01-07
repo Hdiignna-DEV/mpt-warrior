@@ -3,7 +3,11 @@
  * Run this script once to create all required containers
  */
 
+import { config } from 'dotenv';
 import { initializeContainers } from '@/lib/db/cosmos-client';
+
+// Load .env.local
+config({ path: '.env.local' });
 
 async function main() {
   console.log('🚀 Initializing Cosmos DB containers...\n');

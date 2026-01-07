@@ -18,11 +18,21 @@
 
 ### Core Features
 
+#### 👥 User Management & Profile System **[NEW]**
+- **3-Tier Role System** - Warrior, Admin, Super Admin
+- **Badge Progression** - Recruit → Warrior → Veteran
+- **Referral System** - LEGACY codes for Veterans
+- **Profile Management** - Avatar, stats, trading goals
+- **Admin Dashboard** - User management, analytics
+- **Global State** - Zustand store for real-time sync
+- 📖 [Full Documentation](USER_MANAGEMENT_SYSTEM.md) | 🚀 [Quick Start](USER_MANAGEMENT_QUICKSTART.md)
+
 #### 🎯 Dashboard
 - Real-time trading metrics and statistics
 - Win rate tracking and performance overview
 - Recent trades activity feed
 - Customizable widgets
+- Profile stats card with badges
 
 #### 🤖 AI Trading Mentor
 - Real-time chat with Google Gemini AI
