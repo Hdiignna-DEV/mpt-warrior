@@ -95,12 +95,11 @@ export function getCosmosClient(): CosmosClient {
 export function getDatabase(): Database {
   if (!database) {
     const client = getCosmosClient();
-    const databaseId = process.env.AZURE_COSMOS_DATABASE || process.env.NEXT_PUBLIC_COSMOS_DATABASE || "MPT";
+    const databaseId = process.env.AZURE_COSMOS_DATABASE || "mpt-warrior";
     console.log('Connecting to database:', databaseId);
     console.log('Available env vars:', {
       AZURE_COSMOS_DATABASE: process.env.AZURE_COSMOS_DATABASE || 'NOT SET',
-      NEXT_PUBLIC_COSMOS_DATABASE: process.env.NEXT_PUBLIC_COSMOS_DATABASE || 'NOT SET',
-      usingDefault: !process.env.AZURE_COSMOS_DATABASE && !process.env.NEXT_PUBLIC_COSMOS_DATABASE
+      usingDefault: !process.env.AZURE_COSMOS_DATABASE
     });
     database = client.database(databaseId);
   }

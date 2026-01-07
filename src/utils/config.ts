@@ -16,7 +16,7 @@ export const config = {
       maxTokens: 1024,
     },
     cosmosDb: {
-      endpoint: process.env.NEXT_PUBLIC_COSMOS_ENDPOINT || "https://localhost:8081/",
+      endpoint: process.env.AZURE_COSMOS_ENDPOINT || "https://localhost:8081/",
       database: "mpt-warrior",
       containers: {
         trades: "trades",
