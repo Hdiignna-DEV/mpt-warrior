@@ -164,6 +164,7 @@ export default function QuizGradingPage() {
   };
 
   const getModuleBadgeColor = (moduleId: string) => {
+    if (!moduleId) return 'bg-gray-500/10 text-gray-400 border-gray-500/30';
     if (moduleId.includes('module-1')) return 'bg-purple-500/10 text-purple-400 border-purple-500/30';
     if (moduleId.includes('module-2')) return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
     if (moduleId.includes('module-3')) return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
