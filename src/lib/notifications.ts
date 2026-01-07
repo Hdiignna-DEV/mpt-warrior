@@ -3,7 +3,7 @@
  * Handles achievement and milestone notifications
  */
 
-import { showToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 
 // Badge level thresholds
 const BADGE_LEVEL_REQUIREMENTS = {
@@ -108,9 +108,9 @@ export function notifyBadgeUpgrade(badgeType: string, newLevel: string) {
 
   const emoji = newLevel === 'VETERAN' ? '👑' : '⚔️';
   
-  showToast(
-    `${emoji} Badge Upgraded!\n${badgeNames[badgeType]} → ${newLevel}`,
-    'success'
+  toast.success(
+    `${emoji} Badge Upgraded!`,
+    `${badgeNames[badgeType]} → ${newLevel}`
   );
 }
 
@@ -120,9 +120,9 @@ export function notifyBadgeUpgrade(badgeType: string, newLevel: string) {
 export function notifyDisciplineMilestone(score: number) {
   const emoji = score >= 850 ? '🏆' : score >= 500 ? '⭐' : '🎯';
   
-  showToast(
-    `${emoji} Discipline Milestone!\nReached ${score} points`,
-    'success'
+  toast.success(
+    `${emoji} Discipline Milestone!`,
+    `Reached ${score} points`
   );
 }
 
@@ -130,9 +130,9 @@ export function notifyDisciplineMilestone(score: number) {
  * Show referral success notification
  */
 export function notifyReferralSuccess(referredUser: string) {
-  showToast(
-    `🎉 Referral Success!\n${referredUser} joined using your code`,
-    'success'
+  toast.success(
+    `🎉 Referral Success!`,
+    `${referredUser} joined using your code`
   );
 }
 
@@ -143,9 +143,9 @@ export function notifyOverallLevelUp(newLevel: string) {
   const emoji = newLevel === 'VETERAN' ? '👑' : '⚔️';
   const title = newLevel === 'VETERAN' ? 'VETERAN ACHIEVED!' : 'WARRIOR ACHIEVED!';
   
-  showToast(
-    `${emoji} ${title}\nYou've been promoted to ${newLevel}`,
-    'success'
+  toast.success(
+    `${emoji} ${title}`,
+    `You've been promoted to ${newLevel}`
   );
 }
 

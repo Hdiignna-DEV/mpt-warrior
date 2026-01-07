@@ -19,7 +19,7 @@ import {
   Users as UsersIcon
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
-import { showToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 
 interface InvitationCode {
   id: string;
@@ -70,12 +70,12 @@ export default function InvitationControlPage() {
         const data = await response.json();
         setCodes(data.codes);
       } else if (response.status === 403) {
-        showToast('Access denied', 'error');
+        toast.error('Access denied');
         router.push('/dashboard');
       }
     } catch (error) {
       console.error('Error loading codes:', error);
-      showToast('Error loading invitation codes', 'error');
+      toast.error('Error loading invitation codes');
     } finally {
       setIsLoading(false);
     }
@@ -102,18 +102,18 @@ export default function InvitationControlPage() {
 
       if (response.ok) {
         const data = await response.json();
-        showToast(`Generated ${data.codes.length} invitation codes`, 'success');
+        toast.success(`Generated ${data.codes.length} invitation codes`);
         loadCodes();
         
         // Reset form
         setBulkCount(1);
         setDescription('');
       } else {
-        showToast('Failed to generate codes', 'error');
+        toast.error('Failed to generate codes');
       }
     } catch (error) {
       console.error('Error generating codes:', error);
-      showToast('Error generating codes', 'error');
+      toast.error('Error generating codes');
     } finally {
       setIsGenerating(false);
     }
@@ -122,7 +122,7 @@ export default function InvitationControlPage() {
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
-    showToast('Code copied!', 'success');
+    toast.success('Code copied!');
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
@@ -165,14 +165,14 @@ export default function InvitationControlPage() {
       });
 
       if (response.ok) {
-        showToast(`Code ${!currentStatus ? 'activated' : 'deactivated'}`, 'success');
+        toast.success(`Code ${!currentStatus ? 'activated' : 'deactivated'}`);
         loadCodes();
       } else {
-        showToast('Failed to update code status', 'error');
+        toast.error('Failed to update code status');
       }
     } catch (error) {
       console.error('Error toggling code:', error);
-      showToast('Error updating code', 'error');
+      toast.error('Error updating code');
     }
   };
 

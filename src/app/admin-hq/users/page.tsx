@@ -26,7 +26,7 @@ import {
 import { Card } from '@/components/ui/Card';
 import { BadgeLevelDisplay } from '@/components/BadgeSystem';
 import { UserRole, BadgeLevel } from '@/types';
-import { showToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 
 interface UserListItem {
   id: string;
@@ -82,14 +82,14 @@ export default function UserManagementPage() {
         const data = await response.json();
         setUsers(data.users);
       } else if (response.status === 403) {
-        showToast('Access denied', 'error');
+        toast.error('Access denied');
         router.push('/dashboard');
       } else {
-        showToast('Failed to load users', 'error');
+        toast.error('Failed to load users');
       }
     } catch (error) {
       console.error('Error loading users:', error);
-      showToast('Error loading users', 'error');
+      toast.error('Error loading users');
     } finally {
       setIsLoading(false);
     }

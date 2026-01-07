@@ -17,7 +17,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
-import { showToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 
 type Step = 'avatar' | 'goal' | 'strategy' | 'complete';
 
@@ -37,12 +37,12 @@ export default function OnboardingPage() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      showToast('Please upload an image file', 'error');
+      toast.error('Please upload an image file');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      showToast('Image must be less than 5MB', 'error');
+      toast.error('Image must be less than 5MB');
       return;
     }
 
@@ -78,11 +78,11 @@ export default function OnboardingPage() {
           router.push('/dashboard');
         }, 3000);
       } else {
-        showToast('Failed to complete onboarding', 'error');
+        toast.error('Failed to complete onboarding');
       }
     } catch (error) {
       console.error('Error completing onboarding:', error);
-      showToast('Error completing onboarding', 'error');
+      toast.error('Error completing onboarding');
     } finally {
       setIsSubmitting(false);
     }

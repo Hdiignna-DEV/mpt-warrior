@@ -18,7 +18,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
-import { showToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 
 interface GlobalSettings {
   id: string;
@@ -70,14 +70,14 @@ export default function SuperAdminSettingsPage() {
         setAnnouncement(data.settings.systemAnnouncement || '');
         setMaintenanceMode(data.settings.maintenanceMode);
       } else if (response.status === 403) {
-        showToast('Super Admin access required', 'error');
+        toast.error('Super Admin access required');
         router.push('/admin-hq');
       } else {
-        showToast('Failed to load settings', 'error');
+        toast.error('Failed to load settings');
       }
     } catch (error) {
       console.error('Error loading settings:', error);
-      showToast('Error loading settings', 'error');
+      toast.error('Error loading settings');
     } finally {
       setIsLoading(false);
     }
@@ -103,14 +103,14 @@ export default function SuperAdminSettingsPage() {
       });
 
       if (response.ok) {
-        showToast('Settings saved successfully', 'success');
+        toast.success('Settings saved successfully');
         loadSettings();
       } else {
-        showToast('Failed to save settings', 'error');
+        toast.error('Failed to save settings');
       }
     } catch (error) {
       console.error('Error saving settings:', error);
-      showToast('Error saving settings', 'error');
+      toast.error('Error saving settings');
     } finally {
       setIsSaving(false);
     }

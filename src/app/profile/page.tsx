@@ -22,7 +22,7 @@ import {
 import { Card } from '@/components/ui/Card';
 import { BadgeDisplay, BadgeLevelDisplay, BadgeGrid, getAllBadges } from '@/components/BadgeSystem';
 import { Badge, UserStats, ProfileSettings } from '@/types';
-import { showToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 
 interface UserProfile {
   id: string;
@@ -73,11 +73,11 @@ export default function ProfilePage() {
         const data = await response.json();
         setProfile(data.profile);
       } else {
-        showToast('Failed to load profile', 'error');
+        toast.error('Failed to load profile');
       }
     } catch (error) {
       console.error('Error loading profile:', error);
-      showToast('Error loading profile', 'error');
+      toast.error('Error loading profile');
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +87,7 @@ export default function ProfilePage() {
     if (profile?.referralCode) {
       navigator.clipboard.writeText(profile.referralCode);
       setCopiedCode(true);
-      showToast('Referral code copied!', 'success');
+      toast.success('Referral code copied!');
       setTimeout(() => setCopiedCode(false), 2000);
     }
   };

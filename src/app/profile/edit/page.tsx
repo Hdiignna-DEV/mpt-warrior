@@ -17,7 +17,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
-import { showToast } from '@/utils/toast';
+import { toast } from '@/utils/toast';
 
 export default function ProfileEditPage() {
   const router = useRouter();
@@ -50,13 +50,13 @@ export default function ProfileEditPage() {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      showToast('Please upload an image file', 'error');
+      toast.error('Please upload an image file');
       return;
     }
 
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      showToast('Image must be less than 5MB', 'error');
+      toast.error('Image must be less than 5MB');
       return;
     }
 
@@ -92,15 +92,15 @@ export default function ProfileEditPage() {
       });
 
       if (response.ok) {
-        showToast('Profile updated successfully', 'success');
+        toast.success('Profile updated successfully');
         await refreshUser();
         router.push('/profile');
       } else {
-        showToast('Failed to update profile', 'error');
+        toast.error('Failed to update profile');
       }
     } catch (error) {
       console.error('Error saving profile:', error);
-      showToast('Error saving profile', 'error');
+      toast.error('Error saving profile');
     } finally {
       setIsSaving(false);
     }
