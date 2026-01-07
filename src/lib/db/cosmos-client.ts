@@ -21,7 +21,7 @@ let auditLogsContainer: Container | null = null;
 export function getCosmosClient(): CosmosClient {
   if (!cosmosClient) {
     // Support both connection string and endpoint+key methods
-    const connectionString = process.env.NEXT_PUBLIC_COSMOS_CONNECTION_STRING || process.env.AZURE_COSMOS_CONNECTION_STRING;
+    const connectionString = process.env.AZURE_COSMOS_CONNECTION_STRING;
     const endpoint = process.env.AZURE_COSMOS_ENDPOINT;
     const key = process.env.AZURE_COSMOS_KEY;
 

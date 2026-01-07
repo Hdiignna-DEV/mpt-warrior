@@ -7,7 +7,7 @@ let database: Database | null = null;
 export const getCosmosClient = () => {
   if (!cosmosClient) {
     const connectionString =
-      process.env.NEXT_PUBLIC_COSMOS_CONNECTION_STRING ||
+      process.env.AZURE_COSMOS_CONNECTION_STRING ||
       "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QkCqFY=;";
 
     cosmosClient = new CosmosClient({

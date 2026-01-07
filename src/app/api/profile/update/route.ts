@@ -16,7 +16,6 @@ export async function PUT(req: NextRequest) {
 
       // Check if Cosmos DB is configured
       const hasCosmosConfig = 
-        process.env.NEXT_PUBLIC_COSMOS_CONNECTION_STRING || 
         process.env.AZURE_COSMOS_CONNECTION_STRING ||
         (process.env.AZURE_COSMOS_ENDPOINT && process.env.AZURE_COSMOS_KEY);
 
