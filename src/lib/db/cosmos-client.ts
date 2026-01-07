@@ -82,6 +82,11 @@ export function getDatabase(): Database {
     const client = getCosmosClient();
     const databaseId = process.env.AZURE_COSMOS_DATABASE || process.env.NEXT_PUBLIC_COSMOS_DATABASE || "MPT";
     console.log('Connecting to database:', databaseId);
+    console.log('Available env vars:', {
+      AZURE_COSMOS_DATABASE: process.env.AZURE_COSMOS_DATABASE || 'NOT SET',
+      NEXT_PUBLIC_COSMOS_DATABASE: process.env.NEXT_PUBLIC_COSMOS_DATABASE || 'NOT SET',
+      usingDefault: !process.env.AZURE_COSMOS_DATABASE && !process.env.NEXT_PUBLIC_COSMOS_DATABASE
+    });
     database = client.database(databaseId);
   }
 

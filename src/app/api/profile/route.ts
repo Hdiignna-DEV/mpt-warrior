@@ -23,6 +23,13 @@ export async function GET(request: NextRequest) {
         process.env.AZURE_COSMOS_CONNECTION_STRING ||
         (process.env.AZURE_COSMOS_ENDPOINT && process.env.AZURE_COSMOS_KEY);
 
+      console.log('Cosmos DB config check:', {
+        hasConnectionString: !!(process.env.NEXT_PUBLIC_COSMOS_CONNECTION_STRING || process.env.AZURE_COSMOS_CONNECTION_STRING),
+        hasEndpoint: !!process.env.AZURE_COSMOS_ENDPOINT,
+        hasKey: !!process.env.AZURE_COSMOS_KEY,
+        hasCosmosConfig
+      });
+
       if (!hasCosmosConfig) {
         console.warn('Cosmos DB not configured - returning demo profile for:', user.email);
         
@@ -68,9 +75,16 @@ export async function GET(request: NextRequest) {
       // Try to connect to Cosmos DB
       let usersContainer;
       try {
+        console.log('Attempting to get users container...');
         usersContainer = getUsersContainer();
+        console.log('Successfully got users container');
       } catch (dbError) {
         console.error('Failed to get users container:', dbError);
+        console.error('Error details:', {
+          name: dbError instanceof Error ? dbError.name : 'unknown',
+          message: dbError instanceof Error ? dbError.message : 'unknown',
+          stack: dbError instanceof Error ? dbError.stack : 'unknown'
+        });
         // Return demo profile if DB connection fails
         return NextResponse.json({
           success: true,
