@@ -238,7 +238,7 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
         {score.gradedQuestions < score.totalQuestions && (
           <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-4">
             <p className="text-yellow-400 text-sm">
-              ⏳ Some essay questions are pending manual grading by Super Admin
+              ⏳ Some essay questions are pending manual grading by Founder & Head Educator
             </p>
           </div>
         )}
@@ -296,7 +296,7 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
           </Badge>
         </div>
 
-        <h3 className="text-xl font-semibold text-white mb-6">
+        <h3 className="text-xl font-semibold text-white mb-6 leading-relaxed whitespace-pre-wrap">
           {question.question}
         </h3>
 
