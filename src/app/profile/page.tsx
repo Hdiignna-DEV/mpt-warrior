@@ -17,7 +17,10 @@ import {
   Edit2,
   Share2,
   Copy,
-  CheckCircle
+  CheckCircle,
+  TrendingDown,
+  DollarSign,
+  Activity
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { BadgeDisplay, BadgeLevelDisplay, BadgeGrid, getAllBadges } from '@/components/BadgeSystem';
@@ -200,7 +203,7 @@ export default function ProfilePage() {
               </div>
             </div>
             <p className="text-xs text-gray-500">
-              Level progress: {profile.currentBadgeLevel}
+              {profile.stats.losses} losses
             </p>
           </Card>
 
@@ -228,6 +231,72 @@ export default function ProfilePage() {
             </div>
           </Card>
         </div>
+
+        {/* Extended Trading Stats */}
+        {profile.stats.totalTrades > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Total P/L */}
+            <Card className={`p-6 ${
+              (profile.stats.totalProfitLoss || 0) >= 0 
+                ? 'bg-gradient-to-br from-emerald-900/20 to-emerald-950/20 border-emerald-700/30'
+                : 'bg-gradient-to-br from-red-900/20 to-red-950/20 border-red-700/30'
+            }`}>
+              <div className="flex items-center gap-3 mb-2">
+                <DollarSign className={`w-6 h-6 ${
+                  (profile.stats.totalProfitLoss || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
+                }`} />
+                <div>
+                  <p className="text-xs text-gray-400">Total P/L</p>
+                  <p className={`text-2xl font-black ${
+                    (profile.stats.totalProfitLoss || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'
+                  }`}>
+                    {(profile.stats.totalProfitLoss || 0) >= 0 ? '+' : ''}
+                    {(profile.stats.totalProfitLoss || 0).toFixed(2)}%
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Best Trade */}
+            <Card className="bg-gradient-to-br from-green-900/20 to-green-950/20 border-green-700/30 p-6">
+              <div className="flex items-center gap-3 mb-2">
+                <TrendingUp className="w-6 h-6 text-green-400" />
+                <div>
+                  <p className="text-xs text-gray-400">Best Trade</p>
+                  <p className="text-2xl font-black text-green-400">
+                    +{(profile.stats.bestTrade || 0).toFixed(2)}%
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Worst Trade */}
+            <Card className="bg-gradient-to-br from-orange-900/20 to-orange-950/20 border-orange-700/30 p-6">
+              <div className="flex items-center gap-3 mb-2">
+                <TrendingDown className="w-6 h-6 text-orange-400" />
+                <div>
+                  <p className="text-xs text-gray-400">Worst Trade</p>
+                  <p className="text-2xl font-black text-orange-400">
+                    {(profile.stats.worstTrade || 0).toFixed(2)}%
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Average Risk */}
+            <Card className="bg-gradient-to-br from-cyan-900/20 to-cyan-950/20 border-cyan-700/30 p-6">
+              <div className="flex items-center gap-3 mb-2">
+                <Activity className="w-6 h-6 text-cyan-400" />
+                <div>
+                  <p className="text-xs text-gray-400">Avg Risk</p>
+                  <p className="text-2xl font-black text-cyan-400">
+                    {(profile.stats.averageRisk || 0).toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
 
         {/* Badges Section */}
         <Card className="bg-slate-800/30 border-slate-700/50 p-6">

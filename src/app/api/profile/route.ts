@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateActiveUser } from '@/lib/middleware/auth';
-import { getUsersContainer } from '@/lib/db/cosmos-client';
+import { getUsersContainer, getTradesContainer } from '@/lib/db/cosmos-client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,6 +32,29 @@ export async function GET(request: NextRequest) {
 
     console.log('[PROFILE API] Profile found:', userProfile.email, userProfile.warriorId);
 
+    // Calculate real stats from trades
+    const tradesContainer = getTradesContainer();
+    const tradesQuery = {
+      query: "SELECT * FROM c WHERE c.userId = @userId",
+      parameters: [{ name: "@userId", value: userId }]
+    };
+    
+    const { resources: trades } = await tradesContainer.items.query(tradesQuery).fetchAll();
+    
+    // Calculate stats
+    const totalTrades = trades.length;
+    const wins = trades.filter(t => t.outcome === 'WIN').length;
+    const losses = trades.filter(t => t.outcome === 'LOSS').length;
+    const winRate = totalTrades > 0 ? Math.round((wins / totalTrades) * 100) : 0;
+    
+    // Calculate total profit/loss
+    const totalProfitLoss = trades.reduce((sum, t) => sum + (t.profitLoss || 0), 0);
+    const averageRisk = totalTrades > 0 
+      ? trades.reduce((sum, t) => sum + (t.riskPercent || 0), 0) / totalTrades 
+      : 0;
+    
+    console.log('[PROFILE API] Stats calculated:', { totalTrades, wins, losses, winRate });
+
     return NextResponse.json({
       success: true,
       profile: {
@@ -48,6 +71,7 @@ export async function GET(request: NextRequest) {
         whatsapp: userProfile.whatsapp || '',
         telegram_id: userProfile.telegram_id || '',
         avatar: userProfile.avatar || '',
+        referralCode: userProfile.referralCode || '',
         profileSettings: userProfile.profileSettings || {
           personalGoal: '',
           tradingStrategy: 'DAY_TRADING',
@@ -55,10 +79,14 @@ export async function GET(request: NextRequest) {
           bio: ''
         },
         stats: {
-          totalTrades: userProfile.totalTrades || 0,
-          wins: 0,
-          losses: 0,
-          winRate: 0
+          totalTrades,
+          wins,
+          losses,
+          winRate,
+          totalProfitLoss,
+          averageRisk: Math.round(averageRisk * 100) / 100,
+          bestTrade: trades.length > 0 ? Math.max(...trades.map(t => t.profitLoss || 0)) : 0,
+          worstTrade: trades.length > 0 ? Math.min(...trades.map(t => t.profitLoss || 0)) : 0
         },
         createdAt: userProfile.createdAt,
         updatedAt: userProfile.updatedAt

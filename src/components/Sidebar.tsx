@@ -28,7 +28,7 @@ const menuSections = [
   {
     items: [
       { href: '/dashboard', label: 'nav.dashboard', fallback: 'Dashboard', icon: LayoutDashboard, description: 'Overview' },
-      { href: '/profile', label: 'nav.profile', fallback: 'Warrior Profile', icon: User, description: 'Your Profile' },
+      { href: '/profile', label: 'Profile', fallback: 'Warrior Profile', icon: User, description: 'Your Profile' },
     ]
   },
   {
