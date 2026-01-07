@@ -32,26 +32,14 @@ jobs:
       - name: Build Next.js App
         run: npm run build
         env:
-          # Azure Cosmos DB
           AZURE_COSMOS_ENDPOINT: ${{ secrets.AZURE_COSMOS_ENDPOINT }}
           AZURE_COSMOS_KEY: ${{ secrets.AZURE_COSMOS_KEY }}
           AZURE_COSMOS_DATABASE: ${{ secrets.AZURE_COSMOS_DATABASE }}
           AZURE_COSMOS_CONNECTION_STRING: ${{ secrets.AZURE_COSMOS_CONNECTION_STRING }}
-          
-          # AI APIs
           NEXT_PUBLIC_GEMINI_API_KEY: ${{ secrets.NEXT_PUBLIC_GEMINI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          NEXT_PUBLIC_GROQ_API_KEY: ${{ secrets.NEXT_PUBLIC_GROQ_API_KEY }}
-          
-          # JWT & Security
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          
-          # Admin Config
           NEXT_PUBLIC_ADMIN_EMAIL: ${{ secrets.NEXT_PUBLIC_ADMIN_EMAIL }}
-          
-          # App URL - Azure Static Web Apps
-          NEXT_PUBLIC_APP_URL: https://mpt-warrior-app.azurestaticapps.net
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
@@ -62,7 +50,6 @@ jobs:
           action: "upload"
           app_location: "/"
           output_location: ".next"
-          api_location: ""
           skip_app_build: true
 
   close_pull_request_job:
