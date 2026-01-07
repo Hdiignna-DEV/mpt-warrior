@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { validateActiveUser } from '@/lib/auth';
+import { validateActiveUser } from '@/lib/middleware/auth';
 import { getUsersContainer } from '@/lib/db/cosmos-client';
 
 export async function PUT(request: NextRequest) {
