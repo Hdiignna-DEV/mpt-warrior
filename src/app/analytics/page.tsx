@@ -19,7 +19,7 @@ interface Trade {
   posisi: 'BUY' | 'SELL';
   hasil: 'WIN' | 'LOSS';
   pip: number;
-  tanggal: string;
+  tanggal: string; // ISO date string from API
   catatan: string;
 }
 
@@ -51,7 +51,7 @@ export default function AnalyticsPage() {
           posisi: t.position,
           hasil: t.result,
           pip: t.pips,
-          tanggal: new Date(t.tradeDate).toLocaleDateString('id-ID'),
+          tanggal: t.tradeDate, // Keep ISO date string
           catatan: t.notes || '',
         }));
         setTrades(mappedTrades);
@@ -226,7 +226,8 @@ export default function AnalyticsPage() {
                   data={(() => {
                     const monthlyData: Record<string, number> = {};
                     trades.forEach(trade => {
-                      const month = new Date(trade.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'short' });
+                      const date = new Date(trade.tanggal);
+                      const month = date.toLocaleDateString('id-ID', { year: 'numeric', month: 'short' });
                       monthlyData[month] = (monthlyData[month] || 0) + trade.pip;
                     });
                     return Object.entries(monthlyData).map(([month, pnl]) => ({ month, pnl }));
@@ -239,10 +240,13 @@ export default function AnalyticsPage() {
             <Card className="bg-white/5 border-white/10 p-6 mb-8 animate-fadeIn" style={{ animationDelay: '200ms' }}>
               <h3 className="text-xl font-bold text-white mb-4">P&L Trend</h3>
               <PLTrendChart 
-                data={trades.map(trade => ({
-                  date: new Date(trade.tanggal).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' }),
-                  pnl: trade.pip
-                }))}
+                data={trades.map(trade => {
+                  const date = new Date(trade.tanggal);
+                  return {
+                    date: date.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' }),
+                    pnl: trade.pip
+                  };
+                })}
               />
             </Card>
 
