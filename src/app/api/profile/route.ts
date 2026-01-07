@@ -101,8 +101,6 @@ export async function GET(request: NextRequest) {
 
         // Database is healthy, proceed with user lookup
         const usersContainer = getUsersContainer();
-        // Database is healthy, proceed with user lookup
-        const usersContainer = getUsersContainer();
 
         // Get user profile
         const { resource: userProfile } = await usersContainer.item(user.id, user.id).read();
