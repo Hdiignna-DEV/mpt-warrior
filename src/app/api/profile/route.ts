@@ -136,13 +136,12 @@ export async function GET(request: NextRequest) {
                 personalGoal: '',
                 tradingStrategy: 'DAY_TRADING',
                 preferredTimeframe: '',
-              bio: ''
+                bio: ''
+              },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
             },
-            createdAt: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          message: 'User not found in database. Using demo mode.'
+            message: 'User not found in database. Using demo mode.'
         });
       }
 
