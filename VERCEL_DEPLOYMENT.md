@@ -14,15 +14,19 @@ Berikut environment variables yang diperlukan untuk production di Vercel:
 
 ### Required for API & Services
 ```env
-# Azure Cosmos DB
-NEXT_PUBLIC_COSMOS_ENDPOINT=https://your-account.documents.azure.com:443/
-COSMOS_DB_KEY=your-primary-key
-COSMOS_DB_NAME=your-database-name
+# Azure Cosmos DB (Required - dari Azure Portal > Cosmos DB > Keys)
+AZURE_COSMOS_ENDPOINT=https://your-account.documents.azure.com:443/
+AZURE_COSMOS_KEY=your-primary-key
+AZURE_COSMOS_DATABASE=MPT
 
-# Google Generative AI
+# JWT Authentication (Required - generate random string)
+JWT_SECRET=your-secret-key-change-in-production
+
+# Google Generative AI (Optional - untuk AI Mentor)
 NEXT_PUBLIC_GOOGLE_API_KEY=your-google-api-key
 
-# Optional: Add your API keys for other services
+# Email Service (Optional - untuk email notifications)
+# Configure salah satu dari: Resend, Gmail SMTP, atau SendGrid
 ```
 
 ### Theme Configuration (Auto-handled)
@@ -53,8 +57,23 @@ git push origin main
 ### 3. Set Environment Variables
 Di Vercel Dashboard:
 1. Buka Project → Settings → Environment Variables
-2. Tambahkan semua environment variables yang diperlukan
-3. Pastikan variables tersedia untuk production environment
+2. Tambahkan environment variables berikut:
+
+**CRITICAL - Must Set:**
+```
+AZURE_COSMOS_ENDPOINT = https://your-account.documents.azure.com:443/
+AZURE_COSMOS_KEY = your-primary-or-secondary-key
+AZURE_COSMOS_DATABASE = MPT
+JWT_SECRET = random-secret-string-min-32-chars
+```
+
+**Optional:**
+```
+NEXT_PUBLIC_GOOGLE_API_KEY = your-google-ai-api-key
+```
+
+3. Pastikan variables tersedia untuk **Production** environment
+4. Klik "Save" untuk setiap variable
 
 ### 4. Deploy
 ```bash
