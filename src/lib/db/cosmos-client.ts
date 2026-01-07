@@ -21,9 +21,10 @@ let auditLogsContainer: Container | null = null;
 export function getCosmosClient(): CosmosClient {
   if (!cosmosClient) {
     // Support both connection string and endpoint+key methods
-    const endpoint = process.env.AZURE_COSMOS_ENDPOINT;
-    const key = process.env.AZURE_COSMOS_KEY;
-    const connectionString = process.env.AZURE_COSMOS_CONNECTION_STRING;
+    // CRITICAL: Trim all values to remove whitespace/newlines
+    const endpoint = process.env.AZURE_COSMOS_ENDPOINT?.trim();
+    const key = process.env.AZURE_COSMOS_KEY?.trim();
+    const connectionString = process.env.AZURE_COSMOS_CONNECTION_STRING?.trim();
 
     console.log('[COSMOS CLIENT] Environment check:', {
       hasEndpoint: !!endpoint,
@@ -35,25 +36,34 @@ export function getCosmosClient(): CosmosClient {
       endpointLength: endpoint?.length || 0,
       keyLength: key?.length || 0,
       connectionStringLength: connectionString?.length || 0,
+      endpointPreview: endpoint?.substring(0, 50),
       allEnvKeys: Object.keys(process.env).filter(k => k.includes('COSMOS'))
     });
 
     // Method 1: Use endpoint + key (PREFERRED - more stable)
-    if (endpoint && key && typeof endpoint === 'string' && typeof key === 'string' && endpoint.length > 0 && key.length > 0) {
-      console.log('[COSMOS CLIENT] Initializing with endpoint + key');
+    if (endpoint && key && endpoint.length > 0 && key.length > 0) {
+      console.log('[COSMOS CLIENT] Using method 1: endpoint + key');
+      console.log('[COSMOS CLIENT] Endpoint:', endpoint);
+      console.log('[COSMOS CLIENT] Key length:', key.length);
       
-      cosmosClient = new CosmosClient({
-        endpoint,
-        key,
-        connectionPolicy: {
-          requestTimeout: 10000,
-          enableEndpointDiscovery: false,
-        },
-      });
+      try {
+        cosmosClient = new CosmosClient({
+          endpoint: endpoint,
+          key: key,
+          connectionPolicy: {
+            requestTimeout: 10000,
+            enableEndpointDiscovery: false,
+          },
+        });
+        console.log('[COSMOS CLIENT] Successfully initialized with endpoint + key');
+      } catch (clientError: any) {
+        console.error('[COSMOS CLIENT] Failed to create client with endpoint+key:', clientError.message);
+        throw clientError;
+      }
     }
     // Method 2: Use connection string if endpoint+key not available
-    else if (connectionString && typeof connectionString === 'string' && connectionString.length > 0) {
-      console.log('[COSMOS CLIENT] Initializing with connection string');
+    else if (connectionString && connectionString.length > 0) {
+      console.log('[COSMOS CLIENT] Using method 2: connection string');
       
       // Parse connection string to extract endpoint and key
       const endpointMatch = connectionString.match(/AccountEndpoint=([^;]+)/);
