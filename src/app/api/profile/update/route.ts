@@ -20,14 +20,22 @@ export async function PUT(req: NextRequest) {
         (process.env.AZURE_COSMOS_ENDPOINT && process.env.AZURE_COSMOS_KEY);
 
       if (!hasCosmosConfig) {
-        console.error('Cosmos DB not configured');
+        console.error('Cosmos DB not configured - missing environment variables');
         return NextResponse.json({
           error: 'Database not configured. Please contact administrator.'
         }, { status: 503 });
       }
 
-      // Get container
-      const container = getUsersContainer();
+      // Get container (wrapped in try-catch for initialization errors)
+      let container;
+      try {
+        container = getUsersContainer();
+      } catch (containerError) {
+        console.error('Failed to initialize Cosmos DB container:', containerError);
+        return NextResponse.json({
+          error: 'Database connection failed. Please try again later.'
+        }, { status: 503 });
+      }
 
     // Get current user
     const { resource: user } = await container.item(userId, userId).read();

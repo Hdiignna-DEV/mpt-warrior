@@ -99,7 +99,46 @@ export async function GET(request: NextRequest) {
         }
 
         // Database is healthy, proceed with user lookup
-        const usersContainer = getUsersContainer();
+        let usersContainer;
+        try {
+          usersContainer = getUsersContainer();
+        } catch (containerError) {
+          console.error('Failed to get users container:', containerError);
+          // Return demo profile if container initialization fails
+          return NextResponse.json({
+            success: true,
+            isDemoMode: true,
+            profile: {
+              id: user.id,
+              email: user.email,
+              name: user.email?.split('@')[0] || 'Warrior',
+              displayName: user.email?.split('@')[0] || 'Warrior',
+              warriorId: user.warriorId || 'MPT-DEMO-00001',
+              role: user.role,
+              status: 'active',
+              currentBadgeLevel: 'RECRUIT',
+              badges: [],
+              disciplineScore: 500,
+              stats: {
+                totalTrades: 0,
+                wins: 0,
+                losses: 0,
+                winRate: 0
+              },
+              settings: {
+                theme: 'dark',
+                language: 'id',
+                notifications: {
+                  email: true,
+                  push: false
+                }
+              },
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            },
+            message: 'Container initialization failed. Using demo mode.'
+          });
+        }
 
         // Get user profile
         const { resource: userProfile } = await usersContainer.item(user.id, user.id).read();
