@@ -15,13 +15,41 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
-      // Check if Cosmos DB is configured
+      // Check if Cosmos DB is configured - if not, return demo profile
       if (!process.env.AZURE_COSMOS_ENDPOINT || !process.env.AZURE_COSMOS_KEY) {
-        console.error('Cosmos DB credentials not configured');
-        return NextResponse.json({ 
-          error: 'Database not configured',
-          details: 'Azure Cosmos DB credentials missing'
-        }, { status: 503 });
+        console.warn('Cosmos DB not configured - returning demo profile for:', user.email);
+        
+        // Return demo profile based on JWT user data
+        return NextResponse.json({
+          success: true,
+          profile: {
+            id: user.id,
+            email: user.email,
+            name: user.email?.split('@')[0] || 'Warrior',
+            displayName: user.email?.split('@')[0] || 'Warrior',
+            warriorId: user.warriorId || 'MPT-DEMO-00001',
+            role: user.role,
+            status: 'active',
+            currentBadgeLevel: 'RECRUIT',
+            badges: [],
+            disciplineScore: 500,
+            stats: {
+              totalTrades: 0,
+              wins: 0,
+              losses: 0,
+              winRate: 0
+            },
+            settings: {
+              theme: 'dark',
+              language: 'id',
+              notifications: true
+            },
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            // Demo mode indicator
+            _demoMode: true
+          }
+        });
       }
 
       const usersContainer = getUsersContainer();

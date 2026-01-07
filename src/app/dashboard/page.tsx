@@ -19,6 +19,7 @@ import { toast } from '@/utils/toast';
 import { CurrencySelector, useCurrency } from '@/components/CurrencySelector';
 import { formatCurrency, type Currency } from '@/utils/helpers';
 import { getExchangeRate, initializeExchangeRate } from '@/utils/exchange-rate';
+import { DemoModeBanner } from '@/components/DemoModeBanner';
 
 interface Trade {
   id: string;
@@ -221,6 +222,9 @@ export default function Dashboard() {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        {/* Demo Mode Warning Banner */}
+        <DemoModeBanner />
         
         {/* Hero Section - The Warrior Toggle Branding */}
         <motion.div
