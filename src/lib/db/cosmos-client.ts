@@ -116,14 +116,12 @@ export function getCosmosClient(): CosmosClient {
  */
 export function getDatabase(): Database {
   if (!database) {
+    console.log('[getDatabase] Getting Cosmos client...');
     const client = getCosmosClient();
-    const databaseId = process.env.AZURE_COSMOS_DATABASE || "mpt-warrior";
-    console.log('Connecting to database:', databaseId);
-    console.log('Available env vars:', {
-      AZURE_COSMOS_DATABASE: process.env.AZURE_COSMOS_DATABASE || 'NOT SET',
-      usingDefault: !process.env.AZURE_COSMOS_DATABASE
-    });
+    const databaseId = (process.env.AZURE_COSMOS_DATABASE || "mpt-warrior").trim();
+    console.log('[getDatabase] Connecting to database:', databaseId);
     database = client.database(databaseId);
+    console.log('[getDatabase] Database instance ready');
   }
 
   return database;
@@ -135,8 +133,11 @@ export function getDatabase(): Database {
  */
 export function getUsersContainer(): Container {
   if (!usersContainer) {
+    console.log('[getUsersContainer] Getting database...');
     const db = getDatabase();
+    console.log('[getUsersContainer] Getting container...');
     usersContainer = db.container("users");
+    console.log('[getUsersContainer] Container ready');
   }
 
   return usersContainer;
