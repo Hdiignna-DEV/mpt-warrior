@@ -20,29 +20,55 @@ let auditLogsContainer: Container | null = null;
  */
 export function getCosmosClient(): CosmosClient {
   if (!cosmosClient) {
+    // Support both connection string and endpoint+key methods
+    const connectionString = process.env.NEXT_PUBLIC_COSMOS_CONNECTION_STRING || process.env.AZURE_COSMOS_CONNECTION_STRING;
     const endpoint = process.env.AZURE_COSMOS_ENDPOINT;
     const key = process.env.AZURE_COSMOS_KEY;
 
-    if (!endpoint || !key) {
+    // Method 1: Use connection string if available
+    if (connectionString) {
+      console.log('Initializing Cosmos DB with connection string');
+      
+      // Parse connection string to extract endpoint and key
+      const endpointMatch = connectionString.match(/AccountEndpoint=([^;]+)/);
+      const keyMatch = connectionString.match(/AccountKey=([^;]+)/);
+      
+      if (!endpointMatch || !keyMatch) {
+        console.error('Invalid connection string format');
+        throw new Error("Invalid Cosmos DB connection string format");
+      }
+
+      cosmosClient = new CosmosClient({
+        endpoint: endpointMatch[1],
+        key: keyMatch[1],
+        connectionPolicy: {
+          requestTimeout: 10000,
+          enableEndpointDiscovery: false,
+        },
+      });
+    }
+    // Method 2: Use endpoint + key separately
+    else if (endpoint && key) {
+      console.log('Initializing Cosmos DB with endpoint + key');
+      
+      cosmosClient = new CosmosClient({
+        endpoint,
+        key,
+        connectionPolicy: {
+          requestTimeout: 10000,
+          enableEndpointDiscovery: false,
+        },
+      });
+    }
+    // Method 3: No credentials found
+    else {
       console.error('Missing Cosmos DB credentials:', {
+        hasConnectionString: !!connectionString,
         hasEndpoint: !!endpoint,
-        hasKey: !!key,
-        endpoint: endpoint ? 'SET' : 'NOT SET',
-        key: key ? 'SET' : 'NOT SET'
+        hasKey: !!key
       });
       throw new Error("Azure Cosmos DB credentials not found in environment variables");
     }
-
-    console.log('Initializing Cosmos DB client with endpoint:', endpoint);
-
-    cosmosClient = new CosmosClient({
-      endpoint,
-      key,
-      connectionPolicy: {
-        requestTimeout: 10000, // 10 seconds
-        enableEndpointDiscovery: false,
-      },
-    });
   }
 
   return cosmosClient;
@@ -54,7 +80,8 @@ export function getCosmosClient(): CosmosClient {
 export function getDatabase(): Database {
   if (!database) {
     const client = getCosmosClient();
-    const databaseId = process.env.AZURE_COSMOS_DATABASE || "mpt-warrior";
+    const databaseId = process.env.AZURE_COSMOS_DATABASE || process.env.NEXT_PUBLIC_COSMOS_DATABASE || "MPT";
+    console.log('Connecting to database:', databaseId);
     database = client.database(databaseId);
   }
 

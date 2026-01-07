@@ -16,7 +16,12 @@ export async function GET(request: NextRequest) {
       }
 
       // Check if Cosmos DB is configured - if not, return demo profile
-      if (!process.env.AZURE_COSMOS_ENDPOINT || !process.env.AZURE_COSMOS_KEY) {
+      const hasCosmosConfig = 
+        process.env.NEXT_PUBLIC_COSMOS_CONNECTION_STRING || 
+        process.env.AZURE_COSMOS_CONNECTION_STRING ||
+        (process.env.AZURE_COSMOS_ENDPOINT && process.env.AZURE_COSMOS_KEY);
+
+      if (!hasCosmosConfig) {
         console.warn('Cosmos DB not configured - returning demo profile for:', user.email);
         
         // Return demo profile based on JWT user data
