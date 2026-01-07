@@ -10,6 +10,57 @@ import { getUsersContainer, checkCosmosDBHealth } from '@/lib/db/cosmos-client';
 export async function GET(request: NextRequest) {
   // Wrap everything in try-catch to prevent any 500 errors
   try {
+    // CRITICAL: Check environment variables FIRST before any database operations
+    const hasEnvVars = !!(
+      (process.env.AZURE_COSMOS_ENDPOINT && process.env.AZURE_COSMOS_KEY) ||
+      process.env.AZURE_COSMOS_CONNECTION_STRING
+    );
+
+    console.log('[PROFILE API] Environment check:', {
+      hasEndpoint: !!process.env.AZURE_COSMOS_ENDPOINT,
+      hasKey: !!process.env.AZURE_COSMOS_KEY,
+      hasConnectionString: !!process.env.AZURE_COSMOS_CONNECTION_STRING,
+      hasDatabase: !!process.env.AZURE_COSMOS_DATABASE
+    });
+
+    if (!hasEnvVars) {
+      console.error('[PROFILE API] Missing Cosmos DB credentials - returning demo mode');
+      // Return demo profile immediately if no env vars
+      return NextResponse.json({
+        success: true,
+        isDemoMode: true,
+        profile: {
+          id: 'demo-user',
+          email: 'demo@mpt.com',
+          name: 'Demo User',
+          displayName: 'Demo Warrior',
+          warriorId: 'MPT-DEMO-00000',
+          role: 'WARRIOR',
+          status: 'active',
+          currentBadgeLevel: 'RECRUIT',
+          badges: [],
+          disciplineScore: 500,
+          stats: {
+            totalTrades: 0,
+            wins: 0,
+            losses: 0,
+            winRate: 0
+          },
+          settings: {
+            theme: 'dark',
+            language: 'id',
+            notifications: {
+              email: true,
+              push: false
+            }
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        message: 'Environment variables not configured. Contact administrator.'
+      });
+    }
+
     return requireAuth(request, async (req: AuthenticatedRequest) => {
       try {
         const { user } = req;

@@ -8,6 +8,26 @@ import { requireAuth } from '@/lib/middleware/role-check';
 import { getUsersContainer } from '@/lib/db/cosmos-client';
 
 export async function PUT(req: NextRequest) {
+  // CRITICAL: Check environment variables FIRST
+  const hasEnvVars = !!(
+    (process.env.AZURE_COSMOS_ENDPOINT && process.env.AZURE_COSMOS_KEY) ||
+    process.env.AZURE_COSMOS_CONNECTION_STRING
+  );
+
+  console.log('[UPDATE API] Environment check:', {
+    hasEndpoint: !!process.env.AZURE_COSMOS_ENDPOINT,
+    hasKey: !!process.env.AZURE_COSMOS_KEY,
+    hasConnectionString: !!process.env.AZURE_COSMOS_CONNECTION_STRING
+  });
+
+  if (!hasEnvVars) {
+    console.error('[UPDATE API] Missing Cosmos DB credentials');
+    return NextResponse.json({
+      error: 'Database not configured. Please contact administrator.',
+      message: 'Environment variables missing'
+    }, { status: 503 });
+  }
+
   return requireAuth(req, async (authenticatedReq) => {
     try {
       const userId = authenticatedReq.user!.id;
