@@ -231,7 +231,7 @@ export default function QuizGradingPage() {
               <BookOpen className="w-8 h-8 text-blue-400" />
               <div>
                 <p className="text-2xl font-bold text-white">
-                  {new Set(essays.map(e => e.moduleId)).size}
+                  {new Set(essays.filter(e => e.moduleId).map(e => e.moduleId)).size}
                 </p>
                 <p className="text-sm text-gray-400">Modules</p>
               </div>
@@ -243,7 +243,7 @@ export default function QuizGradingPage() {
               <Trophy className="w-8 h-8 text-emerald-400" />
               <div>
                 <p className="text-2xl font-bold text-white">
-                  {essays.reduce((sum, e) => sum + e.questionPoints, 0)}
+                  {essays.reduce((sum, e) => sum + (e.questionPoints || 0), 0)}
                 </p>
                 <p className="text-sm text-gray-400">Total Points to Grade</p>
               </div>
@@ -278,21 +278,21 @@ export default function QuizGradingPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Badge className={`${getModuleBadgeColor(essay.moduleId)} border`}>
-                        {essay.moduleId.toUpperCase()}
+                        {essay.moduleId ? essay.moduleId.toUpperCase() : 'UNKNOWN'}
                       </Badge>
                       <Badge className="bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                        {essay.questionPoints} points
+                        {essay.questionPoints || 0} points
                       </Badge>
                     </div>
                     
                     <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
                       <User className="w-4 h-4" />
-                      <span>{essay.userName} ({essay.userId})</span>
+                      <span>{essay.userName || 'Unknown'} ({essay.userId || 'N/A'})</span>
                     </div>
                     
                     <div className="flex items-center gap-2 text-gray-400 text-sm">
                       <Clock className="w-4 h-4" />
-                      <span>Submitted: {formatDate(essay.submittedAt)}</span>
+                      <span>Submitted: {essay.submittedAt ? formatDate(essay.submittedAt) : 'N/A'}</span>
                     </div>
                   </div>
                 </div>
@@ -300,7 +300,7 @@ export default function QuizGradingPage() {
                 {/* Question */}
                 <div className="mb-4">
                   <h4 className="text-sm font-semibold text-gray-400 mb-2">Question:</h4>
-                  <p className="text-white leading-relaxed">{essay.questionText}</p>
+                  <p className="text-white leading-relaxed">{essay.questionText || 'No question text'}</p>
                 </div>
 
                 {/* Student Answer */}
@@ -308,7 +308,7 @@ export default function QuizGradingPage() {
                   <h4 className="text-sm font-semibold text-gray-400 mb-2">Student Answer:</h4>
                   <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
                     <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-                      {essay.userAnswer}
+                      {essay.userAnswer || 'No answer provided'}
                     </p>
                   </div>
                 </div>
