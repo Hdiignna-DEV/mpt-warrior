@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { sendModuleCompletionEmail } from '@/lib/email/resend-client';
-import { getCosmosClient } from '@/lib/db/cosmosClient';
+import { getCosmosClient } from '@/lib/db/cosmos-client';
 
 export async function POST(request: NextRequest) {
   try {
