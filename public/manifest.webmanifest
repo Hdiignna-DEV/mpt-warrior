@@ -1,22 +1,98 @@
 {
-  "name": "MPT Community - Trading Hub",
-  "short_name": "MPT",
-  "description": "Mindset Plan Trader - Complete Trading Management System",
+  "name": "MPT Warrior - Trading Hub",
+  "short_name": "MPT Warrior",
+  "description": "Mindset Plan Trader - Complete Trading Management & Journal System for Professional Traders",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#0f172a",
-  "theme_color": "#eab308",
+  "theme_color": "#0ea5e9",
   "orientation": "portrait-primary",
+  "categories": ["finance", "productivity", "education"],
+  "lang": "id",
+  "dir": "ltr",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/mpt-logo.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mpt-logo.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/mpt-logo.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "1280x720",
       "type": "image/png"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Trade Journal",
+      "short_name": "Journal",
+      "description": "Add new trade to journal",
+      "url": "/journal",
+      "icons": [{ "src": "/mpt-logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View trading dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/mpt-logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Calculator",
+      "short_name": "Calc",
+      "description": "Risk calculator",
+      "url": "/calculator",
+      "icons": [{ "src": "/mpt-logo.png", "sizes": "192x192" }]
+    }
+  ],
+  "related_applications": [],
+  "iarc_rating_id": ""
 }

@@ -1,0 +1,40 @@
+{
+  "routes": [
+    {
+      "route": "/api/*",
+      "allowedRoles": ["anonymous"]
+    },
+    {
+      "route": "/admin-hq/*",
+      "allowedRoles": ["admin"]
+    },
+    {
+      "route": "/*",
+      "allowedRoles": ["anonymous"]
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/images/*", "/api/*", "/*.{css,scss,js,json,ico,svg,png,jpg,jpeg,webp,gif,woff,woff2,ttf,eot}"]
+  },
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/index.html"
+    }
+  },
+  "globalHeaders": {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+  },
+  "mimeTypes": {
+    ".json": "application/json",
+    ".webmanifest": "application/manifest+json"
+  },
+  "platform": {
+    "apiRuntime": "node:18"
+  },
+  "networking": {
+    "allowedIpRanges": []
+  }
+}

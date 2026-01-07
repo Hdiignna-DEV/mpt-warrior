@@ -741,4 +741,77 @@ body header > div {
   }
 }
 
+/* ============== PWA SPECIFIC STYLES ============== */
+
+/* iOS safe area support */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Standalone mode detection */
+@media (display-mode: standalone) {
+  body {
+    user-select: none;
+  }
+  
+  /* Add subtle indicator for standalone mode */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #0ea5e9 0%, #3b82f6 100%);
+    z-index: 9999;
+    pointer-events: none;
+  }
+}
+
+/* Touch optimization for mobile */
+@media (hover: none) and (pointer: coarse) {
+  button, a {
+    -webkit-tap-highlight-color: rgba(14, 165, 233, 0.2);
+    touch-action: manipulation;
+  }
+  
+  /* Larger tap targets */
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* PWA Install animation */
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+/* Prevent pull-to-refresh on mobile */
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* Better focus states for keyboard navigation in PWA */
+@media (display-mode: standalone) {
+  *:focus-visible {
+    outline: 2px solid #0ea5e9;
+    outline-offset: 2px;
+  }
+}
 

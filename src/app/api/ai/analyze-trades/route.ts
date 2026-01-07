@@ -1,25 +1,28 @@
 /**
  * AI Analyze Trades API
- * Uses Claude Sonnet 4.5 to analyze user's trading history
+ * Uses Google Gemini 2.0 Flash (FREE) to analyze user's trading history
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { validateActiveUser } from '@/lib/middleware/auth';
 import { getUserTrades, getUserTradeStats } from '@/lib/db/trade-service';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if API key exists
-    if (!process.env.CLAUDE_API_KEY) {
+    // Setup AI providers (Hybrid: Groq + Gemini)
+    const geminiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
+    
+    if (!geminiKey && !groqKey) {
       return NextResponse.json({ 
-        error: 'CLAUDE_API_KEY is not configured. Please contact admin.' 
+        error: 'No AI provider configured. Please add GROQ_API_KEY or GEMINI_API_KEY to .env.local' 
       }, { status: 500 });
     }
 
-    const anthropic = new Anthropic({
-      apiKey: process.env.CLAUDE_API_KEY,
-    });
+    const genAI = geminiKey ? new GoogleGenerativeAI(geminiKey) : null;
+    const groq = groqKey ? new Groq({ apiKey: groqKey }) : null;
 
     // Validate auth + active status
     const { decoded, error } = validateActiveUser(request);
@@ -128,21 +131,67 @@ Sebagai MPT Warrior AI Mentor, analisis performa trading ini dengan format:
 
 Gunakan emoji dan bahasa yang engaging tapi tetap profesional. Berikan feedback yang spesifik berdasarkan data aktual, bukan generic advice.`;
 
-    // Call Claude Sonnet 4.5 API
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4096,
-      system: 'Anda adalah MPT Warrior AI Mentor, seorang expert trading analyst yang memberikan feedback konstruktif dan actionable untuk trader.',
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.7,
-    });
+    // HYBRID AI: Prefer Groq (faster), fallback to Gemini
+    let analysis = '';
+    let aiModel = '';
 
-    const analysis = response.content[0].type === 'text' ? response.content[0].text : 'No analysis generated';
+    if (groq) {
+      console.log("⚡ Analyzing trades with Groq (ultra-fast)...");
+      try {
+        const completion = await groq.chat.completions.create({
+          messages: [
+            { role: 'system', content: 'You are a professional trading analyst for MPT Warrior app.' },
+            { role: 'user', content: prompt }
+          ],
+          model: 'llama-3.3-70b-versatile',
+          temperature: 0.7,
+          max_tokens: 4096,
+        });
+
+        analysis = completion.choices[0]?.message?.content || '';
+        aiModel = 'Groq Llama 3.3 70B (FREE)';
+      } catch (groqError: any) {
+        console.warn("⚠️ Groq failed, falling back to Gemini:", groqError.message);
+        
+        // Fallback to Gemini
+        if (genAI) {
+          const model = genAI.getGenerativeModel({ 
+            model: 'gemini-2.0-flash-exp',
+            systemInstruction: 'Anda adalah MPT Warrior AI Mentor, seorang expert trading analyst yang memberikan feedback konstruktif dan actionable untuk trader.',
+          });
+          const geminiResult = await model.generateContent({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 4096,
+            },
+          });
+          const response = await geminiResult.response;
+          analysis = response.text();
+          aiModel = 'Gemini 2.0 Flash (Fallback)';
+        } else {
+          throw groqError;
+        }
+      }
+    } else if (genAI) {
+      console.log("💬 Analyzing trades with Gemini...");
+      const model = genAI.getGenerativeModel({ 
+        model: 'gemini-2.0-flash-exp',
+        systemInstruction: 'Anda adalah MPT Warrior AI Mentor, seorang expert trading analyst yang memberikan feedback konstruktif dan actionable untuk trader.',
+      });
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 4096,
+        },
+      });
+      const response = await result.response;
+      analysis = response.text();
+      aiModel = 'Gemini 2.0 Flash (FREE)';
+    }
+
+    console.log(`✅ Trade analysis completed with: ${aiModel}`);
 
     return NextResponse.json({
       success: true,
@@ -150,10 +199,25 @@ Gunakan emoji dan bahasa yang engaging tapi tetap profesional. Berikan feedback 
       stats,
       tradesAnalyzed: tradesSummary.length,
       generatedAt: new Date().toISOString(),
+      aiModel,
     });
 
   } catch (error: any) {
     console.error('Error analyzing trades:', error);
+    
+    // Helpful error messages
+    if (error.message?.includes('API_KEY') || error.message?.includes('api key')) {
+      return NextResponse.json({ 
+        error: 'AI API Key tidak valid. Pastikan GROQ_API_KEY atau GEMINI_API_KEY sudah dikonfigurasi.' 
+      }, { status: 500 });
+    }
+    
+    if (error.message?.includes('quota') || error.message?.includes('rate limit')) {
+      return NextResponse.json({ 
+        error: 'Quota AI habis. Silakan coba lagi dalam beberapa menit.' 
+      }, { status: 429 });
+    }
+    
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }

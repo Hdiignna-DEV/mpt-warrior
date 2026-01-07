@@ -5,6 +5,12 @@
  * Run: npm run db:check
  */
 
+import * as dotenv from 'dotenv';
+import { resolve } from 'path';
+
+// Load environment variables from .env.local
+dotenv.config({ path: resolve(__dirname, '../.env.local') });
+
 import { checkCosmosDBHealth, initializeContainers } from '../src/lib/db/cosmos-client';
 
 async function checkHealth() {
