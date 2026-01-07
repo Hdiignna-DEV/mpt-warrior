@@ -177,9 +177,9 @@ export default function Header() {
           </div>
 
           {/* Stats Grid */}
-          <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-2 flex-1 max-w-2xl">
+          <div className="hidden sm:flex sm:overflow-x-auto sm:gap-2 sm:scrollbar-hide lg:grid lg:grid-cols-4 flex-1 max-w-2xl">
             {/* Total Trades */}
-            <div className="group relative overflow-hidden backdrop-blur-lg bg-white dark:bg-slate-800 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700 hover:border-sky-300 dark:hover:border-sky-600 transition-all duration-300 cursor-default hover:-translate-y-0.5">
+            <div className="group relative overflow-hidden backdrop-blur-lg bg-white dark:bg-slate-800 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700 hover:border-sky-300 dark:hover:border-sky-600 transition-all duration-300 cursor-default hover:-translate-y-0.5 flex-shrink-0 min-w-[120px]">
               <div className="absolute inset-0 bg-gradient-to-r from-sky-500/0 via-sky-500/5 to-sky-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
                 <p className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-tight flex items-center gap-1">
@@ -193,7 +193,7 @@ export default function Header() {
             </div>
 
             {/* Win Rate */}
-            <div className="group relative overflow-hidden backdrop-blur-lg bg-white dark:bg-slate-800 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300 cursor-default hover:-translate-y-0.5">
+            <div className="group relative overflow-hidden backdrop-blur-lg bg-white dark:bg-slate-800 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-600 transition-all duration-300 cursor-default hover:-translate-y-0.5 flex-shrink-0 min-w-[120px]">
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-emerald-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
                 <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-tight flex items-center gap-1">
@@ -207,7 +207,7 @@ export default function Header() {
             </div>
 
             {/* Balance */}
-            <div className="group relative overflow-hidden backdrop-blur-lg bg-white dark:bg-slate-800 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-600 transition-all duration-300 cursor-default hover:-translate-y-0.5">
+            <div className="group relative overflow-hidden backdrop-blur-lg bg-white dark:bg-slate-800 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-600 transition-all duration-300 cursor-default hover:-translate-y-0.5 flex-shrink-0 min-w-[120px]">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-500/0 via-orange-500/5 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
                 <p className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-tight flex items-center gap-1">
@@ -221,7 +221,7 @@ export default function Header() {
             </div>
 
             {/* Weekly PnL */}
-            <div className="group hidden lg:block relative overflow-hidden backdrop-blur-lg bg-white dark:bg-slate-800 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 cursor-default hover:-translate-y-0.5">
+            <div className="group hidden lg:block relative overflow-hidden backdrop-blur-lg bg-white dark:bg-slate-800 rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 cursor-default hover:-translate-y-0.5 flex-shrink-0 min-w-[120px]">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
                 <p className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-tight flex items-center gap-1">

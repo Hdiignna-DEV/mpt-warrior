@@ -43,14 +43,24 @@ function Toast({ type, message, onClose, duration = 3000 }: Omit<ToastProps, 'id
 
   return (
     <div
-      className={`${colors[type]} backdrop-blur-sm rounded-xl p-4 shadow-xl animate-slide-down max-w-sm border flex items-start gap-3 group hover:scale-105 transition-transform`}
+      className={`${colors[type]} backdrop-blur-md rounded-xl p-4 shadow-2xl animate-slide-down max-w-sm border flex items-start gap-3 group hover:scale-105 transition-all duration-200`}
       role="alert"
     >
-      {icons[type]}
-      <p className="text-sm text-white flex-1 leading-relaxed">{message}</p>
+      <div className="flex-shrink-0 mt-0.5">
+        {icons[type]}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-white leading-relaxed break-words">{message}</p>
+        <div className="h-1 bg-white/20 rounded-full mt-2 overflow-hidden">
+          <div 
+            className="h-full bg-white/60 animate-shrink"
+            style={{ animationDuration: `${duration}ms` }}
+          ></div>
+        </div>
+      </div>
       <button
         onClick={onClose}
-        className="text-slate-400 hover:text-white transition-colors p-1 opacity-0 group-hover:opacity-100 flex-shrink-0"
+        className="text-slate-400 hover:text-white transition-colors p-1 opacity-70 group-hover:opacity-100 flex-shrink-0"
         aria-label="Close notification"
       >
         <X size={16} />
