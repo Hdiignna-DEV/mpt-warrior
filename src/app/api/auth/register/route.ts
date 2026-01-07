@@ -96,9 +96,9 @@ export async function POST(request: NextRequest) {
 
     // Initialize badges at RECRUIT level
     const initialBadges = [
-      { type: 'FIRST_BLOOD', level: 'RECRUIT', progress: 0 },
-      { type: 'CONSISTENT_WARRIOR', level: 'RECRUIT', progress: 0 },
-      { type: 'DISCIPLINE_MASTER', level: 'RECRUIT', progress: 0 },
+      { type: 'FIRST_TRADE', level: 'RECRUIT', progress: 0 },
+      { type: 'CONSISTENT_5', level: 'RECRUIT', progress: 0 },
+      { type: 'DISCIPLINED_WARRIOR', level: 'RECRUIT', progress: 0 },
       { type: 'PROFIT_MASTER', level: 'RECRUIT', progress: 0 },
       { type: 'EDUCATOR', level: 'RECRUIT', progress: 0 },
       { type: 'LEGACY_BUILDER', level: 'RECRUIT', progress: 0 }

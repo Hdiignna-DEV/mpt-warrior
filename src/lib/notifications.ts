@@ -8,25 +8,25 @@ import { toast } from '@/utils/toast';
 // Badge level thresholds
 const BADGE_LEVEL_REQUIREMENTS = {
   RECRUIT: {
-    FIRST_BLOOD: 0,
-    CONSISTENT_WARRIOR: 0,
-    DISCIPLINE_MASTER: 0,
+    FIRST_TRADE: 0,
+    CONSISTENT_5: 0,
+    DISCIPLINED_WARRIOR: 0,
     PROFIT_MASTER: 0,
     EDUCATOR: 0,
     LEGACY_BUILDER: 0
   },
   WARRIOR: {
-    FIRST_BLOOD: 10,        // 10 winning trades
-    CONSISTENT_WARRIOR: 30, // 30 days active trading
-    DISCIPLINE_MASTER: 600, // 600 discipline score
+    FIRST_TRADE: 10,        // 10 winning trades
+    CONSISTENT_5: 30,       // 30 days active trading
+    DISCIPLINED_WARRIOR: 600, // 600 discipline score
     PROFIT_MASTER: 5000,    // $5000 total profit
     EDUCATOR: 5,            // 5 academy modules completed
     LEGACY_BUILDER: 0       // Not applicable
   },
   VETERAN: {
-    FIRST_BLOOD: 100,       // 100 winning trades
-    CONSISTENT_WARRIOR: 90, // 90 days active trading
-    DISCIPLINE_MASTER: 850, // 850 discipline score
+    FIRST_TRADE: 100,       // 100 winning trades
+    CONSISTENT_5: 90,       // 90 days active trading
+    DISCIPLINED_WARRIOR: 850, // 850 discipline score
     PROFIT_MASTER: 25000,   // $25000 total profit
     EDUCATOR: 15,           // 15 academy modules completed
     LEGACY_BUILDER: 10      // 10 successful referrals
@@ -98,9 +98,9 @@ export function checkDisciplineMilestone(
  */
 export function notifyBadgeUpgrade(badgeType: string, newLevel: string) {
   const badgeNames: Record<string, string> = {
-    FIRST_BLOOD: 'First Blood',
-    CONSISTENT_WARRIOR: 'Consistent Warrior',
-    DISCIPLINE_MASTER: 'Discipline Master',
+    FIRST_TRADE: 'First Blood',
+    CONSISTENT_5: 'Consistent Warrior',
+    DISCIPLINED_WARRIOR: 'Discipline Master',
     PROFIT_MASTER: 'Profit Master',
     EDUCATOR: 'Educator',
     LEGACY_BUILDER: 'Legacy Builder'

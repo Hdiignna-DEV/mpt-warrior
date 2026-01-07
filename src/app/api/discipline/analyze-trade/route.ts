@@ -64,14 +64,14 @@ export async function POST(req: NextRequest) {
     const updatedBadges = user.badges || [];
     const badgeUpgrades: any[] = [];
 
-    // Update FIRST_BLOOD badge (winning trades)
+    // Update FIRST_TRADE badge (winning trades)
     if (trade.result === 'WIN') {
-      const firstBloodIndex = updatedBadges.findIndex((b: any) => b.type === 'FIRST_BLOOD');
+      const firstBloodIndex = updatedBadges.findIndex((b: any) => b.type === 'FIRST_TRADE');
       if (firstBloodIndex >= 0) {
         const badge = updatedBadges[firstBloodIndex];
         const newProgress = badge.progress + 1;
         
-        const upgrade = checkBadgeUpgrade('FIRST_BLOOD', badge.level, newProgress);
+        const upgrade = checkBadgeUpgrade('FIRST_TRADE', badge.level, newProgress);
         if (upgrade.upgraded) {
           updatedBadges[firstBloodIndex] = {
             ...badge,
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
             progress: newProgress
           };
           badgeUpgrades.push({
-            badgeType: 'FIRST_BLOOD',
+            badgeType: 'FIRST_TRADE',
             newLevel: upgrade.newLevel
           });
         } else {
@@ -91,11 +91,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Update DISCIPLINE_MASTER badge
-    const disciplineIndex = updatedBadges.findIndex((b: any) => b.type === 'DISCIPLINE_MASTER');
+    // Update DISCIPLINED_WARRIOR badge
+    const disciplineIndex = updatedBadges.findIndex((b: any) => b.type === 'DISCIPLINED_WARRIOR');
     if (disciplineIndex >= 0) {
       const badge = updatedBadges[disciplineIndex];
-      const upgrade = checkBadgeUpgrade('DISCIPLINE_MASTER', badge.level, newScore);
+      const upgrade = checkBadgeUpgrade('DISCIPLINED_WARRIOR', badge.level, newScore);
       
       if (upgrade.upgraded) {
         updatedBadges[disciplineIndex] = {
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
           progress: newScore
         };
         badgeUpgrades.push({
-          badgeType: 'DISCIPLINE_MASTER',
+          badgeType: 'DISCIPLINED_WARRIOR',
           newLevel: upgrade.newLevel
         });
       } else {
