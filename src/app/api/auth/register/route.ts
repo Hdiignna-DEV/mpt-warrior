@@ -89,6 +89,21 @@ export async function POST(request: NextRequest) {
       largestLoss: 0,
     };
 
+    // Generate Warrior ID: MPT-YYYY-XXXXX
+    const year = new Date().getFullYear();
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    const warriorId = `MPT-${year}-${randomNum}`;
+
+    // Initialize badges at RECRUIT level
+    const initialBadges = [
+      { type: 'FIRST_BLOOD', level: 'RECRUIT', progress: 0 },
+      { type: 'CONSISTENT_WARRIOR', level: 'RECRUIT', progress: 0 },
+      { type: 'DISCIPLINE_MASTER', level: 'RECRUIT', progress: 0 },
+      { type: 'PROFIT_MASTER', level: 'RECRUIT', progress: 0 },
+      { type: 'EDUCATOR', level: 'RECRUIT', progress: 0 },
+      { type: 'LEGACY_BUILDER', level: 'RECRUIT', progress: 0 }
+    ];
+
     // Create user with role from invitation code
     // ALL users (ADMIN & WARRIOR) require approval for security
     const newUser = await createUser({
@@ -102,6 +117,17 @@ export async function POST(request: NextRequest) {
       status: 'pending', // All users need approval, even admins
       settings: defaultSettings,
       stats: defaultStats,
+      // Warrior Profile System fields
+      warriorId,
+      currentBadgeLevel: 'RECRUIT',
+      badges: initialBadges,
+      disciplineScore: 500, // Start at mid-point
+      profileSettings: {
+        personalGoal: '',
+        tradingStrategy: 'DAY_TRADING',
+        preferredTimeframe: '',
+        bio: ''
+      }
     });
 
     // Return success (don't include password hash in response)
