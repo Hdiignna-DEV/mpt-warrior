@@ -94,16 +94,6 @@ export async function POST(request: NextRequest) {
     const randomNum = Math.floor(10000 + Math.random() * 90000);
     const warriorId = `MPT-${year}-${randomNum}`;
 
-    // Initialize badges at RECRUIT level
-    const initialBadges = [
-      { type: 'FIRST_TRADE', level: 'RECRUIT', progress: 0 },
-      { type: 'CONSISTENT_5', level: 'RECRUIT', progress: 0 },
-      { type: 'DISCIPLINED_WARRIOR', level: 'RECRUIT', progress: 0 },
-      { type: 'PROFIT_MASTER', level: 'RECRUIT', progress: 0 },
-      { type: 'EDUCATOR', level: 'RECRUIT', progress: 0 },
-      { type: 'LEGACY_BUILDER', level: 'RECRUIT', progress: 0 }
-    ];
-
     // Create user with role from invitation code
     // ALL users (ADMIN & WARRIOR) require approval for security
     const newUser = await createUser({
@@ -120,7 +110,7 @@ export async function POST(request: NextRequest) {
       // Warrior Profile System fields
       warriorId,
       currentBadgeLevel: 'RECRUIT',
-      badges: initialBadges,
+      badges: [], // Empty array initially - badges earned through achievements
       disciplineScore: 500, // Start at mid-point
       profileSettings: {
         personalGoal: '',
