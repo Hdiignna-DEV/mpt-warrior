@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       questionText: question.question,
       questionPoints: question.points,
       userAnswer: answer.answer,
-      submittedAt: answer.answeredAt,
+      submittedAt: answer.submittedAt,
     }));
 
     return NextResponse.json({
