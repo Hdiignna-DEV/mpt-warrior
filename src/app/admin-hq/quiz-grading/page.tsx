@@ -34,7 +34,7 @@ interface UngradedEssay {
 }
 
 interface GradingFormData {
-  score: number;
+  score: number | '';
   feedback: string;
 }
 
@@ -92,7 +92,7 @@ export default function QuizGradingPage() {
       const initialGradingData: Record<string, GradingFormData> = {};
       data.essays.forEach((essay: UngradedEssay) => {
         initialGradingData[essay.id] = {
-          score: 0,
+          score: '',
           feedback: ''
         };
       });
@@ -111,14 +111,14 @@ export default function QuizGradingPage() {
       const token = localStorage.getItem('mpt_token');
       const grading = gradingData[essay.id];
 
-      if (!grading || grading.score === undefined) {
+      if (!grading || grading.score === '' || grading.score === undefined) {
         alert('Please enter a score');
         setSubmitting(false);
         return;
       }
 
-      if (grading.score < 0 || grading.score > essay.questionPoints) {
-        alert(`Score must be between 0 and ${essay.questionPoints}`);
+      if (grading.score < 0 || grading.score > (essay.questionPoints || 0)) {
+        alert(`Score must be between 0 and ${essay.questionPoints || 0}`);
         setSubmitting(false);
         return;
       }
@@ -325,8 +325,11 @@ export default function QuizGradingPage() {
                         type="number"
                         min="0"
                         max={essay.questionPoints}
-                        value={gradingData[essay.id]?.score || 0}
-                        onChange={(e) => updateGradingData(essay.id, 'score', parseInt(e.target.value) || 0)}
+                        value={gradingData[essay.id]?.score ?? ''}
+                        onChange={(e) => {
+                          const value = e.target.value === '' ? '' : parseInt(e.target.value);
+                          updateGradingData(essay.id, 'score', value);
+                        }}
                         className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500"
                         placeholder="Enter score"
                       />
