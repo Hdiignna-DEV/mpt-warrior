@@ -21,12 +21,31 @@ let auditLogsContainer: Container | null = null;
 export function getCosmosClient(): CosmosClient {
   if (!cosmosClient) {
     // Support both connection string and endpoint+key methods
-    const connectionString = process.env.AZURE_COSMOS_CONNECTION_STRING;
     const endpoint = process.env.AZURE_COSMOS_ENDPOINT;
     const key = process.env.AZURE_COSMOS_KEY;
+    const connectionString = process.env.AZURE_COSMOS_CONNECTION_STRING;
 
-    // Method 1: Use connection string if available
-    if (connectionString && typeof connectionString === 'string') {
+    // Method 1: Use endpoint + key (PREFERRED - more stable)
+    if (endpoint && key && typeof endpoint === 'string' && typeof key === 'string') {
+      console.log('Initializing Cosmos DB with endpoint + key');
+      
+      // Validate endpoint and key are not empty
+      if (endpoint.length === 0 || key.length === 0) {
+        console.error('Endpoint or key is empty');
+        throw new Error("Empty Cosmos DB endpoint or key");
+      }
+      
+      cosmosClient = new CosmosClient({
+        endpoint,
+        key,
+        connectionPolicy: {
+          requestTimeout: 10000,
+          enableEndpointDiscovery: false,
+        },
+      });
+    }
+    // Method 2: Use connection string if endpoint+key not available
+    else if (connectionString && typeof connectionString === 'string') {
       console.log('Initializing Cosmos DB with connection string');
       
       // Validate connection string is actually a string
@@ -53,22 +72,8 @@ export function getCosmosClient(): CosmosClient {
         },
       });
     }
-    // Method 2: Use endpoint + key separately
-    else if (endpoint && key && typeof endpoint === 'string' && typeof key === 'string') {
-      console.log('Initializing Cosmos DB with endpoint + key');
-      
-      // Validate endpoint and key are not empty
-      if (endpoint.length === 0 || key.length === 0) {
-        console.error('Endpoint or key is empty');
-        throw new Error("Empty Cosmos DB endpoint or key");
-      }
-      
-      cosmosClient = new CosmosClient({
-        endpoint,
-        key,
-        connectionPolicy: {
-          requestTimeout: 10000,
-          enableEndpointDiscovery: false,
+    // Method 3: No credentials found
+    else {
         },
       });
     }
