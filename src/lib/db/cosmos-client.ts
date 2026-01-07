@@ -34,11 +34,12 @@ export function getCosmosClient(): CosmosClient {
       connectionStringType: typeof connectionString,
       endpointLength: endpoint?.length || 0,
       keyLength: key?.length || 0,
-      connectionStringLength: connectionString?.length || 0
+      connectionStringLength: connectionString?.length || 0,
+      allEnvKeys: Object.keys(process.env).filter(k => k.includes('COSMOS'))
     });
 
     // Method 1: Use endpoint + key (PREFERRED - more stable)
-    if (endpoint && key && typeof endpoint === 'string' && typeof key === 'string') {
+    if (endpoint && key && typeof endpoint === 'string' && typeof key === 'string' && endpoint.length > 0 && key.length > 0) {
       console.log('[COSMOS CLIENT] Initializing with endpoint + key');
       
       // Validate endpoint and key are not empty
@@ -57,7 +58,7 @@ export function getCosmosClient(): CosmosClient {
       });
     }
     // Method 2: Use connection string if endpoint+key not available
-    else if (connectionString && typeof connectionString === 'string') {
+    else if (connectionString && typeof connectionString === 'string' && connectionString.length > 0) {
       console.log('[COSMOS CLIENT] Initializing with connection string');
       
       // Validate connection string is actually a string
