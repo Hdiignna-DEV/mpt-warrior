@@ -91,7 +91,6 @@ export async function GET(request: NextRequest) {
                 preferredTimeframe: '',
                 bio: ''
               },
-            createdAt: new Date().toISOString(),
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
             },
