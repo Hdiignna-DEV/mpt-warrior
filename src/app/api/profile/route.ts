@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateActiveUser } from '@/lib/middleware/auth';
 import { getUsersContainer, getTradesContainer } from '@/lib/db/cosmos-client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   try {
     // Validate auth + active status
