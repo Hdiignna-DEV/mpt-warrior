@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth, AuthenticatedRequest } from '@/lib/middleware/role-check';
-import { getDatabase } from '@/utils/cosmosdb';
+import { getUsersContainer, getDatabase } from '@/lib/db/cosmos-client';
 
 export async function GET(request: NextRequest) {
   return requireAuth(request, async (req: AuthenticatedRequest) => {
@@ -15,8 +15,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
-      const database = await getDatabase();
-      const usersContainer = database.container('users');
+      const usersContainer = getUsersContainer();
 
       // Get user profile
       const { resource: userProfile } = await usersContainer.item(user.id, user.id).read();
@@ -28,25 +27,31 @@ export async function GET(request: NextRequest) {
       // Get referral stats if user is Veteran
       let referralStats = null;
       if (userProfile.currentBadgeLevel === 'VETERAN' && userProfile.referralCode) {
-        const referralsContainer = database.container('referrals');
-        const { resources: referrals } = await referralsContainer.items
-          .query({
-            query: 'SELECT * FROM c WHERE c.referrerId = @userId',
-            parameters: [{ name: '@userId', value: user.id }]
-          })
-          .fetchAll();
+        try {
+          const database = getDatabase();
+          const referralsContainer = database.container('referrals');
+          const { resources: referrals } = await referralsContainer.items
+            .query({
+              query: 'SELECT * FROM c WHERE c.referrerId = @userId',
+              parameters: [{ name: '@userId', value: user.id }]
+            })
+            .fetchAll();
 
-        const totalReferrals = referrals.length;
-        const activeReferrals = referrals.filter(r => r.status === 'USED').length;
-        const totalEarnings = referrals
-          .filter(r => r.status === 'USED')
-          .reduce((sum, r) => sum + (r.discountPercent || 0), 0);
+          const totalReferrals = referrals.length;
+          const activeReferrals = referrals.filter(r => r.status === 'USED').length;
+          const totalEarnings = referrals
+            .filter(r => r.status === 'USED')
+            .reduce((sum, r) => sum + (r.discountPercent || 0), 0);
 
-        referralStats = {
-          totalReferrals,
-          activeReferrals,
-          totalEarnings
-        };
+          referralStats = {
+            totalReferrals,
+            activeReferrals,
+            totalEarnings
+          };
+        } catch (refError) {
+          console.warn('Referrals container not available:', refError);
+          // Skip referral stats if container doesn't exist
+        }
       }
 
       // Return sanitized profile (exclude password)
@@ -62,6 +67,11 @@ export async function GET(request: NextRequest) {
 
     } catch (error) {
       console.error('Error loading profile:', error);
+      // Log detailed error for debugging
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
       return NextResponse.json(
         { error: 'Failed to load profile' },
         { status: 500 }
