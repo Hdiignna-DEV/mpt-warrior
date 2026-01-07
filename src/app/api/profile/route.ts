@@ -51,6 +51,12 @@ export async function GET(request: NextRequest) {
               language: 'id',
               notifications: true
             },
+            profileSettings: {
+              personalGoal: '',
+              tradingStrategy: 'DAY_TRADING',
+              preferredTimeframe: '',
+              bio: ''
+            },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             // Demo mode indicator
@@ -90,6 +96,12 @@ export async function GET(request: NextRequest) {
               language: 'id',
               notifications: true
             },
+            profileSettings: {
+              personalGoal: '',
+              tradingStrategy: 'DAY_TRADING',
+              preferredTimeframe: '',
+              bio: ''
+            },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             _demoMode: true,
@@ -127,6 +139,12 @@ export async function GET(request: NextRequest) {
               theme: 'dark',
               language: 'id',
               notifications: true
+            },
+            profileSettings: {
+              personalGoal: '',
+              tradingStrategy: 'DAY_TRADING',
+              preferredTimeframe: '',
+              bio: ''
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -210,6 +228,12 @@ export async function GET(request: NextRequest) {
               theme: 'dark',
               language: 'id',
               notifications: true
+            },
+            profileSettings: {
+              personalGoal: '',
+              tradingStrategy: 'DAY_TRADING',
+              preferredTimeframe: '',
+              bio: ''
             },
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
