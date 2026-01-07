@@ -46,15 +46,20 @@ export async function POST(request: NextRequest) {
 
     // Send email notification to user
     try {
+      console.log('🔔 Starting email notification process...');
       const database = getDatabase();
       const usersContainer = database.container('users');
       const questionsContainer = database.container('quiz-questions');
       
       // Get user details
+      console.log('📋 Fetching user details for:', userId);
       const { resource: user } = await usersContainer.item(userId, userId).read();
+      console.log('✅ User found:', user?.email);
       
       // Get question details for module info
+      console.log('📋 Fetching question details for:', questionId);
       const { resource: question } = await questionsContainer.item(questionId, questionId).read();
+      console.log('✅ Question found for module:', question?.moduleId);
       
       if (user && user.email && question) {
         const moduleTitle = question.moduleId === 'module-1' ? 'The Warrior Mindset' :
@@ -62,7 +67,8 @@ export async function POST(request: NextRequest) {
                            question.moduleId === 'module-3' ? 'The Map (Technical Analysis)' :
                            'Module';
         
-        await sendEssayGradedEmail(
+        console.log('📧 Sending essay graded email...');
+        const emailResult = await sendEssayGradedEmail(
           user.email,
           user.name,
           moduleTitle,
@@ -70,11 +76,18 @@ export async function POST(request: NextRequest) {
           question.points || 10,
           feedback || ''
         );
-        console.log('📧 Essay graded email sent to:', user.email);
+        
+        if (emailResult.success) {
+          console.log('✅ Essay graded email sent successfully to:', user.email);
+        } else {
+          console.error('❌ Email failed:', emailResult.error);
+        }
+      } else {
+        console.warn('⚠️ Missing data for email - user:', !!user, 'email:', !!user?.email, 'question:', !!question);
       }
     } catch (emailError) {
       // Don't fail the grading if email fails
-      console.error('Failed to send email notification:', emailError);
+      console.error('❌ Failed to send email notification:', emailError);
     }
 
     return NextResponse.json({
