@@ -578,6 +578,11 @@ export default function AIMentor() {
             {/* SYSTEM STATUS */}
             <div className="text-[9px] md:text-[10px] text-slate-600 px-2 md:px-4 py-1.5 md:py-3 text-center border-t border-amber-500/10 font-mono uppercase tracking-widest bg-slate-950">
               <span className="text-amber-500/50">[ MODE:</span> <span className="font-bold text-amber-400">{conversationMode.toUpperCase()}</span> <span className="text-amber-500/50">] [ STATUS:</span> <span className="text-green-400">OPERATIONAL</span> <span className="text-amber-500/50">]</span>
+              <div className="mt-1 flex items-center justify-center gap-1 text-[8px] md:text-[9px]">
+                <span className="text-slate-500">POWERED BY</span>
+                <span className="text-blue-400 font-bold">GOOGLE GEMINI 2.0</span>
+                <Sparkles size={10} className="text-blue-400" />
+              </div>
             </div>
           </div>
         </div>

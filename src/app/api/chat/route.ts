@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import Groq from 'groq-sdk';
 
 const SYSTEM_INSTRUCTION = `
 ROLE: Anda adalah "MPT Bot", asisten mentor Mindset Plan Trader (MPT).
@@ -11,14 +10,21 @@ RULES:
 1. JIKA USER MENGIRIM GAMBAR CHART: Analisa struktur marketnya (Trend, Support/Resistance). Berikan pandangan objektif. JANGAN BERIKAN SINYAL BUY/SELL LANGSUNG, tapi tanya: "Apa plan lo di area ini?" atau "Dimana SL lo?".
 2. Selalu rujuk ke 4 Pilar: Mindset, Plan, Risk (1%), Discipline.
 3. Jawab ringkas (maksimal 3 paragraf).
+4. Untuk risk calculation, SELALU berikan output dalam format table yang terstruktur dengan parameter: Balance, Risk %, SL (pips), Maksimal Kerugian, Nilai Per Pip, dan LOT SIZE.
 `;
 
-// Check available AI providers
-const hasGemini = !!(process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY);
-const hasGroq = !!(process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY);
+// Get Gemini API Key
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 export async function POST(req: Request): Promise<Response> {
   try {
+    // Validate Gemini API Key
+    if (!GEMINI_API_KEY) {
+      return NextResponse.json({ 
+        error: 'Gemini API key not configured. Please add GEMINI_API_KEY to environment variables.' 
+      }, { status: 500 });
+    }
+
     const { messages, image, language } = await req.json() as { 
       messages: Array<{ role: string; content: string }>, 
       image?: string, 
@@ -41,6 +47,7 @@ RULES:
 1. IF USER SENDS CHART IMAGE: Analyze market structure (Trend, Support/Resistance). Give objective view. DON'T GIVE BUY/SELL SIGNALS DIRECTLY, but ask: "What's your plan in this area?" or "Where's your SL?".
 2. Always refer to 4 Pillars: Mindset, Plan, Risk (1%), Discipline.
 3. Answer concisely (max 3 paragraphs).
+4. For risk calculation, ALWAYS provide output in structured table format with parameters: Balance, Risk %, SL (pips), Maximum Loss, Pip Value, and LOT SIZE.
 `;
 
     // Build conversation history
@@ -50,31 +57,22 @@ RULES:
 
     const fullSystemPrompt = `${systemPrompt}\n${languageInstruction}\n\nHISTORY CHAT:\n${conversationHistory}`;
 
-    // HYBRID STRATEGY:
-    // 1. If image → Use Gemini (has vision)
-    // 2. If text only → Use Groq (faster + save Gemini quota)
-    // 3. Fallback to available provider if one fails
+    // Initialize Gemini AI
+    console.log("🤖 Processing with Google Gemini 2.0 Flash...");
+    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    
+    let result: string;
 
-    let result;
-    let aiModel = '';
+    try {
+      const modelConfig = { 
+        model: 'gemini-2.0-flash-exp',
+        systemInstruction: fullSystemPrompt,
+      };
 
-    if (image) {
-      // IMAGE ANALYSIS: Use Gemini (only AI with vision support)
-      if (!hasGemini) {
-        return NextResponse.json({ 
-          error: 'Image analysis requires Gemini API. Please configure GEMINI_API_KEY.' 
-        }, { status: 500 });
-      }
-
-      console.log("📸 Analyzing chart image with Gemini Vision...");
-      const geminiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      const genAI = new GoogleGenerativeAI(geminiKey!);
-      
-      try {
-        const model = genAI.getGenerativeModel({ 
-          model: 'gemini-2.0-flash-exp',
-          systemInstruction: fullSystemPrompt,
-        });
+      if (image) {
+        // IMAGE ANALYSIS with Vision
+        console.log("📸 Analyzing chart image with Gemini Vision...");
+        const model = genAI.getGenerativeModel(modelConfig);
 
         const imagePart = {
           inlineData: {
@@ -86,100 +84,53 @@ RULES:
         const geminiResult = await model.generateContent([lastMessage, imagePart]);
         const response = await geminiResult.response;
         result = response.text();
-        aiModel = 'Gemini 2.0 Flash (Vision)';
-      } catch (error: any) {
-        console.error("❌ Gemini error:", error.message);
-        return NextResponse.json({ 
-          error: `Image analysis failed: ${error.message}. Please try again or get a new Gemini API key.` 
-        }, { status: 500 });
-      }
-    } else {
-      // TEXT ONLY: Prefer Groq (faster), fallback to Gemini
-      if (hasGroq) {
-        console.log("⚡ Processing with Groq (super fast)...");
-        const groqKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
-        const groq = new Groq({ apiKey: groqKey });
-
-        try {
-          const completion = await groq.chat.completions.create({
-            messages: [
-              { role: 'system', content: fullSystemPrompt },
-              { role: 'user', content: lastMessage }
-            ],
-            model: 'llama-3.3-70b-versatile', // FREE & Fast!
-            temperature: 0.7,
-            max_tokens: 2048,
-          });
-
-          result = completion.choices[0]?.message?.content || '';
-          aiModel = 'Groq Llama 3.3 70B (FREE)';
-        } catch (groqError: any) {
-          console.warn("⚠️ Groq failed, falling back to Gemini:", groqError.message);
-          
-          // Fallback to Gemini if Groq fails
-          if (hasGemini) {
-            const geminiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-            const genAI = new GoogleGenerativeAI(geminiKey!);
-            const model = genAI.getGenerativeModel({ 
-              model: 'gemini-2.0-flash-exp',
-              systemInstruction: fullSystemPrompt,
-            });
-
-            const geminiResult = await model.generateContent(lastMessage);
-            const response = await geminiResult.response;
-            result = response.text();
-            aiModel = 'Gemini 2.0 Flash (Fallback)';
-          } else {
-            throw groqError;
-          }
-        }
-      } else if (hasGemini) {
-        // Only Gemini available
-        console.log("💬 Processing with Gemini...");
-        const geminiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-        const genAI = new GoogleGenerativeAI(geminiKey!);
-        const model = genAI.getGenerativeModel({ 
-          model: 'gemini-2.0-flash-exp',
-          systemInstruction: fullSystemPrompt,
-        });
-
+      } else {
+        // TEXT ONLY
+        console.log("💬 Processing text with Gemini...");
+        const model = genAI.getGenerativeModel(modelConfig);
+        
         const geminiResult = await model.generateContent(lastMessage);
         const response = await geminiResult.response;
         result = response.text();
-        aiModel = 'Gemini 2.0 Flash';
-      } else {
-        return NextResponse.json({ 
-          error: 'No AI provider configured. Please add GROQ_API_KEY or GEMINI_API_KEY to .env.local' 
-        }, { status: 500 });
       }
+
+      console.log("✅ Response generated successfully with Gemini 2.0 Flash");
+
+      return NextResponse.json({ 
+        choices: [{ message: { role: 'assistant', content: result } }],
+        model: 'Gemini 2.0 Flash Experimental',
+      });
+    } catch (geminiError: any) {
+      console.error("❌ Gemini API error:", geminiError);
+      
+      // Provide helpful error messages
+      if (geminiError.message?.includes('API_KEY_INVALID') || geminiError.message?.includes('API key')) {
+        return NextResponse.json({ 
+          error: 'Gemini API key tidak valid. Silakan periksa konfigurasi API key.' 
+        }, { status: 401 });
+      }
+      
+      if (geminiError.message?.includes('quota') || geminiError.message?.includes('RESOURCE_EXHAUSTED')) {
+        return NextResponse.json({ 
+          error: 'Quota Gemini API habis. Silakan coba lagi dalam beberapa menit atau upgrade ke paid plan.' 
+        }, { status: 429 });
+      }
+
+      if (geminiError.message?.includes('SAFETY')) {
+        return NextResponse.json({ 
+          error: 'Konten terdeteksi tidak aman. Mohon gunakan bahasa yang lebih profesional.' 
+        }, { status: 400 });
+      }
+      
+      throw geminiError;
     }
-
-    console.log(`✅ Response generated with: ${aiModel}`);
-
-    return NextResponse.json({ 
-      choices: [{ message: { role: 'assistant', content: result } }],
-      model: aiModel,
-    });
     
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error("❌ AI Error:", error);
-    
-    // Helpful error messages
-    if (errorMessage.includes('API_KEY') || errorMessage.includes('api key')) {
-      return NextResponse.json({ 
-        error: 'AI API key tidak valid. Hubungi admin untuk konfigurasi.' 
-      }, { status: 500 });
-    }
-    
-    if (errorMessage.includes('quota') || errorMessage.includes('rate limit')) {
-      return NextResponse.json({ 
-        error: 'Quota AI habis. Silakan coba lagi dalam beberapa menit.' 
-      }, { status: 429 });
-    }
+    console.error("❌ AI Mentor Error:", error);
     
     return NextResponse.json({ 
-      error: `AI Mentor error: ${errorMessage}` 
+      error: `AI Mentor mengalami gangguan: ${errorMessage}. Silakan coba lagi.` 
     }, { status: 500 });
   }
 }
