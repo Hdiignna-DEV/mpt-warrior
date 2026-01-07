@@ -3,6 +3,7 @@
   "short_name": "MPT Warrior",
   "description": "Mindset Plan Trader - Complete Trading Management System",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#eab308",
@@ -27,8 +28,21 @@
       "purpose": "maskable"
     }
   ],
-  "screenshots": [],
-  "categories": ["finance", "productivity", "utilities"],
+  "screenshots": [
+    {
+      "src": "/images/screenshot-mobile.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/images/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "categories": ["finance", "productivity", "utilities", "education"],
   "shortcuts": [
     {
       "name": "Trading Journal",
@@ -51,5 +65,20 @@
       "url": "/ai-mentor",
       "icons": [{ "src": "/mpt-logo.png", "sizes": "96x96" }]
     }
-  ]
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "share_target": {
+    "action": "/api/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "display_override": ["window-controls-overlay", "standalone"],
+  "edge_side_panel": {},
+  "protocol_handlers": []
 }
