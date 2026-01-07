@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { sendModuleCompletionEmail } from '@/lib/email/resend-client';
-import { getCosmosClient } from '@/lib/db/cosmos-client';
+import { getDatabase } from '@/lib/db/cosmos-client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user and module details
-    const { database } = await getCosmosClient();
+    const database = getDatabase();
     const usersContainer = database.container('users');
     const modulesContainer = database.container('educational-modules');
 
