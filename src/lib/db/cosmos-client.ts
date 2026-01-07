@@ -74,11 +74,6 @@ export function getCosmosClient(): CosmosClient {
     }
     // Method 3: No credentials found
     else {
-        },
-      });
-    }
-    // Method 3: No credentials found
-    else {
       console.error('Missing Cosmos DB credentials:', {
         hasConnectionString: !!connectionString,
         connectionStringType: typeof connectionString,
