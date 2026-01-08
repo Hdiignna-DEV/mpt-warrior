@@ -176,6 +176,13 @@ export async function POST(req: Request): Promise<Response> {
     let result: string;
     let aiModel: string;
 
+    // Debug: Log API keys status
+    console.log("🔑 API Keys Check:", {
+      hasGroqKey: !!GROQ_API_KEY,
+      hasGeminiKey: !!GEMINI_API_KEY,
+      hasImage: !!image
+    });
+
     // ============================================================
     // HYBRID LOGIC: Route to appropriate AI based on input type
     // ============================================================
