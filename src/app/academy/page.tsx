@@ -171,10 +171,11 @@ export default function AcademyPage() {
   const [userProgress, setUserProgress] = useState<Record<string, number>>({});
   const [completedModules, setCompletedModules] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Check authentication
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('mpt_token');
     if (!token) {
       router.push('/login');
       return;
@@ -190,26 +191,44 @@ export default function AcademyPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (summaryRes.ok) {
-        const { summary } = await summaryRes.json();
-        const progressMap: Record<string, number> = {};
-        const completed = new Set<string>();
-
-        summary.forEach((item: any) => {
-          progressMap[item.moduleId] = item.progress;
-          // Module completed if 100% progress
-          if (item.progress === 100) {
-            completed.add(item.moduleId);
-          }
-        });
-
-        setUserProgress(progressMap);
-        setCompletedModules(completed);
+      if (!summaryRes.ok) {
+        const errorData = await summaryRes.json().catch(() => ({ error: 'Unknown error' }));
+        const errorMessage = errorData.error || `Server error: ${summaryRes.status}`;
+        
+        console.error('[Academy Error] Failed to fetch progress:', errorMessage, summaryRes.status);
+        
+        if (summaryRes.status === 403) {
+          setError('Akses ditolak. Tunggu persetujuan admin untuk mengakses academy.');
+          // Redirect to pending approval after delay
+          setTimeout(() => router.push('/pending-approval'), 2000);
+        } else if (summaryRes.status === 401) {
+          setError('Sesi Anda telah habis. Silakan login kembali.');
+          setTimeout(() => router.push('/login'), 2000);
+        } else {
+          setError(errorMessage);
+        }
+        setLoading(false);
+        return;
       }
 
+      const { summary } = await summaryRes.json();
+      const progressMap: Record<string, number> = {};
+      const completed = new Set<string>();
+
+      summary.forEach((item: any) => {
+        progressMap[item.moduleId] = item.progress;
+        // Module completed if 100% progress
+        if (item.progress === 100) {
+          completed.add(item.moduleId);
+        }
+      });
+
+      setUserProgress(progressMap);
+      setCompletedModules(completed);
       setLoading(false);
     } catch (error) {
-      console.error('Failed to fetch progress:', error);
+      console.error('[Academy Error] Network or parsing error:', error);
+      setError('Gagal memuat academy. Coba refresh halaman.');
       setLoading(false);
     }
   };
@@ -320,6 +339,13 @@ export default function AcademyPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Error Alert */}
+        {error && (
+          <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+            <p className="text-red-400 font-medium">⚠️ {error}</p>
+          </div>
+        )}
+
         {/* Header Section */}
         <div className="mb-10">
           <div className="flex items-center gap-3 mb-4">

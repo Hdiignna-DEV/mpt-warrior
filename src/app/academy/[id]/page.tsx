@@ -64,7 +64,7 @@ export default function ModuleDetailPage({
 
   useEffect(() => {
     // Fallback: jika token tidak ada di localStorage, coba ambil dari cookie
-    let token: string | undefined = localStorage.getItem('token') || undefined;
+    let token: string | undefined = localStorage.getItem('mpt_token') || undefined;
     if (!token) {
       const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
       if (match && match[1]) {
@@ -87,7 +87,7 @@ export default function ModuleDetailPage({
 
   const fetchModuleData = async (tokenParam?: string) => {
     try {
-      const token = tokenParam || localStorage.getItem('token');
+      const token = tokenParam || localStorage.getItem('mpt_token');
       if (!token) {
         router.push('/');
         return;

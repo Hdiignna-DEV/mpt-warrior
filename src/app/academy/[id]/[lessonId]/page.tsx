@@ -50,7 +50,7 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
 
   useEffect(() => {
     // Fallback: jika token tidak ada di localStorage, coba ambil dari cookie
-    let token: string | undefined = localStorage.getItem('token') || undefined;
+    let token: string | undefined = localStorage.getItem('mpt_token') || undefined;
     if (!token) {
       const match = document.cookie.match(/(?:^|; )token=([^;]*)/);
       if (match && match[1]) {
@@ -105,7 +105,7 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
 
   const fetchLessonData = async (tokenParam?: string) => {
     try {
-      const token = tokenParam || localStorage.getItem('token');
+      const token = tokenParam || localStorage.getItem('mpt_token');
       if (!token) {
         router.push('/');
         return;
@@ -140,7 +140,7 @@ export default function LessonPage({ params }: { params: Promise<{ id: string; l
 
   const markAsComplete = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('mpt_token');
       if (!token) return;
       const res = await fetch('/api/academy/progress', {
         method: 'POST',
