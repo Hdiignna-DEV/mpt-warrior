@@ -13,6 +13,8 @@ let database: Database | null = null;
 let usersContainer: Container | null = null;
 let tradesContainer: Container | null = null;
 let codesContainer: Container | null = null;
+let chatThreadsContainer: Container | null = null;
+let chatMessagesContainer: Container | null = null;
 let auditLogsContainer: Container | null = null;
 
 /**
@@ -183,6 +185,34 @@ export function getAuditLogsContainer(): Container {
 }
 
 /**
+ * Get Chat Threads container
+ * Partition key: userId (group all chat threads by user)
+ * Stores conversation thread metadata
+ */
+export function getChatThreadsContainer(): Container {
+  if (!chatThreadsContainer) {
+    const db = getDatabase();
+    chatThreadsContainer = db.container("chat-threads");
+  }
+
+  return chatThreadsContainer;
+}
+
+/**
+ * Get Chat Messages container
+ * Partition key: threadId (group all messages by thread)
+ * Stores individual chat messages with history
+ */
+export function getChatMessagesContainer(): Container {
+  if (!chatMessagesContainer) {
+    const db = getDatabase();
+    chatMessagesContainer = db.container("chat-messages");
+  }
+
+  return chatMessagesContainer;
+}
+
+/**
  * Initialize all containers (call this on app startup)
  * This ensures containers exist
  */
@@ -217,6 +247,18 @@ export async function initializeContainers() {
     });
     console.log('✓ audit-logs container ready');
 
+    await db.containers.createIfNotExists({
+      id: "chat-threads",
+      partitionKey: { paths: ["/userId"] },
+    });
+    console.log('✓ chat-threads container ready');
+
+    await db.containers.createIfNotExists({
+      id: "chat-messages",
+      partitionKey: { paths: ["/threadId"] },
+    });
+    console.log('✓ chat-messages container ready');
+
     console.log("✅ Cosmos DB containers initialized successfully");
     return true;
   } catch (error) {
@@ -237,6 +279,8 @@ export async function checkCosmosDBHealth(): Promise<{
     trades: boolean;
     invitationCodes: boolean;
     auditLogs: boolean;
+    chatThreads: boolean;
+    chatMessages: boolean;
   };
   error?: string;
 }> {
@@ -248,6 +292,8 @@ export async function checkCosmosDBHealth(): Promise<{
       trades: false,
       invitationCodes: false,
       auditLogs: false,
+      chatThreads: false,
+      chatMessages: false,
     },
     error: undefined as string | undefined,
   };
