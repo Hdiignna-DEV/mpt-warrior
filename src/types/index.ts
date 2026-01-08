@@ -54,9 +54,20 @@ export interface User {
   stats: UserStats;
 }
 
+export type CodeType = 'LEGACY' | 'VET-USER';
+export type CodeBenefit = 'FOUNDER_BADGE' | 'REFERRAL_DISCOUNT' | 'WAR_POINTS';
+
+export interface CodeBenefits {
+  badgesToAdd?: BadgeType[]; // Badges granted on registration (e.g., 'LEGACY_BUILDER')
+  discountPercent?: number; // Flat discount % for membership (e.g., 20)
+  warPointsOnUse?: number; // War Points awarded to referrer (e.g., 500)
+  startBadgeLevel?: BadgeLevel; // Badge level when registering (e.g., 'WARRIOR')
+}
+
 export interface InvitationCode {
   id: string;
   code: string;
+  codeType: CodeType; // 'LEGACY' or 'VET-USER'
   created_by?: string;
   max_uses: number;
   used_count: number;
@@ -65,6 +76,10 @@ export interface InvitationCode {
   role: 'ADMIN' | 'WARRIOR'; // Role assigned to users who register with this code
   created_at: Date;
   description?: string;
+  
+  // Code-specific benefits
+  benefits?: CodeBenefits;
+  referrerId?: string; // User ID of referrer (for VET-USER codes)
 }
 
 export interface AuditLog {

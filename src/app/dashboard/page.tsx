@@ -19,6 +19,8 @@ import { toast } from '@/utils/toast';
 import { CurrencySelector, useCurrency } from '@/components/CurrencySelector';
 import { formatCurrency, type Currency } from '@/utils/helpers';
 import { getExchangeRate, initializeExchangeRate } from '@/utils/exchange-rate';
+// FASE 2.6.4: Import discipline metrics components
+import { EmotionDistribution, DisciplineTrend, EmotionPerformance } from '@/components/Dashboard/DisciplineMetrics';
 
 interface Trade {
   id: string;
@@ -556,6 +558,18 @@ export default function Dashboard() {
               </Card>
             </Link>
           </div>
+        </motion.div>
+
+        {/* FASE 2.6.4: Discipline Metrics Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.5 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-4"
+        >
+          <EmotionDistribution trades={trades} />
+          <DisciplineTrend trades={trades} />
+          <EmotionPerformance trades={trades} />
         </motion.div>
 
         {/* Recent Trades - MODERN TABLE DESIGN */}

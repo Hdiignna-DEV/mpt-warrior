@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { analyzeWithWarriorCommander, getAIStatus } from '@/lib/ai-service';
 
 // HYBRID AI MENTOR SYSTEM - MPT WARRIOR
 // Vision: Gemini 1.5 Flash | Brain: Groq Llama 3.3 70B
@@ -138,180 +137,60 @@ async function retryWithBackoff<T>(
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    // Validate API keys first
-    if (!GROQ_API_KEY && !GEMINI_API_KEY) {
-      return NextResponse.json({ 
-        error: '🔑 API Keys belum dikonfigurasi di Vercel.\n\n**Setup Required:**\n1. Buka Vercel Dashboard → Project Settings → Environment Variables\n2. Tambahkan:\n   - `GROQ_API_KEY` (dari https://console.groq.com/keys)\n   - `GEMINI_API_KEY` (dari https://aistudio.google.com/app/apikey)\n3. Redeploy aplikasi\n\n📚 Lihat: HYBRID_AI_QUICK_REFERENCE.md' 
+    // Check AI Status
+    const aiStatus = getAIStatus();
+    if (!aiStatus.isReady) {
+      return NextResponse.json({
+        error: `🔑 AI Systems Not Ready: ${aiStatus.message}`,
       }, { status: 503 });
     }
 
-    const { messages, image, language, threadId = 'default' } = await req.json() as { 
-      messages: Array<{ role: string; content: string }>, 
-      image?: string,
-      language?: string,
-      threadId?: string
+    const { 
+      messages, 
+      image,
+      threadId = 'default' 
+    } = await req.json() as {
+      messages: Array<{ role: string; content: string }>;
+      image?: string;
+      threadId?: string;
     };
-    
-    // Rate limiting
-    const userId = req.headers.get('x-forwarded-for') || 'anonymous';
-    if (isRateLimited(userId)) {
-      return NextResponse.json({ 
-        error: 'Terlalu banyak request. Silakan tunggu 1 menit sebelum mencoba lagi.' 
-      }, { status: 429 });
+
+    if (!messages || messages.length === 0) {
+      return NextResponse.json({
+        error: 'No messages provided',
+      }, { status: 400 });
     }
-    
-    const lastMessage = messages[messages.length - 1].content;
-    const threadContext = getThreadContext(threadId);
-    
-    // Language-aware system instruction
-    const languageInstruction = language === 'id'
-      ? 'User menggunakan bahasa Indonesia. Jawab dalam bahasa Indonesia yang casual tapi profesional, istilah trading tetap bahasa Inggris.'
-      : 'User is using English. Respond in English while maintaining professional trading terminology.';
-    
-    // Build conversation history
-    const conversationHistory = messages.slice(0, -1).map((m) => 
-      `${m.role === 'user' ? 'User' : 'Warrior Buddy'}: ${m.content}`
-    ).join('\n');
 
-    let result: string;
-    let aiModel: string;
+    const userMessage = messages[messages.length - 1].content;
 
-    // Debug: Log API keys status
-    console.log("🔑 API Keys Check:", {
-      hasGroqKey: !!GROQ_API_KEY,
-      hasGeminiKey: !!GEMINI_API_KEY,
-      hasImage: !!image
+    // Use Warrior Commander Service
+    const result = await analyzeWithWarriorCommander(userMessage, {
+      imageBase64: image,
+      conversationHistory: messages.slice(0, -1),
     });
 
-    // ============================================================
-    // HYBRID LOGIC: Route to appropriate AI based on input type
-    // ============================================================
-    
-    if (image && GEMINI_API_KEY) {
-      // ========== SCENARIO A: VISION ANALYSIS (GEMINI) ==========
-      console.log("📸 [WARRIOR VISION] Analyzing chart with Gemini...");
-      
-      try {
-        result = await retryWithBackoff(async () => {
-        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
-        const model = genAI.getGenerativeModel({ 
-          model: 'gemini-2.5-flash'
-        });
-
-        const imagePart = {
-          inlineData: {
-            data: image.replace(/^data:image\/\w+;base64,/, ''),
-            mimeType: 'image/png',
-          },
-        };
-
-        const prompt = `${GEMINI_VISION_INSTRUCTION}\n\nUSER REQUEST: ${lastMessage}\n\nAnalisa chart ini dengan standar MPT Warrior. Fokus pada SNR, rejection pattern, dan validitas setup.`;
-        const geminiResult = await model.generateContent([prompt, imagePart]);
-        const response = await geminiResult.response;
-        
-        return response.text();
-      });
-
-      // Save vision analysis to thread context
-      updateThreadContext(threadId, { visionAnalysis: result });
-      
-      aiModel = '📸 Warrior Vision (Gemini 1.5 Flash)';
-      console.log("✅ [WARRIOR VISION] Chart analysis complete");
-      
-      } catch (geminiError: any) {
-        console.error("❌ Gemini Vision failed:", geminiError);
-        console.error("Error details:", JSON.stringify(geminiError, null, 2));
-        
-        // Fallback to Groq with image disclaimer
-        console.log("⚠️ Falling back to Groq (text-only mode)...");
-        
-        const errorDetail = geminiError.message || geminiError.toString();
-        result = `⚠️ **Gemini Vision Error**\n\nMaaf Warrior, sistem analisa chart mengalami gangguan.\n\n**Error:** ${errorDetail}\n\n💡 **Alternatif:**\n1. Kirim tanpa gambar untuk konsultasi text\n2. Hubungi admin dengan error di atas\n\nCoba lagi nanti! 🙏`;
-        aiModel = '⚠️ Debug Mode';
-      }
-
-      
-    } else if (image && !GEMINI_API_KEY) {
-      // Image uploaded but no Gemini key
-      result = `⚠️ **Analisa gambar tidak tersedia.**\n\nGemini Vision belum dikonfigurasi. Admin perlu menambahkan GEMINI_API_KEY.\n\nUntuk sementara, kirim pertanyaan tanpa gambar. ⚡ Groq Buddy siap membantu!`;
-      aiModel = '⚠️ Config Required';
-      
-    } else {
-      // ========== SCENARIO B: TEXT CONSULTATION (GROQ) ==========
-      if (!GROQ_API_KEY) {
-        return NextResponse.json({ 
-          error: 'Groq API key not configured for chat.' 
-        }, { status: 500 });
-      }
-
-      console.log("⚡ [WARRIOR BUDDY] Processing with Groq...");
-      
-      // Build enhanced context with previous vision analysis
-      let enhancedPrompt = lastMessage;
-      if (threadContext.visionAnalysis) {
-        enhancedPrompt = `KONTEKS DARI ANALISA CHART SEBELUMNYA:\n${threadContext.visionAnalysis}\n\nPERTANYAAN USER SEKARANG:\n${lastMessage}\n\nJawab dengan mempertimbangkan analisa chart di atas. Jika ada inkonsistensi dengan data yang user kasih, TEGUR dengan tegas tapi supportif!`;
-      }
-
-      const fullSystemPrompt = `${WARRIOR_BUDDY_INSTRUCTION}\n${languageInstruction}\n\nHISTORY CHAT:\n${conversationHistory}`;
-
-      result = await retryWithBackoff(async () => {
-        const groq = new Groq({ apiKey: GROQ_API_KEY! });
-        const completion = await groq.chat.completions.create({
-          messages: [
-            { role: 'system', content: fullSystemPrompt },
-            { role: 'user', content: enhancedPrompt }
-          ],
-          model: 'llama-3.3-70b-versatile',
-          temperature: 0.7,
-          max_tokens: 2048,
-          top_p: 1,
-          stream: false,
-        });
-
-        return completion.choices[0]?.message?.content || '';
-      });
-
-      // Save journal data if detected
-      if (lastMessage.toLowerCase().includes('jurnal') || lastMessage.toLowerCase().includes('rr')) {
-        updateThreadContext(threadId, { journalData: lastMessage });
-      }
-
-      aiModel = '⚡ Warrior Buddy (Groq Llama 3.3 70B)';
-      console.log("✅ [WARRIOR BUDDY] Response generated");
+    if (!result.success) {
+      return NextResponse.json({
+        error: result.error || 'Failed to analyze request',
+      }, { status: 500 });
     }
 
-    return NextResponse.json({ 
-      choices: [{ message: { role: 'assistant', content: result } }],
-      model: aiModel,
-      threadId: threadId,
-      contextAvailable: !!(threadContext.visionAnalysis || threadContext.journalData)
+    return NextResponse.json({
+      choices: [{
+        message: {
+          role: 'assistant',
+          content: result.response,
+        },
+      }],
+      model: result.model,
+      analysisType: result.analysisType,
+      threadId,
     });
-    
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error("❌ AI Mentor Error:", error);
-    
-    // Specific error handling
-    if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('API key') || errorMessage.includes('invalid_api_key')) {
-      return NextResponse.json({ 
-        error: '🔑 Groq API key tidak valid. Hubungi admin untuk konfigurasi ulang.' 
-      }, { status: 401 });
-    }
-    
-    if (errorMessage.includes('rate_limit') || errorMessage.includes('429')) {
-      return NextResponse.json({ 
-        error: '⏰ Rate limit Groq tercapai. Coba lagi dalam 1 menit.\n\n💡 Groq FREE: 30 requests/menit.' 
-      }, { status: 429 });
-    }
 
-    if (errorMessage.includes('model_not_found') || errorMessage.includes('model')) {
-      return NextResponse.json({ 
-        error: '⚠️ Model AI tidak tersedia. Hubungi admin.' 
-      }, { status: 503 });
-    }
-    
-    return NextResponse.json({ 
-      error: `❌ AI Mentor error: ${errorMessage}\n\nSilakan coba lagi atau hubungi admin jika masalah berlanjut.` 
+  } catch (error: any) {
+    console.error('❌ Chat API Error:', error);
+    return NextResponse.json({
+      error: `Error: ${error.message || 'Unknown error'}`,
     }, { status: 500 });
   }
 }

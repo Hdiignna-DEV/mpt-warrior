@@ -11,6 +11,21 @@ interface Trade {
   pip: number;
   tanggal: string;
   catatan: string;
+  // FASE 2.3 Enhanced fields
+  screenshotUrl?: string;
+  emotion?: 'Tenang' | 'Takut' | 'Serakah';
+  entryPrice?: number;
+  stopLoss?: number;
+  takeProfit?: number;
+  riskPercent?: number;
+  mtaCheckList?: {
+    planReviewed: boolean;
+    noFearTrade: boolean;
+    risiBersih: boolean;
+    takeProfit: boolean;
+    noPanicClose: boolean;
+  };
+  disciplineScore?: number;
 }
 
 // List of popular trading pairs
@@ -48,6 +63,23 @@ export default function JurnalTrading() {
   const [catatan, setCatatan] = useState('');
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [showPairDropdown, setShowPairDropdown] = useState(false);
+
+  // FASE 2.3: Enhanced journal form fields
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const [emotion, setEmotion] = useState<'Tenang' | 'Takut' | 'Serakah'>('Tenang');
+  const [entryPrice, setEntryPrice] = useState('');
+  const [stopLoss, setStopLoss] = useState('');
+  const [takeProfit, setTakeProfit] = useState('');
+  const [riskPercent, setRiskPercent] = useState('');
+  const [mtaCheckList, setMtaCheckList] = useState({
+    planReviewed: false,
+    noFearTrade: false,
+    risiBersih: false,
+    takeProfit: false,
+    noPanicClose: false,
+  });
+  const [disciplineScore, setDisciplineScore] = useState(0);
 
   // Load trades from API
   useEffect(() => {
@@ -92,6 +124,54 @@ export default function JurnalTrading() {
     return pipValue > 0 ? 'WIN' : 'LOSS';
   };
 
+  // FASE 2.3: Handle screenshot upload
+  const handleScreenshotUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('❌ File terlalu besar. Max 5MB');
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('❌ File harus berupa gambar (PNG, JPG, WebP)');
+        return;
+      }
+
+      setScreenshotFile(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setScreenshotPreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // FASE 2.3: Calculate discipline score based on MTA checklist
+  const calculateDisciplineScore = (): number => {
+    const checkedItems = Object.values(mtaCheckList).filter(Boolean).length;
+    return Math.round((checkedItems / 5) * 100);
+  };
+
+  // FASE 2.3: Calculate risk-reward ratio
+  const calculateRiskReward = (): { risk: number; reward: number; ratio: number } | null => {
+    const entry = parseFloat(entryPrice);
+    const sl = parseFloat(stopLoss);
+    const tp = parseFloat(takeProfit);
+
+    if (isNaN(entry) || isNaN(sl) || isNaN(tp)) return null;
+
+    const risk = Math.abs(entry - sl);
+    const reward = Math.abs(tp - entry);
+    const ratio = reward > 0 ? reward / risk : 0;
+
+    return { risk, reward, ratio };
+  };
+
   const tambahTrade = async () => {
     if (!pair || !pip) {
       alert(t('journal.fillPairPip'));
@@ -104,40 +184,124 @@ export default function JurnalTrading() {
       return;
     }
 
+    // FASE 2.3: Calculate final discipline score
+    const finalScore = calculateDisciplineScore();
+
     setSubmitting(true);
     try {
       const token = localStorage.getItem('mpt_token');
-      const response = await fetch('/api/trades', {
+      
+      // Prepare form data for file upload if screenshot exists
+      let body: any = {
+        pair,
+        position: posisi,
+        result: getHasil(),
+        pips: pipValue,
+        notes: catatan,
+        tradeDate: new Date().toISOString(),
+        // FASE 2.3: Enhanced fields
+        emotion,
+        entryPrice: entryPrice ? parseFloat(entryPrice) : undefined,
+        stopLoss: stopLoss ? parseFloat(stopLoss) : undefined,
+        takeProfit: takeProfit ? parseFloat(takeProfit) : undefined,
+        riskPercent: riskPercent ? parseFloat(riskPercent) : undefined,
+        mtaCheckList,
+        disciplineScore: finalScore,
+      };
+
+      const requestOptions: any = {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          pair,
-          position: posisi,
-          result: getHasil(),
-          pips: pipValue,
-          notes: catatan,
-          tradeDate: new Date().toISOString(),
-        }),
-      });
+        body: JSON.stringify(body),
+      };
 
-      if (response.ok) {
-        // Reload trades from API
-        await loadTrades();
-        
-        // Emit event to notify other components (like Dashboard)
-        window.dispatchEvent(new CustomEvent('tradesUpdated'));
-        
-        // Reset form
-        setPair('XAUUSD');
-        setPip('');
-        setCatatan('');
-        setPosisi('BUY');
-        
-        alert('✅ Trade berhasil disimpan!');
+      // If screenshot exists, we would upload it separately (FASE 2.4)
+      if (screenshotFile) {
+        // For now, we'll include it as base64 for smaller files
+        const reader = new FileReader();
+        reader.onload = async () => {
+          body.screenshotBase64 = reader.result;
+          
+          const response = await fetch('/api/trades', {
+            ...requestOptions,
+            body: JSON.stringify(body),
+          });
+
+          await handleTradeResponse(response);
+        };
+        reader.readAsDataURL(screenshotFile);
       } else {
+        const response = await fetch('/api/trades', requestOptions);
+        await handleTradeResponse(response);
+      }
+    } catch (error) {
+      console.error('Error adding trade:', error);
+      alert(t('journal.errorSaving'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleTradeResponse = async (response: Response) => {
+    if (response.ok) {
+      // Reload trades from API
+      await loadTrades();
+      
+      // FASE 2.4: If screenshot exists, automatically analyze it
+      if (screenshotFile) {
+        try {
+          const token = localStorage.getItem('mpt_token');
+          const formData = new FormData();
+          formData.append('image', screenshotFile);
+          formData.append('message', `Analyze this chart for ${pair} ${posisi} position. Entry: ${entryPrice}, SL: ${stopLoss}, TP: ${takeProfit}`);
+
+          const chartResponse = await fetch('/api/trades/analyze-chart', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+          });
+
+          if (chartResponse.ok) {
+            const analysisData = await chartResponse.json();
+            console.log('✅ Chart analyzed:', analysisData);
+            // Could show analysis in modal or toast here
+          }
+        } catch (error) {
+          console.error('Error analyzing chart:', error);
+          // Non-blocking error - trade was saved successfully
+        }
+      }
+      
+      // Emit event to notify other components (like Dashboard)
+      window.dispatchEvent(new CustomEvent('tradesUpdated'));
+      
+      // Reset form
+      setPair('XAUUSD');
+      setPip('');
+      setCatatan('');
+      setPosisi('BUY');
+      setScreenshotFile(null);
+      setScreenshotPreview(null);
+      setEmotion('Tenang');
+      setEntryPrice('');
+      setStopLoss('');
+      setTakeProfit('');
+      setRiskPercent('');
+      setMtaCheckList({
+        planReviewed: false,
+        noFearTrade: false,
+        risiBersih: false,
+        takeProfit: false,
+        noPanicClose: false,
+      });
+      
+      alert('✅ Trade berhasil disimpan!');
+    } else {
         const data = await response.json();
         alert('❌ ' + (data.error || 'Gagal menyimpan trade'));
       }
@@ -526,6 +690,167 @@ export default function JurnalTrading() {
             />
           </div>
 
+          {/* FASE 2.3: Screenshot Upload */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">📸 Screenshot Grafik (Optional)</label>
+            <div className="bg-slate-800/50 border-2 border-dashed border-slate-700 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleScreenshotUpload}
+                className="hidden"
+                id="screenshot-input"
+              />
+              <label htmlFor="screenshot-input" className="cursor-pointer">
+                <div className="text-center">
+                  <p className="text-slate-300 font-semibold mb-2">Klik atau drag gambar grafik di sini</p>
+                  <p className="text-xs text-slate-500">Max 5MB (PNG, JPG, WebP)</p>
+                </div>
+              </label>
+            </div>
+            {screenshotPreview && (
+              <div className="mt-3 relative rounded-lg overflow-hidden border border-slate-700">
+                <img src={screenshotPreview} alt="preview" className="w-full h-48 object-contain bg-slate-900" />
+                <button
+                  onClick={() => {
+                    setScreenshotFile(null);
+                    setScreenshotPreview(null);
+                  }}
+                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded px-2 py-1 text-xs font-bold"
+                >
+                  Hapus
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* FASE 2.3: Emotion Selector */}
+          <div>
+            <label className="block text-sm font-semibold text-slate-300 mb-2">😌 Emosi saat Trade</label>
+            <div className="grid grid-cols-3 gap-3">
+              {(['Tenang', 'Takut', 'Serakah'] as const).map((em) => (
+                <button
+                  key={em}
+                  onClick={() => setEmotion(em)}
+                  className={`py-3 rounded-lg font-bold transition-all ${
+                    emotion === em
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-slate-800/50 text-slate-300 border border-slate-700'
+                  }`}
+                >
+                  {em === 'Tenang' && '😌'} {em === 'Takut' && '😨'} {em === 'Serakah' && '🤑'} {em}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* FASE 2.3: Risk/Reward Fields */}
+          <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700/50">
+            <label className="block text-sm font-semibold text-slate-300 mb-4">📊 Risk / Reward Analysis</label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div>
+                <label className="text-xs text-slate-400">Entry Price</label>
+                <input
+                  type="number"
+                  step="0.0001"
+                  placeholder="1.2000"
+                  value={entryPrice}
+                  onChange={(e) => setEntryPrice(e.target.value)}
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-400">Stop Loss</label>
+                <input
+                  type="number"
+                  step="0.0001"
+                  placeholder="1.1950"
+                  value={stopLoss}
+                  onChange={(e) => setStopLoss(e.target.value)}
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-400">Take Profit</label>
+                <input
+                  type="number"
+                  step="0.0001"
+                  placeholder="1.2050"
+                  value={takeProfit}
+                  onChange={(e) => setTakeProfit(e.target.value)}
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-slate-400">Risk %</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  placeholder="2"
+                  value={riskPercent}
+                  onChange={(e) => setRiskPercent(e.target.value)}
+                  className="w-full bg-slate-800/50 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+            </div>
+            {calculateRiskReward() && (
+              <div className="mt-3 text-xs text-slate-300 space-y-1">
+                <p>📍 Risk: <span className="text-red-400 font-bold">{calculateRiskReward()?.risk.toFixed(4)}</span></p>
+                <p>🎯 Reward: <span className="text-green-400 font-bold">{calculateRiskReward()?.reward.toFixed(4)}</span></p>
+                <p>⚖️ Ratio: <span className={`font-bold ${calculateRiskReward()!.ratio >= 2 ? 'text-green-400' : 'text-yellow-400'}`}>{calculateRiskReward()?.ratio.toFixed(2)}:1</span></p>
+              </div>
+            )}
+          </div>
+
+          {/* FASE 2.3: MTA Checklist */}
+          <div className="bg-slate-800/30 rounded-lg p-4 border border-slate-700/50">
+            <label className="block text-sm font-semibold text-slate-300 mb-4">✅ MTA Checklist (Moving Target Abandon)</label>
+            <div className="space-y-3">
+              {[
+                { key: 'planReviewed', label: 'Plan reviewed sebelum entry' },
+                { key: 'noFearTrade', label: 'No fear trade - strictly follow plan' },
+                { key: 'risiBersih', label: 'Risi bersih per trade < 2%' },
+                { key: 'takeProfit', label: 'Take profit hit atau exit plan dilakukan' },
+                { key: 'noPanicClose', label: 'Tidak panic close atau revenge trade' },
+              ].map((item) => (
+                <label key={item.key} className="flex items-center gap-3 cursor-pointer hover:bg-slate-700/30 p-2 rounded">
+                  <input
+                    type="checkbox"
+                    checked={mtaCheckList[item.key as keyof typeof mtaCheckList]}
+                    onChange={(e) =>
+                      setMtaCheckList({
+                        ...mtaCheckList,
+                        [item.key]: e.target.checked,
+                      })
+                    }
+                    className="w-5 h-5 rounded border border-slate-500 cursor-pointer"
+                  />
+                  <span className="text-sm text-slate-300">{item.label}</span>
+                </label>
+              ))}
+            </div>
+            <div className="mt-4 p-3 bg-blue-500/10 rounded border border-blue-500/30">
+              <p className="text-xs text-slate-400 mb-1">Discipline Score:</p>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-slate-800/50 rounded-full h-3 overflow-hidden">
+                  <div
+                    className={`h-full transition-all ${
+                      calculateDisciplineScore() >= 80
+                        ? 'bg-green-500'
+                        : calculateDisciplineScore() >= 60
+                          ? 'bg-yellow-500'
+                          : 'bg-red-500'
+                    }`}
+                    style={{ width: `${calculateDisciplineScore()}%` }}
+                  />
+                </div>
+                <span className="font-bold text-sm text-white w-12 text-right">{calculateDisciplineScore()}%</span>
+              </div>
+            </div>
+          </div>
+
           {/* Submit Button */}
           <button
             onClick={tambahTrade}
@@ -596,7 +921,39 @@ export default function JurnalTrading() {
                   }`}>
                     {trade.pip > 0 ? '+' : ''}{trade.pip} pips
                   </span>
+                  {/* FASE 2.3: Show emotion if available */}
+                  {trade.emotion && (
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold bg-purple-500/30 text-purple-400`}>
+                      {trade.emotion === 'Tenang' && '😌'} {trade.emotion === 'Takut' && '😨'} {trade.emotion === 'Serakah' && '🤑'} {trade.emotion}
+                    </span>
+                  )}
+                  {/* FASE 2.3: Show discipline score if available */}
+                  {trade.disciplineScore !== undefined && (
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      trade.disciplineScore >= 80
+                        ? 'bg-green-500/30 text-green-400'
+                        : trade.disciplineScore >= 60
+                          ? 'bg-yellow-500/30 text-yellow-400'
+                          : 'bg-red-500/30 text-red-400'
+                    }`}>
+                      📊 {trade.disciplineScore}%
+                    </span>
+                  )}
                 </div>
+
+                {/* FASE 2.3: Screenshot preview */}
+                {trade.screenshotUrl && (
+                  <div className="mb-3 rounded border border-slate-700 overflow-hidden">
+                    <img src={trade.screenshotUrl} alt="trade chart" className="w-full h-32 object-contain bg-slate-900" />
+                  </div>
+                )}
+
+                {/* FASE 2.3: Risk/Reward info if available */}
+                {trade.entryPrice && trade.stopLoss && trade.takeProfit && (
+                  <div className="mb-3 text-xs text-slate-400 bg-slate-900/40 rounded p-2 space-y-1">
+                    <p>📍 Entry: {trade.entryPrice.toFixed(4)} | SL: {trade.stopLoss.toFixed(4)} | TP: {trade.takeProfit.toFixed(4)}</p>
+                  </div>
+                )}
 
                 {trade.catatan && (
                   <p className="text-sm text-slate-300 bg-slate-900/40 rounded p-2">

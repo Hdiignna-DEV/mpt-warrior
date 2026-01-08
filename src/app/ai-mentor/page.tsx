@@ -95,6 +95,10 @@ export default function AIMentor() {
   const [threadId] = useState(() => `thread_${Date.now()}`);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // FASE 2.6: Track latest trades for context
+  const [latestTrades, setLatestTrades] = useState<any[]>([]);
+  const [userEmotionState, setUserEmotionState] = useState<'Tenang' | 'Takut' | 'Serakah' | null>(null);
 
   // Load chat history from localStorage
   useEffect(() => {
@@ -102,6 +106,32 @@ export default function AIMentor() {
     if (saved) {
       setChatHistory(JSON.parse(saved));
     }
+  }, []);
+  
+  // FASE 2.6: Load latest trades for AI context
+  useEffect(() => {
+    const loadLatestTrades = async () => {
+      try {
+        const token = localStorage.getItem('mpt_token');
+        const response = await fetch('/api/trades?limit=5', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setLatestTrades(data.trades || []);
+          
+          // Get latest emotion if available
+          if (data.trades && data.trades.length > 0) {
+            setUserEmotionState(data.trades[0].emotion);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading latest trades:', error);
+      }
+    };
+    
+    loadLatestTrades();
   }, []);
 
   // Save chat history
@@ -239,16 +269,75 @@ export default function AIMentor() {
   const getSystemContext = () => {
     const baseContext = 'You are MPT Warrior AI Mentor - a professional trading mentor focused on Mindset, Plan, and Risk management (1% per trade max). Respond in Indonesian, professional yet friendly (Bro-to-Bro).';
     
-    switch(conversationMode) {
-      case 'analysis':
-        return baseContext + ' Focus on technical analysis: chart patterns, support/resistance, entry points, and confirmation signals.';
-      case 'strategy':
-        return baseContext + ' Focus on strategy review: profitability, consistency, risk/reward ratio, and improvement areas.';
-      case 'mindset':
-        return baseContext + ' Focus on psychological aspects: discipline, emotion control, confidence, and trading psychology.';
-      default:
-        return baseContext;
+    // FASE 2.6: Add recent trade context
+    let tradeContext = '';
+    if (latestTrades && latestTrades.length > 0) {
+      const recentTrade = latestTrades[0];
+      tradeContext = `\n\nRECENT TRADE CONTEXT:\n`;
+      tradeContext += `- Latest trade: ${recentTrade.pair} ${recentTrade.position}\n`;
+      if (recentTrade.emotion) {
+        tradeContext += `- User emotion state: ${recentTrade.emotion} ${
+          recentTrade.emotion === 'Tenang' ? '😌' : 
+          recentTrade.emotion === 'Takut' ? '😨' : 
+          '🤑'
+        }\n`;
+      }
+      if (recentTrade.disciplineScore !== undefined) {
+        tradeContext += `- Recent discipline score: ${recentTrade.disciplineScore}%\n`;
+      }
+      if (recentTrade.result) {
+        tradeContext += `- Last result: ${recentTrade.result} (${recentTrade.pips > 0 ? '+' : ''}${recentTrade.pips} pips)\n`;
+      }
     }
+    
+    const modeContext = (() => {
+      switch(conversationMode) {
+        case 'analysis':
+          return ' Focus on technical analysis: chart patterns, support/resistance, entry points, and confirmation signals.';
+        case 'strategy':
+          return ' Focus on strategy review: profitability, consistency, risk/reward ratio, and improvement areas.';
+        case 'mindset':
+          return ' Focus on psychological aspects: discipline, emotion control, confidence, and trading psychology.';
+        default:
+          return '';
+      }
+    })();
+    
+    return baseContext + modeContext + tradeContext;
+  };
+
+  // FASE 2.6: Check MTA violations and generate feedback
+  const checkMTAViolations = (): string | null => {
+    if (!latestTrades || latestTrades.length === 0) return null;
+    
+    const recent = latestTrades[0];
+    const violations: string[] = [];
+    
+    // Check for plan review before entry
+    if (recent.mtaCheckList && !recent.mtaCheckList.planReviewed) {
+      violations.push('❌ **Violation: No Plan Review** - You didn\'t review trading plan before entry');
+    }
+    
+    // Check for fear trading
+    if (recent.mtaCheckList && !recent.mtaCheckList.noFearTrade) {
+      violations.push('⚠️ **Risk Alert: Emotional Trading** - Seems like fear-based trading detected');
+    }
+    
+    // Check excessive risk (> 2%)
+    if (recent.riskPercent && recent.riskPercent > 2) {
+      violations.push(`🚨 **Excessive Risk: ${recent.riskPercent}%** - Max allowed is 2% per trade (MPT Rule #1)`);
+    }
+    
+    // Check discipline score
+    if (recent.disciplineScore !== undefined && recent.disciplineScore < 40) {
+      violations.push(`📉 **Low Discipline Score: ${recent.disciplineScore}%** - Need more checklist compliance`);
+    }
+    
+    if (violations.length > 0) {
+      return `\n⚠️ **MTA AUDIT ALERT**\n\n${violations.join('\n\n')}\n\n💡 Focus on the plan, not the panic!`;
+    }
+    
+    return null;
   };
 
   const exportChat = () => {
@@ -449,6 +538,20 @@ export default function AIMentor() {
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto px-2 py-3 md:p-6 space-y-3 md:space-y-4 flex flex-col pb-32 md:pb-40">
+            {/* FASE 2.6: Show MTA Violations Banner */}
+            {checkMTAViolations() && messages.length > 1 && (
+              <div className="bg-red-500/20 border border-red-500/40 rounded-lg p-3 md:p-4 text-red-200 text-sm">
+                <ReactMarkdown
+                  components={{
+                    p: ({...props}) => <p className="mb-1 last:mb-0" {...props} />,
+                    strong: ({...props}) => <strong className="text-red-100" {...props} />,
+                  }}
+                >
+                  {checkMTAViolations()!}
+                </ReactMarkdown>
+              </div>
+            )}
+            
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                 {m.role === 'assistant' && (
@@ -464,12 +567,18 @@ export default function AIMentor() {
                       </div>
                     </div>
                     <div className="flex-1 relative">
-                      {/* AI Model Badge */}
-                      {(m as any).model && (
-                        <div className="mb-1 text-[9px] font-mono text-slate-500 flex items-center gap-1">
-                          <span>{(m as any).model}</span>
-                        </div>
-                      )}
+                      {/* AI Model Badge + Emotion State */}
+                      <div className="mb-1 text-[9px] font-mono text-slate-500 flex items-center gap-2">
+                        {(m as any).model && <span>{(m as any).model}</span>}
+                        {/* FASE 2.6: Show emotion emoji in conversation */}
+                        {userEmotionState && m.role === 'assistant' && (
+                          <span className="flex items-center gap-1 text-slate-400">
+                            {userEmotionState === 'Tenang' && '😌 Tenang'}
+                            {userEmotionState === 'Takut' && '😨 Takut'}
+                            {userEmotionState === 'Serakah' && '🤑 Serakah'}
+                          </span>
+                        )}
+                      </div>
                       {/* Cek apakah ada risk calculation */}
                       {m.content.includes('LOT SIZE') && m.content.includes('Balance') ? (
                         <>

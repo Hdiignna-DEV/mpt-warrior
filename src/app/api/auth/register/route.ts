@@ -56,10 +56,11 @@ export async function POST(request: NextRequest) {
 
     // Get role from invitation code (default to WARRIOR if not specified)
     const assignedRole = codeValidation.code?.role || 'WARRIOR';
+    const codeBenefits = codeValidation.code?.benefits || {};
 
-    // IMPORTANT: Mark invitation code as used FIRST
+    // IMPORTANT: Mark invitation code as used FIRST (this also awards war points if referral)
     // If this fails, we don't create the user (prevents orphaned users)
-    await useInvitationCode(invitation_code, email);
+    const codeUseResult = await useInvitationCode(invitation_code, email);
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -94,6 +95,31 @@ export async function POST(request: NextRequest) {
     const randomNum = Math.floor(10000 + Math.random() * 90000);
     const warriorId = `MPT-${year}-${randomNum}`;
 
+    // Apply code benefits
+    let initialBadgeLevel = codeBenefits.startBadgeLevel || 'RECRUIT';
+    let initialBadges: any[] = [];
+    
+    // If code has badges, add them
+    if (codeBenefits.badgesToAdd && codeBenefits.badgesToAdd.length > 0) {
+      initialBadges = codeBenefits.badgesToAdd.map(badgeType => ({
+        type: badgeType,
+        level: initialBadgeLevel,
+        name: `${badgeType} Badge`,
+        description: `Earned via ${codeValidation.code?.codeType || 'LEGACY'} code`,
+        icon: 'badge-icon',
+        color: '#FFD700',
+        gradient: 'from-yellow-500 to-amber-600',
+        earnedAt: new Date(),
+      }));
+    }
+
+    // Store referral discount info (will be used during checkout)
+    const membershipData = {
+      discountPercent: codeBenefits.discountPercent || 0,
+      referrerId: codeValidation.code?.referrerId,
+      invitationCodeUsed: codeValidation.code?.code,
+    };
+
     // Create user with role from invitation code
     // ALL users (ADMIN & WARRIOR) require approval for security
     const newUser = await createUser({
@@ -109,8 +135,8 @@ export async function POST(request: NextRequest) {
       stats: defaultStats,
       // Warrior Profile System fields
       warriorId,
-      currentBadgeLevel: 'RECRUIT',
-      badges: [], // Empty array initially - badges earned through achievements
+      currentBadgeLevel: initialBadgeLevel,
+      badges: initialBadges,
       disciplineScore: 500, // Start at mid-point
       profileSettings: {
         personalGoal: '',
@@ -134,6 +160,15 @@ export async function POST(request: NextRequest) {
         name: newUser.name,
         status: newUser.status,
         role: newUser.role,
+        warriorId: newUser.warriorId,
+        badges: newUser.badges,
+        currentBadgeLevel: newUser.currentBadgeLevel,
+      },
+      benefits: {
+        discountPercent: membershipData.discountPercent,
+        badgesEarned: initialBadges.length,
+        startingLevel: initialBadgeLevel,
+        referrerEarnings: codeUseResult.warPointsAwarded ? `${codeUseResult.warPointsAwarded} War Points awarded to referrer` : undefined,
       },
     });
   } catch (error: any) {
