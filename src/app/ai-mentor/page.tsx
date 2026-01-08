@@ -655,7 +655,7 @@ export default function AIMentor() {
                   </div>
                 )}
               </div>
-            ))}
+            })
             {isLoading && (
               <div className="flex justify-start animate-fade-in gap-1.5 md:gap-2">
                 <CommanderArkaAvatar 
