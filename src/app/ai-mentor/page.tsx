@@ -594,8 +594,8 @@ export default function AIMentor() {
               <span className="text-amber-500/50">[ MODE:</span> <span className="font-bold text-amber-400">{conversationMode.toUpperCase()}</span> <span className="text-amber-500/50">] [ STATUS:</span> <span className="text-green-400">OPERATIONAL</span> <span className="text-amber-500/50">]</span>
               <div className="mt-1 flex items-center justify-center gap-1 text-[8px] md:text-[9px]">
                 <span className="text-slate-500">POWERED BY</span>
-                <span className="text-blue-400 font-bold">GOOGLE GEMINI 2.0</span>
-                <Sparkles size={10} className="text-blue-400" />
+                <span className="text-purple-400 font-bold">GROQ LLAMA 3.3 70B</span>
+                <Zap size={10} className="text-purple-400" />
               </div>
             </div>
           </div>

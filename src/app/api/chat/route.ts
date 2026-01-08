@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 
 const SYSTEM_INSTRUCTION = `
 ROLE: Anda adalah "MPT Bot", asisten mentor Mindset Plan Trader (MPT).
@@ -13,8 +13,8 @@ RULES:
 4. Untuk risk calculation, SELALU berikan output dalam format table yang terstruktur dengan parameter: Balance, Risk %, SL (pips), Maksimal Kerugian, Nilai Per Pip, dan LOT SIZE.
 `;
 
-// Get Gemini API Key
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+// Get Groq API Key
+const GROQ_API_KEY = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
 
 // Rate limiting: Simple in-memory store (for serverless, use Redis/Upstash in production)
 const requestTimestamps = new Map<string, number[]>();
@@ -26,8 +26,8 @@ function isRateLimited(userId: string): boolean {
   // Remove requests older than 1 minute
   const recentRequests = userRequests.filter(timestamp => now - timestamp < 60000);
   
-  // Limit: 10 requests per minute per user
-  if (recentRequests.length >= 10) {
+  // Limit: 15 requests per minute per user (Groq allows 30/min)
+  if (recentRequests.length >= 15) {
     return true;
   }
   
@@ -47,9 +47,9 @@ async function retryWithBackoff<T>(
       return await fn();
     } catch (error: any) {
       const isLastAttempt = attempt === maxRetries - 1;
-      const isRetryable = error.message?.includes('RESOURCE_EXHAUSTED') || 
-                          error.message?.includes('quota') ||
-                          error.message?.includes('429');
+      const isRetryable = error.message?.includes('rate_limit') || 
+                          error.message?.includes('429') ||
+                          error.message?.includes('503');
       
       if (isLastAttempt || !isRetryable) {
         throw error;
@@ -66,10 +66,10 @@ async function retryWithBackoff<T>(
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    // Validate Gemini API Key
-    if (!GEMINI_API_KEY) {
+    // Validate Groq API Key
+    if (!GROQ_API_KEY) {
       return NextResponse.json({ 
-        error: 'Gemini API key not configured. Please add GEMINI_API_KEY to environment variables.' 
+        error: 'Groq API key not configured. Please add GROQ_API_KEY to environment variables.' 
       }, { status: 500 });
     }
 
@@ -78,6 +78,13 @@ export async function POST(req: Request): Promise<Response> {
       image?: string, 
       language?: string 
     };
+    
+    // Image not supported by Groq
+    if (image) {
+      return NextResponse.json({ 
+        error: '📸 Groq tidak support analisa gambar. Silakan kirim chart dalam bentuk deskripsi text.\n\nContoh: "Analisa EURUSD di TF H1, price di 1.0950, ada resistance di 1.1000"' 
+      }, { status: 400 });
+    }
     
     // Simple rate limiting (use IP or user ID from auth in production)
     const userId = req.headers.get('x-forwarded-for') || 'anonymous';
@@ -113,50 +120,34 @@ RULES:
 
     const fullSystemPrompt = `${systemPrompt}\n${languageInstruction}\n\nHISTORY CHAT:\n${conversationHistory}`;
 
-    // Initialize Gemini AI
-    console.log("🤖 Processing with Google Gemini 2.0 Flash...");
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+    // Initialize Groq AI
+    console.log("⚡ Processing with Groq Llama 3.3 70B...");
+    const groq = new Groq({ apiKey: GROQ_API_KEY });
     
     let result: string;
 
-    // Wrap Gemini calls with retry logic
+    // Wrap Groq calls with retry logic
     result = await retryWithBackoff(async () => {
-      const modelConfig = { 
-        model: 'gemini-2.0-flash-exp',
-        systemInstruction: fullSystemPrompt,
-      };
+      const completion = await groq.chat.completions.create({
+        messages: [
+          { role: 'system', content: fullSystemPrompt },
+          { role: 'user', content: lastMessage }
+        ],
+        model: 'llama-3.3-70b-versatile',
+        temperature: 0.7,
+        max_tokens: 2048,
+        top_p: 1,
+        stream: false,
+      });
 
-      if (image) {
-        // IMAGE ANALYSIS with Vision
-        console.log("📸 Analyzing chart image with Gemini Vision...");
-        const model = genAI.getGenerativeModel(modelConfig);
-
-        const imagePart = {
-          inlineData: {
-            data: image.replace(/^data:image\/\w+;base64,/, ''),
-            mimeType: 'image/png',
-          },
-        };
-
-        const geminiResult = await model.generateContent([lastMessage, imagePart]);
-        const response = await geminiResult.response;
-        return response.text();
-      } else {
-        // TEXT ONLY
-        console.log("💬 Processing text with Gemini...");
-        const model = genAI.getGenerativeModel(modelConfig);
-        
-        const geminiResult = await model.generateContent(lastMessage);
-        const response = await geminiResult.response;
-        return response.text();
-      }
+      return completion.choices[0]?.message?.content || '';
     });
 
-    console.log("✅ Response generated successfully with Gemini 2.0 Flash");
+    console.log("✅ Response generated successfully with Groq Llama 3.3 70B");
 
     return NextResponse.json({ 
       choices: [{ message: { role: 'assistant', content: result } }],
-      model: 'Gemini 2.0 Flash Experimental',
+      model: 'Groq Llama 3.3 70B',
     });
     return NextResponse.json({ 
       choices: [{ message: { role: 'assistant', content: result } }],
@@ -168,22 +159,22 @@ RULES:
     console.error("❌ AI Mentor Error:", error);
     
     // Specific error handling
-    if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('API key')) {
+    if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('API key') || errorMessage.includes('invalid_api_key')) {
       return NextResponse.json({ 
-        error: '🔑 API key tidak valid. Hubungi admin untuk konfigurasi ulang.' 
+        error: '🔑 Groq API key tidak valid. Hubungi admin untuk konfigurasi ulang.' 
       }, { status: 401 });
     }
     
-    if (errorMessage.includes('quota') || errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('429')) {
+    if (errorMessage.includes('rate_limit') || errorMessage.includes('429')) {
       return NextResponse.json({ 
-        error: '⏰ Quota Gemini habis untuk hari ini. Coba lagi besok atau hubungi admin untuk upgrade ke paid plan.\n\n💡 Tip: Free tier = 1,500 requests/hari.' 
+        error: '⏰ Rate limit Groq tercapai. Coba lagi dalam 1 menit.\n\n💡 Groq FREE: 30 requests/menit.' 
       }, { status: 429 });
     }
 
-    if (errorMessage.includes('SAFETY')) {
+    if (errorMessage.includes('model_not_found') || errorMessage.includes('model')) {
       return NextResponse.json({ 
-        error: '⚠️ Pesan terdeteksi tidak aman. Gunakan bahasa yang lebih profesional.' 
-      }, { status: 400 });
+        error: '⚠️ Model AI tidak tersedia. Hubungi admin.' 
+      }, { status: 503 });
     }
     
     return NextResponse.json({ 
