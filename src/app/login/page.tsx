@@ -152,9 +152,9 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
                 </form>
               </div>
 
-              {/* Secure Login Info + Mascot Peeking - Split 3:1 Layout */}
+              {/* Secure Login Info + Mascot Peeking - Split 2:1 Layout */}
               <div className="flex gap-3 items-stretch">
-                {/* Secure Login Info Box - 3 parts (SAME AS DESKTOP) */}
+                {/* Secure Login Info Box - 2 parts (SAME AS DESKTOP) */}
                 <div className="flex-1 bg-gradient-to-r from-blue-500/10 to-blue-500/5 border border-blue-500/30 rounded-lg p-3 shadow-md">
                   <div className="flex items-start gap-2">
                     <Shield size={14} className="text-blue-400 mt-0.5 flex-shrink-0" />
@@ -167,10 +167,10 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
                   </div>
                 </div>
 
-                {/* Mascot Peeking - 1 part, NO background box */}
-                <div className="w-20 flex-shrink-0 flex items-end pointer-events-none">
+                {/* Mascot Peeking - 1 part, NO background box, LARGER */}
+                <div className="w-32 flex-shrink-0 flex items-end pointer-events-none">
                   <div className="drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
-                    {isClient && <CommanderArkaFullDisplay pose="onboarding" size="small" showLabel={false} />}
+                    {isClient && <CommanderArkaFullDisplay pose="onboarding" size="medium" showLabel={false} />}
                   </div>
                 </div>
               </div>
