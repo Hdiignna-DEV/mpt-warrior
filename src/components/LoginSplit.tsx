@@ -33,107 +33,113 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
 
   return (
     <div className="relative min-h-screen md:min-h-[80vh]">
-      {/* Mobile: Split layout 1:3 (form:mascot) */}
-      <div className="md:hidden flex h-screen">
-        {/* Mobile Left: Form area - narrower */}
-        <div className="w-2/3 bg-slate-900 p-4 flex items-center justify-center overflow-y-auto">
-          <div className="relative w-full">
-            {/* Salute overlay */}
-            {showSalute && (
-              <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
-                <div className="bg-black/60 rounded-lg p-6 flex flex-col items-center gap-3 backdrop-blur-sm transition-opacity duration-500 opacity-100">
-                  <div className="w-20 h-20">
-                    <CommanderArkaFullDisplay pose="onboarding" size="small" showLabel={false} />
-                  </div>
-                  <p className="text-green-300 font-bold text-sm">Akses Diterima</p>
+      {/* Mobile: Normal layout */}
+      <div className="md:hidden flex flex-col items-center justify-center bg-slate-900 p-4 min-h-screen">
+        <div className="relative w-full max-w-sm">
+          {/* Salute overlay */}
+          {showSalute && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+              <div className="bg-black/60 rounded-lg p-6 flex flex-col items-center gap-3 backdrop-blur-sm transition-opacity duration-500 opacity-100">
+                <div className="w-20 h-20">
+                  <CommanderArkaFullDisplay pose="onboarding" size="small" showLabel={false} />
                 </div>
+                <p className="text-green-300 font-bold text-sm">Akses Diterima</p>
               </div>
-            )}
-
-            <div className="flex flex-col items-center gap-1">
-              <p className="text-amber-400 font-bold text-xl text-center">MPT WARRIOR</p>
-              <p className="text-slate-300 text-xs text-center">Tactical Dashboard</p>
             </div>
+          )}
 
-            <div className="glass-premium rounded-2xl p-6 mt-4 relative z-20">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-red-400 text-xs">
-                     {error}
-                  </div>
+          <div className="flex flex-col items-center gap-1 mb-4">
+            <p className="text-amber-400 font-bold text-2xl text-center">MPT WARRIOR</p>
+            <p className="text-slate-300 text-xs text-center">Tactical Dashboard</p>
+          </div>
+
+          <div className="glass-premium rounded-3xl p-6 relative z-20 mb-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-red-400 text-xs">
+                   {error}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-2">
+                  <Mail size={14} /> Email
+                </label>
+                <Input
+                  type="email"
+                  placeholder="warrior@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  required
+                  className="w-full bg-slate-800/50 border-slate-700 text-white text-sm py-2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-2">
+                  <KeyRound size={14} /> Password
+                </label>
+                <Input
+                  type="password"
+                  placeholder=""
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onFocus={() => setPasswordFocus(true)}
+                  onBlur={() => setPasswordFocus(false)}
+                  required
+                  className="w-full bg-slate-800/50 border-slate-700 text-white text-sm py-2"
+                />
+              </div>
+
+              <Button type="submit" disabled={loading} className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm py-3 flex items-center justify-center gap-2 transition-all">
+                {loading ? (
+                  <>
+                    <div className="animate-spin"></div> Logging in...
+                  </>
+                ) : (
+                  <>
+                    <LogIn size={16} /> LOGIN
+                  </>
                 )}
+              </Button>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-2">
-                    <Mail size={14} /> Email
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder="warrior@example.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                    className="w-full bg-slate-800/50 border-slate-700 text-white text-sm py-2"
-                  />
-                </div>
+              <div className="text-center text-xs text-slate-400">
+                Belum punya akun?{' '}
+                <a href="/register" className="text-amber-400 hover:text-amber-300 font-bold">
+                  Register
+                </a>
+              </div>
+            </form>
+          </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-2">
-                    <KeyRound size={14} /> Password
-                  </label>
-                  <Input
-                    type="password"
-                    placeholder=""
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    onFocus={() => setPasswordFocus(true)}
-                    onBlur={() => setPasswordFocus(false)}
-                    required
-                    className="w-full bg-slate-800/50 border-slate-700 text-white text-sm py-2"
-                  />
-                </div>
-
-                <Button type="submit" disabled={loading} className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-sm py-4 flex items-center justify-center gap-2 transition-all">
-                  {loading ? (
-                    <>
-                      <div className="animate-spin"></div> Logging in...
-                    </>
-                  ) : (
-                    <>
-                      <LogIn size={16} /> LOGIN
-                    </>
-                  )}
-                </Button>
-
-                <div className="text-center text-xs text-slate-400">
-                  Belum punya akun?{' '}
-                  <a href="/register" className="text-amber-400 hover:text-amber-300 font-bold">
-                    Register
-                  </a>
-                </div>
-              </form>
+          {/* Secure Login - Split dengan Mascot */}
+          <div className="flex gap-3 items-stretch">
+            {/* Text area */}
+            <div className="flex-1 bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+              <p className="font-bold text-blue-400 text-sm mb-1"> Secure Login</p>
+              <p className="text-xs text-slate-300 leading-snug">Login untuk member approved. Status PENDING akan diarahkan ke waiting approval.</p>
             </div>
 
-            <div className="mt-4 bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-xs text-slate-300">
-              <p className="font-bold text-blue-400 mb-1"> Secure Login</p>
-              <p className="text-xs leading-snug">Login untuk member approved. Status PENDING akan diarahkan ke waiting approval.</p>
+            {/* Mascot area - no box background */}
+            <div className="w-[100px] flex items-end justify-center pointer-events-none">
+              <div className="w-[90px] h-[110px] relative">
+                <Image
+                  src="/images/mascots/commander-arka-onboarding.png"
+                  alt="Commander Arka"
+                  width={90}
+                  height={110}
+                  className="w-full h-full object-contain object-bottom drop-shadow-[0_4px_8px_rgba(2,6,23,0.6)]"
+                  priority={false}
+                />
+              </div>
             </div>
-          </div>
-        </div>
-
-        {/* Mobile Right: Mascot area */}
-        <div className="w-1/3 bg-gradient-to-tr from-[#071032] to-[#0b2a44] p-2 flex items-center justify-center relative overflow-hidden">
-          <div className="absolute bottom-0 right-0 w-[140px] h-[180px] transform drop-shadow-[0_12px_24px_rgba(2,6,23,0.8)] pointer-events-none">
-            <Image src="/images/mascots/commander-arka-onboarding.png" alt="Commander Arka" width={140} height={180} className="w-full h-full object-contain object-bottom" priority={false} />
-          </div>
-          <div className="absolute top-8 left-2 right-2 bg-slate-800/90 text-white text-xs font-semibold px-2 py-1 rounded-md shadow-lg z-30 text-center">
-            {passwordFocus ? 'Keamanan utama!' : 'Siap bertugas?'}
           </div>
         </div>
       </div>
 
       {/* Desktop: Grid layout */}
       <div className="hidden md:grid grid-cols-2 min-h-[80vh] max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-xl">
+        {/* Left: Mascot area */}
         <div className="flex items-center justify-center bg-gradient-to-tr from-[#071032] to-[#0b2a44] p-6 relative">
           <div className="w-full h-[85vh] flex items-center justify-center relative">
             <div className="absolute top-8 right-12 bg-slate-800/80 text-white text-sm font-semibold px-3 py-2 rounded-lg shadow-lg backdrop-blur-sm">
@@ -145,8 +151,10 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
           </div>
         </div>
 
+        {/* Right: Form area */}
         <div className="flex items-center justify-center bg-slate-900 p-6">
           <div className="relative w-full max-w-md">
+            {/* Salute overlay */}
             {showSalute && (
               <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
                 <div className="bg-black/60 rounded-lg p-6 flex flex-col items-center gap-3 backdrop-blur-sm transition-opacity duration-500 opacity-100">
