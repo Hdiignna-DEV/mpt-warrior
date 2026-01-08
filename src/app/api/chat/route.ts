@@ -213,11 +213,15 @@ export async function POST(req: Request): Promise<Response> {
       console.log("✅ [WARRIOR VISION] Chart analysis complete");
       
       } catch (geminiError: any) {
-        console.error("❌ Gemini Vision failed:", geminiError.message);
+        console.error("❌ Gemini Vision failed:", geminiError);
+        console.error("Error details:", JSON.stringify(geminiError, null, 2));
+        
         // Fallback to Groq with image disclaimer
         console.log("⚠️ Falling back to Groq (text-only mode)...");
-        result = `⚠️ **Gemini Vision sedang tidak tersedia.**\n\nMaaf Warrior, saat ini sistem analisa chart via Gemini Vision mengalami gangguan.\n\n💡 **Alternatif:**\n1. Kirim tanpa gambar untuk konsultasi text\n2. Atau hubungi admin untuk perbaikan Gemini API\n\nCoba lagi nanti, atau tanya sesuatu tanpa upload gambar. 🙏`;
-        aiModel = '⚠️ System Notice';
+        
+        const errorDetail = geminiError.message || geminiError.toString();
+        result = `⚠️ **Gemini Vision Error**\n\nMaaf Warrior, sistem analisa chart mengalami gangguan.\n\n**Error:** ${errorDetail}\n\n💡 **Alternatif:**\n1. Kirim tanpa gambar untuk konsultasi text\n2. Hubungi admin dengan error di atas\n\nCoba lagi nanti! 🙏`;
+        aiModel = '⚠️ Debug Mode';
       }
 
     } else if (image && !GEMINI_API_KEY) {
