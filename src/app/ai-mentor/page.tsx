@@ -307,12 +307,8 @@ export default function AIMentor() {
               <span className="text-slate-600">+</span>
               <span className="px-1.5 py-0.5 bg-purple-500/10 border border-purple-500/30 rounded text-purple-400">⚡ Groq Brain</span>
             </div>
+            <p className="text-[10px] md:text-xs text-slate-500 font-mono uppercase tracking-widest hidden sm:block mt-1">MPT WARRIOR INTELLIGENCE DIVISION</p>
           </div>
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-green-400">SYSTEM: ACTIVE</span>
-              </div>
-            </div>
-            <p className="text-[10px] md:text-xs text-slate-500 font-mono uppercase tracking-widest hidden sm:block">MPT WARRIOR INTELLIGENCE DIVISION</p>
           </div>
         </div>
         
