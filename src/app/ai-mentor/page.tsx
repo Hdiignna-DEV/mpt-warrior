@@ -311,7 +311,7 @@ export default function AIMentor() {
           </div>
         </div>
         
-        {/* Encryption Badge */}}
+        {/* Encryption Badge */}
         <div className="absolute top-2 right-3 md:top-4 md:right-6 text-[9px] font-mono text-amber-500/40 uppercase tracking-widest">
           ENCRYPTION: AES-256_SECURE
         </div>
