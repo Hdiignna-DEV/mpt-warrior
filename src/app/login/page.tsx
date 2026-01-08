@@ -152,10 +152,10 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
                 </form>
               </div>
 
-              {/* Info + Mascot Peeking Section */}
-              <div className="relative">
-                {/* Info Box */}
-                <div className="bg-gradient-to-r from-blue-500/15 to-blue-500/5 border border-blue-500/30 rounded-lg p-3 mb-0 relative z-10">
+              {/* Secure Login Info + Mascot Peeking - Split 3:1 Layout */}
+              <div className="flex gap-3 items-end">
+                {/* Secure Login Info Box - 3 parts */}
+                <div className="flex-1 bg-gradient-to-r from-blue-500/15 to-blue-500/5 border border-blue-500/30 rounded-lg p-3">
                   <p className="font-bold text-blue-400 text-xs mb-0.5 flex items-center gap-1">
                     <Shield size={12} /> Secure
                   </p>
@@ -164,9 +164,9 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
                   </p>
                 </div>
 
-                {/* Mascot - Peeking from bottom-right with absolute positioning */}
-                <div className="absolute -bottom-2 right-0 w-24 h-32 pointer-events-none">
-                  <div className="drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)] h-full flex items-end justify-end">
+                {/* Mascot Peeking - 1 part, NO background box */}
+                <div className="w-20 flex-shrink-0 pointer-events-none">
+                  <div className="drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
                     {isClient && <CommanderArkaFullDisplay pose="onboarding" size="small" showLabel={false} />}
                   </div>
                 </div>
