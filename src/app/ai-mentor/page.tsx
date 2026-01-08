@@ -241,7 +241,7 @@ export default function AIMentor() {
   };
 
   const startNewChat = () => {
-    setMessages([{ role: 'assistant', content: 'Siap, Bro! 🚀 **MPT Warrior AI** aktif. Apa yang ingin kita diskusikan hari ini?' }]);
+    setMessages([{ role: 'assistant', content: 'Siap, Bro! 🚀 **MPT Warrior AI** aktif. Apa yang ingin kita diskusikan hari ini?', model: '⚡ Warrior Buddy' }]);
     setInput('');
     setSelectedImage(null);
     setImagePreview(null);
