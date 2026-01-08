@@ -37,11 +37,11 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
     <div className="relative grid grid-cols-1 md:grid-cols-2 min-h-[80vh] max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-xl">
       {/* Left visual for desktop */}
       <div className="hidden md:flex items-center justify-center bg-gradient-to-tr from-[#071032] to-[#0b2a44] p-6 relative">
-        <div className="w-full h-[65vh] flex items-center justify-center relative">
+        <div className="w-full h-[85vh] flex items-center justify-center relative">
           <div className="absolute top-8 right-12 bg-slate-800/80 text-white text-sm font-semibold px-3 py-2 rounded-lg shadow-lg backdrop-blur-sm">
             {tooltip}
           </div>
-          <div className="w-full h-full flex items-center justify-center pointer-events-none select-none">
+          <div className="w-full h-full flex items-center justify-center pointer-events-none select-none scale-125">
             <CommanderArkaFullDisplay pose="onboarding" size="large" showLabel={false} />
           </div>
         </div>
@@ -62,22 +62,22 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
             </div>
           )}
 
-          {/* Mobile peeking mascot: visible from bottom-right, behind form */}
-          <div className="md:hidden fixed bottom-0 right-0 h-screen w-full pointer-events-none z-0" aria-hidden="true">
-            <div className="absolute bottom-0 right-0 w-[200px] h-[240px] transform drop-shadow-[0_12px_24px_rgba(2,6,23,0.8)]">
+          {/* Mobile peeking mascot: positioned at top-left, visible above form */}
+          <div className="md:hidden fixed top-0 left-0 w-full h-screen pointer-events-none z-10" aria-hidden="true">
+            <div className="absolute top-12 left-0 w-[180px] h-[220px] transform drop-shadow-[0_12px_24px_rgba(2,6,23,0.8)]">
               <Image
                 src="/images/mascots/commander-arka-onboarding.png"
                 alt="Commander Arka"
-                width={200}
-                height={240}
-                className="w-full h-full object-contain object-bottom"
+                width={180}
+                height={220}
+                className="w-full h-full object-contain object-top"
                 priority={false}
               />
             </div>
           </div>
 
           {/* Tooltip - positioned above form on mobile */}
-          <div className="md:hidden absolute -bottom-16 right-0 bg-slate-800/90 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-lg z-30">
+          <div className="md:hidden absolute top-16 left-4 bg-slate-800/90 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-lg z-30 max-w-[120px]">
             {passwordFocus ? 'Keamanan adalah prioritas utama!' : tooltip}
           </div>
 
