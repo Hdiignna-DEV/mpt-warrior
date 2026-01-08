@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { BookOpen, Plus, Trash2, Download, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { ResultNotificationModal } from './ChatUIEnhancers';
+import { ResultNotificationModal, CommanderArkaFullDisplay } from './ChatUIEnhancers';
 
 interface Trade {
   id: string;
@@ -895,8 +895,13 @@ export default function JurnalTrading() {
             <p className="text-slate-400">Loading trades...</p>
           </div>
         ) : trades.length === 0 ? (
-          <div className="text-center py-12">
-            <BookOpen size={48} className="mx-auto text-slate-600 mb-4" />
+          <div className="text-center py-12 space-y-4">
+            {/* Touchpoint: Empty Journal State */}
+            <div className="flex justify-center mb-4">
+              <div className="w-32 h-32">
+                <CommanderArkaFullDisplay pose="empty" showLabel={false} />
+              </div>
+            </div>
             <p className="text-slate-400 text-lg font-bold tracking-wider" suppressHydrationWarning>{t('journal.noData')}</p>
             <p className="text-slate-500 text-sm mt-2" suppressHydrationWarning>{t('journal.startTrading')}</p>
           </div>

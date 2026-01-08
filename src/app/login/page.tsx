@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield, Mail, KeyRound, LogIn } from 'lucide-react';
+import { Mail, KeyRound, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { CommanderArkaFullDisplay } from '@/components/ChatUIEnhancers';
@@ -62,27 +62,27 @@ export default function LoginPage() {
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-blue-500/8 rounded-full blur-3xl animate-blob" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="relative max-w-md w-full">
-        {/* Commander Arka Greeting - Touchpoint 1 */}
-        <div className="text-center mb-8 flex flex-col items-center gap-4">
-          <div className="h-32 w-32 flex items-center justify-center">
-            <CommanderArkaFullDisplay pose="onboarding" />
+      <div className="relative max-w-md w-full space-y-8">
+        {/* Commander Arka Greeting - Clean & Centered */}
+        <div className="flex flex-col items-center gap-2 pt-4">
+          <div className="w-28 h-28 sm:w-40 sm:h-40 flex items-center justify-center pointer-events-none select-none">
+            <CommanderArkaFullDisplay pose="onboarding" size="medium" showLabel={false} />
           </div>
-          <p className="text-amber-400 font-bold text-lg">Siap bertugas, Warrior!</p>
-          <p className="text-slate-300 text-sm">Masuk ke markas sekarang</p>
+          <p className="text-amber-400 font-bold text-xl text-center">Siap bertugas, Warrior!</p>
+          <p className="text-slate-300 text-sm text-center">Masuk ke markas sekarang</p>
         </div>
 
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-block p-4 bg-amber-500/20 rounded-2xl mb-4">
-            <Shield className="text-amber-400" size={48} />
+        {/* Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-700/50"></div>
           </div>
-          <h1 className="text-4xl font-black text-amber-400 mb-2">MPT WARRIOR LOGIN</h1>
-          <p className="text-slate-300">Access your tactical dashboard</p>
         </div>
 
         {/* Login Form */}
         <div className="glass-premium rounded-3xl p-8">
+          <h1 className="text-2xl font-black text-amber-400 mb-6 text-center">MPT WARRIOR</h1>
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (

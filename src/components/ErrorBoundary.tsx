@@ -52,7 +52,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               {/* Touchpoint 5: Commander Arka with confused/empty pose */}
               <div className="flex justify-center">
                 <div className="w-32 h-32">
-                  <CommanderArkaFullDisplay pose="empty" />
+                  <CommanderArkaFullDisplay pose="empty" showLabel={false} />
                 </div>
               </div>
               

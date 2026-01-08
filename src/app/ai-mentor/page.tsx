@@ -5,6 +5,7 @@ import '@/utils/i18n';
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Bot, Send, Paperclip, X, Sparkles, Zap, Brain, TrendingUp, Shield, Target, Download, Trash2, RotateCw, MessageCircle } from 'lucide-react';
+import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { MessageBubble, CommanderArkaAvatar } from '@/components/ChatUIEnhancers';
 
@@ -728,6 +729,19 @@ export default function AIMentor() {
                 accept="image/*" 
               />
               
+              {/* Small mascot next to Upload Chart (vision) - non-interactive and responsive */}
+              <div className="flex items-center flex-shrink-0 mr-1 pointer-events-none select-none" aria-hidden="true">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 relative">
+                  <Image
+                    src="/images/mascots/commander-arka-vision.png"
+                    alt="Commander Arka Vision"
+                    fill
+                    className={`${aiProcessing === 'vision' ? 'animate-pulse' : ''} object-contain`}
+                    priority={false}
+                  />
+                </div>
+              </div>
+
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}

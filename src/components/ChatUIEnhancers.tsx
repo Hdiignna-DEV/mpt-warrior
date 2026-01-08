@@ -83,18 +83,11 @@ export function CommanderArkaAvatar({
   };
 
   const style = getPoseStyle();
-  
   return (
-    <div className="flex-shrink-0 pt-0.5">
-      <div className="relative w-8 h-8 md:w-10 md:h-10">
-        {/* Aura effect based on pose */}
-        {(isThinking || pose === 'victory' || pose === 'warning') && (
-          <div className={`absolute inset-0 ${style.aura} rounded-full`} />
-        )}
-        
-        {/* Avatar background with pose-specific styling */}
-        <div className={`relative w-full h-full ${style.bg} ${style.border} rounded-full flex items-center justify-center border overflow-hidden transition-all`}>
-          {/* Commander Arka Image */}
+    <div className="flex-shrink-0 pt-0.5 pointer-events-none select-none">
+      <div className="relative w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10">
+        {/* Render image only (no background) to preserve PNG transparency */}
+        <div className="relative w-full h-full flex items-center justify-center transition-all">
           <Image
             src={`/images/mascots/commander-arka-${pose}.png`}
             alt={`Commander Arka - ${pose}`}
@@ -104,15 +97,15 @@ export function CommanderArkaAvatar({
             priority={false}
           />
         </div>
-        
-        {/* Status indicator - only for thinking/loading */}
+
+        {/* Status indicator - only for thinking/loading (visual only) */}
         {isThinking && (
           <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border border-slate-900 animate-pulse" />
         )}
       </div>
-      
-      {/* Model label with pose info */}
-      <div className="text-[9px] font-mono text-slate-500 text-center mt-1 whitespace-nowrap">
+
+      {/* Model label with pose info - hidden on very small screens */}
+      <div className="hidden sm:block text-[9px] font-mono text-slate-500 text-center mt-1 whitespace-nowrap">
         <div>{model}</div>
         <div className="text-[8px] uppercase tracking-widest text-slate-600">{pose}</div>
       </div>
@@ -231,9 +224,9 @@ export function CommanderArkaFullDisplay({
   showLabel?: boolean;
 }) {
   const sizeMap = {
-    small: 'w-20 h-20',
-    medium: 'w-40 h-40',
-    large: 'w-80 h-80'
+    small: 'w-16 h-16 sm:w-20 sm:h-20',
+    medium: 'w-24 h-24 sm:w-40 sm:h-40',
+    large: 'w-40 h-40 sm:w-80 sm:h-80'
   };
 
   const getPoseLabel = (): string => {
@@ -247,21 +240,10 @@ export function CommanderArkaFullDisplay({
     }
   };
 
-  const getBackgroundColor = (): string => {
-    switch(pose) {
-      case 'onboarding': return 'bg-amber-500/10 border-amber-500/30';
-      case 'victory': return 'bg-green-500/10 border-green-500/30';
-      case 'warning': return 'bg-red-500/10 border-red-500/30';
-      case 'empty': return 'bg-slate-500/10 border-slate-500/30';
-      case 'vision':
-      default: return 'bg-blue-500/10 border-blue-500/30';
-    }
-  };
-
   return (
-    <div className="flex flex-col items-center gap-4">
-      {/* Mascot Container */}
-      <div className={`${sizeMap[size]} rounded-2xl border-2 ${getBackgroundColor()} flex items-center justify-center backdrop-blur-sm relative overflow-hidden`}>
+    <div className="flex flex-col items-center gap-4 pointer-events-none select-none">
+      {/* Mascot Container - No background, no border. Allow overflow so art isn't cropped */}
+      <div className={`${sizeMap[size]} flex items-center justify-center relative overflow-visible z-0`}>
         {/* Commander Arka Full Display Image */}
         <Image
           src={`/images/mascots/commander-arka-${pose}.png`}
@@ -272,9 +254,9 @@ export function CommanderArkaFullDisplay({
         />
       </div>
 
-      {/* Label */}
+      {/* Label - hidden on very small screens to avoid overlap */}
       {showLabel && (
-        <div className="text-center">
+        <div className="hidden sm:block text-center">
           <p className="font-bold text-slate-200">{getPoseLabel()}</p>
           <p className="text-xs text-slate-500 font-mono mt-1">Level 4 - COMMANDER</p>
         </div>
