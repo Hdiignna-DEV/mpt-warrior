@@ -40,6 +40,7 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Important: send cookies
         body: JSON.stringify(formData),
       });
 
@@ -57,13 +58,11 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
         throw new Error(data.error || 'Login gagal');
       }
 
-      // Save token
-      localStorage.setItem('token', data.token);
-      
       // Trigger salute animation
       setShowSalute(true);
       
       // Redirect ke dashboard setelah animasi
+      // Token sudah di-set sebagai HTTP-only cookie di API response
       setTimeout(() => {
         router.push('/dashboard');
       }, 1500);
