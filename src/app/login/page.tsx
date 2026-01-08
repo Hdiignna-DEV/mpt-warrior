@@ -56,7 +56,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-3 sm:p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-3 sm:p-4 md:p-6 py-8">
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-72 h-72 sm:w-96 sm:h-96 bg-amber-500/5 rounded-full blur-3xl animate-pulse"></div>
@@ -65,26 +65,30 @@ export default function LoginPage() {
 
       <div className="relative w-full max-w-md mx-auto">
         {/* Commander Arka Avatar & Welcome Message */}
-        <div className="flex flex-col items-center mb-4 sm:mb-6 px-4">
-          <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 mb-3 sm:mb-4 flex items-center justify-center">
-            <CommanderArkaFullDisplay pose="onboarding" />
+        <div className="flex flex-col items-center mb-3 sm:mb-4 px-4">
+          {/* Avatar dengan border dan background untuk tidak terpotong */}
+          <div className="w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 mb-2 sm:mb-3 flex items-center justify-center bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border-2 border-slate-700/50 p-2 shadow-xl">
+            <div className="w-full h-full flex items-center justify-center">
+              <CommanderArkaFullDisplay pose="onboarding" />
+            </div>
           </div>
+          
           <h2 className="text-lg sm:text-xl font-bold text-white mb-1">Welcome Warrior!</h2>
           <p className="text-amber-400 font-bold text-base sm:text-lg">Siap bertugas, Warrior!</p>
-          <p className="text-slate-400 text-xs sm:text-sm">Level 4 - COMMANDER</p>
-          <p className="text-slate-500 text-xs sm:text-sm mt-1">Masuk ke markas sekarang</p>
+          <p className="text-slate-400 text-xs sm:text-sm mt-0.5">Level 4 - COMMANDER</p>
+          <p className="text-slate-500 text-xs sm:text-sm">Masuk ke markas sekarang</p>
         </div>
 
         {/* Shield Icon */}
-        <div className="flex justify-center mb-4 sm:mb-6">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-amber-600 to-amber-700 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl">
+        <div className="flex justify-center mb-4 sm:mb-5">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-amber-600 to-amber-700 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl shadow-amber-500/20">
             <Shield className="text-amber-300 w-8 h-8 sm:w-10 sm:h-10" strokeWidth={2.5} />
           </div>
         </div>
 
         {/* Title */}
-        <div className="text-center mb-6 sm:mb-8 px-4">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-amber-400 mb-2 tracking-tight">
+        <div className="text-center mb-5 sm:mb-6 px-4">
+          <h1 className="text-3xl sm:text-3xl md:text-4xl font-black text-amber-400 mb-1 sm:mb-2 tracking-tight">
             MPT WARRIOR LOGIN
           </h1>
           <p className="text-slate-400 text-xs sm:text-sm">Access your tactical dashboard</p>
@@ -92,7 +96,7 @@ export default function LoginPage() {
 
         {/* Login Form Card */}
         <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 shadow-2xl mx-3 sm:mx-0">
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Error Message */}
             {error && (
               <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 text-red-400 text-xs sm:text-sm flex items-start gap-2">
@@ -103,7 +107,7 @@ export default function LoginPage() {
 
             {/* Email Field */}
             <div>
-              <label className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-300 mb-2">
+              <label className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-300 mb-1.5">
                 <Mail size={14} className="text-slate-400 sm:w-4 sm:h-4" />
                 Email
               </label>
@@ -119,7 +123,7 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div>
-              <label className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-300 mb-2">
+              <label className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-300 mb-1.5">
                 <KeyRound size={14} className="text-slate-400 sm:w-4 sm:h-4" />
                 Password
               </label>
@@ -144,24 +148,26 @@ export default function LoginPage() {
             </div>
 
             {/* Login Button */}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 sm:h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold text-sm sm:text-base rounded-lg shadow-lg shadow-blue-500/30 transition-all duration-200 transform active:scale-95 sm:hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100 touch-manipulation"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  Logging in...
-                </span>
-              ) : (
-                '🔐 LOGIN'
-              )}
-            </Button>
+            <div className="pt-1">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 sm:h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold text-sm sm:text-base rounded-lg shadow-lg shadow-blue-500/30 transition-all duration-200 transform active:scale-95 sm:hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100 touch-manipulation"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Logging in...
+                  </span>
+                ) : (
+                  '🔐 LOGIN'
+                )}
+              </Button>
+            </div>
           </form>
 
           {/* Divider */}
-          <div className="relative my-5 sm:my-6">
+          <div className="relative my-4 sm:my-5">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-700"></div>
             </div>
@@ -185,9 +191,9 @@ export default function LoginPage() {
         </div>
 
         {/* Info Box */}
-        <div className="mt-4 sm:mt-6 bg-blue-500/5 border border-blue-500/20 rounded-xl p-3 sm:p-4 mx-3 sm:mx-0">
+        <div className="mt-4 sm:mt-5 bg-blue-500/5 border border-blue-500/20 rounded-xl p-3 sm:p-4 mx-3 sm:mx-0">
           <div className="flex items-start gap-2 sm:gap-3">
-            <div className="text-xl sm:text-2xl flex-shrink-0">🔒</div>
+            <div className="text-lg sm:text-xl flex-shrink-0 mt-0.5">🔒</div>
             <div>
               <p className="font-bold text-blue-400 text-xs sm:text-sm mb-1">Secure Login</p>
               <p className="text-xs text-slate-400 leading-relaxed">
