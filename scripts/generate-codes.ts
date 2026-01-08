@@ -22,6 +22,7 @@ async function main() {
 
       const invitationCode = await createInvitationCode({
         code,
+        codeType: 'LEGACY', // Legacy code type for batch generation
         created_by: ADMIN_EMAIL,
         max_uses: maxUsesPerCode,
         expires_at: expiresAt,
