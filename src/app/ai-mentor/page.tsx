@@ -309,10 +309,9 @@ export default function AIMentor() {
             </div>
             <p className="text-[10px] md:text-xs text-slate-500 font-mono uppercase tracking-widest hidden sm:block mt-1">MPT WARRIOR INTELLIGENCE DIVISION</p>
           </div>
-          </div>
         </div>
         
-        {/* Encryption Badge */}
+        {/* Encryption Badge */}}
         <div className="absolute top-2 right-3 md:top-4 md:right-6 text-[9px] font-mono text-amber-500/40 uppercase tracking-widest">
           ENCRYPTION: AES-256_SECURE
         </div>
