@@ -104,6 +104,35 @@ export default function AIMentor() {
   const [latestTrades, setLatestTrades] = useState<any[]>([]);
   const [userEmotionState, setUserEmotionState] = useState<'Tenang' | 'Takut' | 'Serakah' | null>(null);
 
+  // SPRINT 1 TASK 4: Opacity mode for dynamic mascot visibility
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [mascotOpacity, setMascotOpacity] = useState<'opacity-100' | 'opacity-30'>('opacity-100');
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Monitor scroll for opacity toggle
+  useEffect(() => {
+    const messagesContainer = document.querySelector('[data-messages-container]');
+    if (!messagesContainer) return;
+
+    const handleScroll = () => {
+      setMascotOpacity('opacity-30'); // Fade out when scrolling
+      setIsScrolling(true);
+      
+      // Reset to full opacity after 2 seconds of idle
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => {
+        setMascotOpacity('opacity-100');
+        setIsScrolling(false);
+      }, 2000);
+    };
+
+    messagesContainer.addEventListener('scroll', handleScroll);
+    return () => {
+      messagesContainer.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
+
   // Load chat history from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('mpt_ai_chat_history');
@@ -542,7 +571,7 @@ export default function AIMentor() {
           </div>
 
           {/* Messages Area - Responsive: flex-col on mobile, grid on desktop to prevent overlap */}
-          <div className="flex-1 overflow-y-auto px-2 py-3 md:p-6 space-y-3 md:space-y-4 flex flex-col pb-32 md:pb-40 scroll-smooth">
+          <div className="flex-1 overflow-y-auto px-2 py-3 md:p-6 space-y-3 md:space-y-4 flex flex-col pb-32 md:pb-40 scroll-smooth transition-opacity duration-300" data-messages-container>
             {/* FASE 2.6: Show MTA Violations Banner */}
             {checkMTAViolations() && messages.length > 1 && (
               <div className="bg-red-500/20 border border-red-500/40 rounded-lg p-3 md:p-4 text-red-200 text-sm">

@@ -176,17 +176,7 @@ export default function AcademyPage() {
   useEffect(() => {
     // Check authentication
     const token = localStorage.getItem('mpt_token');
-    const user = localStorage.getItem('mpt_user');
-    
-    console.log('[Academy Debug] Token check:', {
-      hasToken: !!token,
-      tokenLength: token?.length,
-      hasUser: !!user,
-      user: user ? JSON.parse(user) : null,
-    });
-    
     if (!token) {
-      console.log('[Academy Debug] No token found, redirecting to login');
       router.push('/login');
       return;
     }
