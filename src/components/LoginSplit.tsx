@@ -62,23 +62,23 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
             </div>
           )}
 
-          {/* Mobile peeking mascot: clipped to show waist-up only, behind form */}
-          <div className="md:hidden absolute -bottom-3 right-0 w-32 h-40 overflow-visible pointer-events-none z-0" aria-hidden="true">
-            <div className="absolute bottom-0 right-0 w-[160px] h-[180px] transform drop-shadow-[0_8px_16px_rgba(2,6,23,0.7)]">
-              <div style={{ clipPath: 'inset(40% 0 0 0)' }} className="w-full h-full">
-                <Image
-                  src="/images/mascots/commander-arka-onboarding.png"
-                  alt="Commander Arka"
-                  width={160}
-                  height={180}
-                  className="object-contain object-top"
-                  priority={false}
-                />
-              </div>
+          {/* Mobile peeking mascot: visible from bottom-right, behind form */}
+          <div className="md:hidden fixed bottom-0 right-0 h-screen w-full pointer-events-none z-0" aria-hidden="true">
+            <div className="absolute bottom-0 right-0 w-[200px] h-[240px] transform drop-shadow-[0_12px_24px_rgba(2,6,23,0.8)]">
+              <Image
+                src="/images/mascots/commander-arka-onboarding.png"
+                alt="Commander Arka"
+                width={200}
+                height={240}
+                className="w-full h-full object-contain object-bottom"
+                priority={false}
+              />
             </div>
-            <div className="absolute -top-8 right-2 bg-slate-800/90 text-white text-xs font-semibold px-2 py-1 rounded-md shadow z-10">
-              {passwordFocus ? 'Keamanan adalah prioritas utama!' : tooltip}
-            </div>
+          </div>
+
+          {/* Tooltip - positioned above form on mobile */}
+          <div className="md:hidden absolute -bottom-16 right-0 bg-slate-800/90 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-lg z-30">
+            {passwordFocus ? 'Keamanan adalah prioritas utama!' : tooltip}
           </div>
 
           <div className="flex flex-col items-center gap-2 pt-4 md:pt-0">
