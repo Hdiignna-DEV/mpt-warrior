@@ -285,38 +285,40 @@ export function ResultNotificationModal({
   const isProfit = result === 'WIN';
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className={`relative max-w-md w-full rounded-2xl p-8 border-2 ${
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 md:p-4">
+      <div className={`relative w-full max-w-sm md:max-w-md rounded-2xl p-4 md:p-8 border-2 ${
         isProfit 
           ? 'bg-gradient-to-br from-green-900/40 to-emerald-900/40 border-green-500/50 shadow-2xl shadow-green-500/20' 
           : 'bg-gradient-to-br from-red-900/40 to-orange-900/40 border-red-500/50 shadow-2xl shadow-red-500/20'
       }`}>
         
-        {/* Mascot Display */}
-        <div className="flex justify-center mb-6">
-          <div className="w-28 h-28">
+        {/* Mascot Display - Responsive sizing */}
+        <div className="flex justify-center mb-4 md:mb-6">
+          <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 relative">
             <CommanderArkaFullDisplay 
               pose={isProfit ? 'victory' : 'warning'}
+              size="large"
+              showLabel={false}
             />
           </div>
         </div>
 
         {/* Result Text */}
-        <div className="text-center space-y-4">
-          <p className={`text-3xl font-black ${isProfit ? 'text-green-400' : 'text-red-400'}`}>
+        <div className="text-center space-y-3 md:space-y-4">
+          <p className={`text-2xl md:text-3xl font-black ${isProfit ? 'text-green-400' : 'text-red-400'}`}>
             {isProfit ? '🎖️ Kemenangan! 🎖️' : '⚠️ Alert Disiplin ⚠️'}
           </p>
           
-          <div className={`p-4 rounded-lg border ${
+          <div className={`p-3 md:p-4 rounded-lg border ${
             isProfit
               ? 'bg-green-500/10 border-green-500/30 text-green-200'
               : 'bg-red-500/10 border-red-500/30 text-red-200'
           }`}>
-            <p className="text-sm leading-relaxed font-mono">{message}</p>
+            <p className="text-xs md:text-sm leading-relaxed font-mono">{message}</p>
           </div>
 
           {/* Motivational Message */}
-          <p className={`text-sm font-bold ${isProfit ? 'text-green-300' : 'text-red-300'}`}>
+          <p className={`text-xs md:text-sm font-bold ${isProfit ? 'text-green-300' : 'text-red-300'}`}>
             {isProfit 
               ? '✨ Kemenangan yang layak! Lanjutkan konsistensi! ✨'
               : '💡 Disiplin adalah kunci kesuksesan. Jangan ulangi kesalahan ini! 💡'
@@ -327,7 +329,7 @@ export function ResultNotificationModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className={`w-full mt-6 px-4 py-3 rounded-lg font-bold transition-colors ${
+          className={`w-full mt-4 md:mt-6 px-4 py-2 md:py-3 rounded-lg font-bold transition-colors text-sm md:text-base ${
             isProfit
               ? 'bg-green-500 hover:bg-green-600 text-white'
               : 'bg-red-500 hover:bg-red-600 text-white'
