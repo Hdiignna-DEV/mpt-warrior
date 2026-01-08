@@ -84,10 +84,10 @@ export function CommanderArkaAvatar({
 
   const style = getPoseStyle();
   return (
-    <div className="flex-shrink-0 pt-0.5 pointer-events-none select-none">
+    <div className="flex-shrink-0 pt-0.5 pointer-events-none select-none z-0">
       <div className="relative w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10">
         {/* Render image only (no background) to preserve PNG transparency */}
-        <div className="relative w-full h-full flex items-center justify-center transition-all">
+        <div className="relative w-full h-full flex items-center justify-center transition-all z-0">
           <Image
             src={`/images/mascots/commander-arka-${pose}.png`}
             alt={`Commander Arka - ${pose}`}

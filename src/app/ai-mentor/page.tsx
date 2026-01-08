@@ -606,11 +606,13 @@ export default function AIMentor() {
                 <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in relative z-10`}>
                   {m.role === 'assistant' && (
                     <div className="flex gap-1.5 md:gap-3 max-w-[95%] md:max-w-[85%] relative z-20">
-                      {/* Dynamic Commander Arka Avatar pose */}
-                      <CommanderArkaAvatar 
-                        model={(m as any).model || 'Warrior Buddy'} 
-                        pose={pose}
-                      />
+                      {/* Dynamic Commander Arka Avatar pose - with opacity control */}
+                      <div className={`${mascotOpacity} transition-opacity duration-300`}>
+                        <CommanderArkaAvatar 
+                          model={(m as any).model || 'Warrior Buddy'} 
+                          pose={pose}
+                        />
+                      </div>
                       <div className="flex-1 relative">
                         {/* AI Model Badge + Emotion State */}
                         <div className="mb-1 text-[9px] font-mono text-slate-500 flex items-center gap-2">
@@ -689,11 +691,13 @@ export default function AIMentor() {
             })}
             {isLoading && (
               <div className="flex justify-start animate-fade-in gap-1.5 md:gap-2">
-                <CommanderArkaAvatar 
-                  isThinking={true}
-                  model={aiProcessing === 'vision' ? 'Warrior Vision' : 'Warrior Buddy'}
-                  pose={aiProcessing === 'vision' ? 'vision' : aiProcessing === 'buddy' ? 'empty' : 'onboarding'}
-                />
+                <div className={`${mascotOpacity} transition-opacity duration-300`}>
+                  <CommanderArkaAvatar 
+                    isThinking={true}
+                    model={aiProcessing === 'vision' ? 'Warrior Vision' : 'Warrior Buddy'}
+                    pose={aiProcessing === 'vision' ? 'vision' : aiProcessing === 'buddy' ? 'empty' : 'onboarding'}
+                  />
+                </div>
                 <div className="bg-slate-900/60 backdrop-blur-sm border-l-2 border-amber-500/50 p-2.5 md:p-4 rounded-sm flex items-center gap-2">
                   <div className="flex gap-1">
                     <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
