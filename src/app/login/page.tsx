@@ -221,6 +221,18 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
               <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
               <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-500/5 rounded-full blur-3xl"></div>
 
+              {/* Logo Background - Behind Mascot */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <Image
+                  src="/logo.png"
+                  alt="MPT Warrior Logo"
+                  width={400}
+                  height={400}
+                  className="opacity-15 object-contain"
+                  priority
+                />
+              </div>
+
               {/* Mascot Container */}
               <div className="relative z-10 flex flex-col items-center justify-center gap-8 w-full">
                 {/* Interactive Tooltip/Chat Bubble */}
