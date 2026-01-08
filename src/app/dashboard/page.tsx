@@ -44,6 +44,7 @@ export default function Dashboard() {
   const [tempBalance, setTempBalance] = useState<string>('10000000');
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [exchangeRate, setExchangeRate] = useState<number>(15750);
+  const [showArkaPanel, setShowArkaPanel] = useState(true); // Show/hide Arka panel
 
   // Initialize exchange rate on mount
   useEffect(() => {
@@ -712,34 +713,65 @@ export default function Dashboard() {
 
       </div>
 
-      {/* Touchpoint 2: Commander Arka Status Widget - Bottom Right */}
-      <div className="fixed bottom-8 right-8 z-40">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 md:p-6 shadow-2xl shadow-amber-500/20 max-w-xs"
-        >
-          <div className="flex items-start gap-4">
-            <div className="w-20 h-20 md:w-24 md:h-24 flex-shrink-0">
+      {/* Touchpoint 2: Commander Arka Floating Button - Bottom Right Corner */}
+      <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-40">
+        {/* Minimize Button */}
+        {!showArkaPanel && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={() => setShowArkaPanel(true)}
+            className="flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 rounded-full shadow-lg shadow-amber-500/50 transition-all duration-300 hover:scale-110 cursor-pointer"
+            title="Buka Commander Arka"
+          >
+            <div className="w-10 h-10 md:w-12 md:h-12">
               <CommanderArkaFullDisplay pose="vision" />
             </div>
-            <div className="flex-1 space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-amber-400 font-bold text-sm md:text-base">Commander Online & Siaga</span>
+          </motion.button>
+        )}
+
+        {/* Expanded Panel */}
+        {showArkaPanel && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 md:p-5 shadow-2xl shadow-amber-500/20 w-72 md:w-80"
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowArkaPanel(false)}
+              className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 hover:bg-red-600 rounded-full text-white flex items-center justify-center text-lg font-bold transition-colors"
+              title="Tutup panel"
+            >
+              ×
+            </button>
+
+            <div className="flex items-start gap-3">
+              {/* Mascot */}
+              <div className="w-16 h-16 md:w-20 md:h-20 flex-shrink-0 mt-1">
+                <CommanderArkaFullDisplay pose="vision" />
               </div>
-              <p className="text-slate-300 text-xs md:text-sm">
-                Siap membantu Anda dalam setiap trading decision
-              </p>
-              <Link href="/ai-mentor">
-                <button className="mt-2 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-lg transition-colors">
-                  Konsultasi Sekarang
-                </button>
-              </Link>
+
+              {/* Content */}
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-amber-400 font-bold text-sm md:text-base">Commander Online</span>
+                </div>
+                <p className="text-slate-300 text-xs md:text-sm leading-tight">
+                  Siap membantu Anda dalam setiap trading decision
+                </p>
+                <Link href="/ai-mentor">
+                  <button className="mt-3 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-lg transition-colors w-full">
+                    Konsultasi Sekarang
+                  </button>
+                </Link>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
       </div>
     </div>
   );
