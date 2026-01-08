@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, KeyRound, LogIn, Shield } from 'lucide-react';
+import { Mail, KeyRound, LogIn, Shield, Eye } from 'lucide-react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/Button';
@@ -87,34 +87,62 @@ export default function LoginPage({ onSubmit }: { onSubmit?: (data: { email: str
 
   return (
     <div className="relative min-h-screen bg-slate-900">
-      {/* ========== DESKTOP LAYOUT (>=768px) - Simple Centered Form ========== */}
-      <div className="hidden md:flex items-center justify-center min-h-screen">
-        <div className="w-full max-w-md">
-          {/* Success Animation */}
-          {showSalute && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-              <div className="animate-fadeIn bg-black/70 rounded-2xl p-6 flex flex-col items-center gap-3 backdrop-blur-md border border-green-500/30">
-                <div className="w-20 h-20">
-                  {isClient && <CommanderArkaFullDisplay pose="onboarding" size="small" showLabel={false} />}
-                </div>
-                <p className="text-green-300 font-bold text-sm">✓ Login Berhasil</p>
+      {/* ========== DESKTOP LAYOUT (>=768px) - Split Screen ========== */}
+      <div className="hidden md:grid grid-cols-2 min-h-screen">
+        {/* Left Side - Mascot & Branding */}
+        <div className="flex flex-col items-center justify-center px-8 py-12 bg-gradient-to-b from-slate-800/50 to-slate-900">
+          {/* Logo Background & Mascot */}
+          <div className="relative w-full flex flex-col items-center justify-center">
+            {/* Hexagon Background Pattern */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-5">
+              <div className="w-96 h-96 border-4 border-amber-400 rounded-3xl transform rotate-45"></div>
+            </div>
+            
+            {/* Mascot */}
+            <div className="relative z-10 flex flex-col items-center mb-8">
+              <div className="w-56 h-56 mb-6 drop-shadow-2xl">
+                {isClient && <CommanderArkaFullDisplay pose="onboarding" size="large" showLabel={false} />}
+              </div>
+              <div className="text-center">
+                <p className="text-slate-400 text-xs font-mono mb-2 uppercase tracking-widest\">Dipimpin oleh</p>
+                <h2 className="text-amber-400 font-black text-3xl mb-1\">COMMANDER ARKA</h2>
+                <p className="text-slate-400 text-sm\">Tactical Mentor & Guardian</p>
               </div>
             </div>
-          )}
-
-          {/* Logo/Branding */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-amber-400 mb-2">MPT WARRIOR</h1>
-            <p className="text-slate-400 text-sm md:text-base">Masuk ke Tactical Command Center</p>
           </div>
+        </div>
 
-          {/* Form Card */}
-          <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 md:p-8 backdrop-blur-sm">
-            <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Right Side - Login Form */}
+        <div className="flex items-center justify-center px-8 py-12">
+          <div className="w-full max-w-sm">
+            {/* Success Animation */}
+            {showSalute && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+                <div className="animate-fadeIn bg-black/70 rounded-2xl p-6 flex flex-col items-center gap-3 backdrop-blur-md border border-green-500/30">
+                  <div className="w-20 h-20">
+                    {isClient && <CommanderArkaFullDisplay pose="onboarding" size="small" showLabel={false} />}
+                  </div>
+                  <p className="text-green-300 font-bold text-sm">✓ Login Berhasil</p>
+                </div>
+              </div>
+            )}
+
+            {/* Branding */}
+            <div className="text-center mb-8">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Shield size={28} className="text-amber-400" />
+                <h1 className="text-3xl font-black text-amber-400">MPT WARRIOR</h1>
+              </div>
+              <p className="text-slate-400 text-xs">Masuk ke Tactical Command Center</p>
+            </div>
+
+            {/* Form Card */}
+            <div className="bg-slate-800/60 border border-slate-700/50 rounded-lg p-6 backdrop-blur-sm">
+              <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email Input */}
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-slate-300 text-sm font-medium">
-                  <Mail size={16} className="text-amber-400" />
+                  <Mail size={16} />
                   Email
                 </label>
                 <Input
@@ -122,7 +150,7 @@ export default function LoginPage({ onSubmit }: { onSubmit?: (data: { email: str
                   placeholder="warrior@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-100 placeholder-slate-500"
+                  className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-100 placeholder-slate-500 text-sm"
                   disabled={loading}
                 />
               </div>
@@ -130,19 +158,22 @@ export default function LoginPage({ onSubmit }: { onSubmit?: (data: { email: str
               {/* Password Input */}
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-slate-300 text-sm font-medium">
-                  <KeyRound size={16} className="text-amber-400" />
+                  <KeyRound size={16} />
                   Password
                 </label>
-                <Input
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  onFocus={() => setPasswordFocus(true)}
-                  onBlur={() => setPasswordFocus(false)}
-                  className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-100 placeholder-slate-500"
-                  disabled={loading}
-                />
+                <div className="relative">
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onFocus={() => setPasswordFocus(true)}
+                    onBlur={() => setPasswordFocus(false)}
+                    className="w-full px-4 py-2.5 bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-100 placeholder-slate-500 text-sm"
+                    disabled={loading}
+                  />
+                  <Eye size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 cursor-pointer" />
+                </div>
               </div>
 
               {/* Error Message */}
@@ -156,30 +187,28 @@ export default function LoginPage({ onSubmit }: { onSubmit?: (data: { email: str
               <Button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg flex items-center justify-center gap-2 transition-colors mt-2"
               >
-                <LogIn size={18} />
-                {loading ? 'Sedang Login...' : 'LOGIN'}
+                <LogIn size={16} />
+                {loading ? '⏳ LOGIN' : '→1  LOGIN'}
               </Button>
 
               {/* Register Link */}
-              <p className="text-center text-slate-400 text-sm mt-4">
-                Belum punya akun?{' '}
-                <a href="/register" className="text-amber-400 hover:text-amber-300 font-semibold">
-                  Register di sini
-                </a>
+              <p className="text-center text-slate-400 text-xs mt-3">
+                Belum punya akun? <a href="/register" className="text-amber-400 hover:text-amber-300 font-bold">Register di sini</a>
               </p>
             </form>
 
             {/* Security Info */}
-            <div className="mt-6 pt-6 border-t border-slate-700/50">
-              <div className="flex items-start gap-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                <Shield size={16} className="text-blue-400 mt-0.5 flex-shrink-0" />
+            <div className="mt-5 pt-5 border-t border-slate-700/50">
+              <div className="flex items-start gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <Shield size={14} className="text-blue-400 mt-1 flex-shrink-0" />
                 <div className="text-xs text-slate-300">
-                  <p className="font-semibold text-blue-300 mb-1">Keamanan Terjamin</p>
-                  <p>Login tersedia untuk member yang sudah di-approve. Status PENDING akan dinotifikasi ke halaman waiting approval.</p>
+                  <p className="font-bold text-blue-300 mb-0.5">🔒 Keamanan Terjamin</p>
+                  <p className="leading-snug">Login tersedia untuk member yang sudah di-approve. Status PENDING akan diarahkan ke halaman waiting approval.</p>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         </div>
