@@ -118,9 +118,12 @@ export default function AIMentor() {
     const file = e.target.files?.[0];
     if (!file) return;
     
+    console.log("📁 File selected:", file.name, file.type, file.size);
+    
     // Validate file type
     const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
+      console.error("❌ Invalid file type:", file.type);
       alert('❌ Format file tidak didukung!\n\nGunakan: JPG, PNG, atau WEBP');
       return;
     }
@@ -128,16 +131,20 @@ export default function AIMentor() {
     // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
+      console.error("❌ File too large:", file.size);
       alert('❌ File terlalu besar!\n\nMaksimal: 5MB\nUkuran file Anda: ' + (file.size / 1024 / 1024).toFixed(2) + 'MB\n\n💡 Compress dulu gambarnya.');
       return;
     }
     
+    console.log("✅ File validation passed, reading file...");
     const reader = new FileReader();
     reader.onloadend = () => {
+      console.log("✅ File read complete");
       setImagePreview(reader.result as string);
       setSelectedImage((reader.result as string).split(',')[1]); 
     };
     reader.onerror = () => {
+      console.error("❌ File read error");
       alert('❌ Gagal membaca file!\n\nCoba lagi atau gunakan gambar lain.');
     };
     reader.readAsDataURL(file);
