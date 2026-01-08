@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { MessageBubble, CommanderArkaAvatar } from '@/components/ChatUIEnhancers';
 import { FloatingAIMentorBubble } from '@/components/FloatingAIMentor';
 import { AIMentorSidebar } from '@/components/AIMentorSidebar';
+import { getPoseFromConversation } from '@/lib/pose-detection';
 
 // Risk Calculator Table Component
 function RiskCalculatorTable({ data }: { data: string }) {
@@ -715,21 +716,14 @@ export default function AIMentor() {
             )}
             
             {messages.map((m, i) => {
-              // Dynamic pose logic for mascot
-              let pose: 'onboarding' | 'empty' | 'vision' | 'warning' | 'victory' = 'empty';
+              // SPRINT 3: Dynamic pose detection based on message content
+              let pose = getPoseFromConversation(messages);
+              
+              // Special case: first message is always onboarding
               if (i === 0 && m.role === 'assistant') {
                 pose = 'onboarding';
-              } else if ((m as any).model?.includes('Vision')) {
-                pose = 'vision';
-              } else if (m.content?.toLowerCase().includes('kemenangan') || m.content?.toLowerCase().includes('victory') || m.content?.toLowerCase().includes('selamat')) {
-                pose = 'victory';
-              } else if (checkMTAViolations() && m.role === 'assistant') {
-                pose = 'warning';
-              } else if ((m as any).model?.toLowerCase().includes('error') || m.content?.toLowerCase().includes('gagal') || m.content?.toLowerCase().includes('error')) {
-                pose = 'warning';
-              } else if ((m as any).model?.includes('Buddy')) {
-                pose = 'empty';
               }
+              
               return (
                 <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in relative z-10`}>
                   {m.role === 'assistant' && (
