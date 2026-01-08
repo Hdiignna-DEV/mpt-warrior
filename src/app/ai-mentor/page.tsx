@@ -530,23 +530,6 @@ export default function AIMentor() {
                 </div>
               </div>
             )}
-                      <Bot className="text-green-300 w-3.5 h-3.5 md:w-5 md:h-5 animate-pulse" />
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-slate-900/40 backdrop-blur-sm border-l-2 md:border-l-4 border-green-500 rounded-sm p-2 md:p-4 flex items-center gap-2 md:gap-3 relative overflow-hidden">
-                  {/* Scanner line animation */}
-                  <div className="absolute left-0 right-0 h-px bg-green-500 animate-pulse" style={{top: '50%'}} />
-                  <div className="flex gap-1">
-                    <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-green-400 rounded-sm animate-pulse" style={{animationDelay: '0ms'}}></div>
-                    <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-green-400 rounded-sm animate-pulse" style={{animationDelay: '150ms'}}></div>
-                    <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-green-400 rounded-sm animate-pulse" style={{animationDelay: '300ms'}}></div>
-                  </div>
-                  <span className="text-[10px] md:text-sm text-green-400 font-mono uppercase tracking-wider">[ PROCESSING... ]</span>
-                  <span className="ml-1 md:ml-2 text-green-500 font-mono animate-pulse text-xs md:text-base">█</span>
-                </div>
-              </div>
-            )}
             <div ref={messagesEndRef} />
           </div>
 
