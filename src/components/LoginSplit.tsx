@@ -62,19 +62,21 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
             </div>
           )}
 
-          {/* Mobile peeking mascot: clipped, smaller, behind the form to avoid overlap */}
-          <div className="md:hidden absolute -bottom-2 right-2 w-24 h-24 overflow-hidden pointer-events-none z-0" aria-hidden="true">
-            <div className="absolute bottom-0 right-0 w-[140px] h-[160px] -translate-y-8 transform drop-shadow-[0_6px_12px_rgba(2,6,23,0.6)]">
-              <Image
-                src="/images/mascots/commander-arka-onboarding.png"
-                alt="Commander Arka"
-                width={140}
-                height={160}
-                className="object-contain"
-                priority={false}
-              />
+          {/* Mobile peeking mascot: clipped to show waist-up only, behind form */}
+          <div className="md:hidden absolute -bottom-3 right-0 w-32 h-40 overflow-visible pointer-events-none z-0" aria-hidden="true">
+            <div className="absolute bottom-0 right-0 w-[160px] h-[180px] transform drop-shadow-[0_8px_16px_rgba(2,6,23,0.7)]">
+              <div style={{ clipPath: 'inset(40% 0 0 0)' }} className="w-full h-full">
+                <Image
+                  src="/images/mascots/commander-arka-onboarding.png"
+                  alt="Commander Arka"
+                  width={160}
+                  height={180}
+                  className="object-contain object-top"
+                  priority={false}
+                />
+              </div>
             </div>
-            <div className="absolute -top-7 right-0 bg-slate-800/90 text-white text-xs font-semibold px-2 py-1 rounded-md shadow z-10">
+            <div className="absolute -top-8 right-2 bg-slate-800/90 text-white text-xs font-semibold px-2 py-1 rounded-md shadow z-10">
               {passwordFocus ? 'Keamanan adalah prioritas utama!' : tooltip}
             </div>
           </div>
