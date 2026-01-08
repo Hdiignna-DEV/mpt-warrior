@@ -9,23 +9,13 @@ const JWT_SECRET = process.env.JWT_SECRET || '33bd8a08f87cbebc4c4d39cbf23de95442
 // Semua fitur LOCKED untuk members
 // ==========================================
 
-// Public routes (Landing page + Auth pages only)
-// NOTE: Dashboard routes menggunakan client-side protection karena token di localStorage
+// Public routes (Landing page + Auth pages ONLY - no login required)
 const PUBLIC_ROUTES = [
   '/', 
   '/login', 
   '/register', 
   '/pending-approval', 
   '/access-denied',
-  '/dashboard',        // Client-side protected
-  '/ai-mentor',        // Client-side protected
-  '/journal',          // Client-side protected
-  '/calculator',       // Client-side protected
-  '/achievements',     // Client-side protected
-  '/analytics',        // Client-side protected
-  '/tutorial',         // Client-side protected
-  '/profile',          // Warrior profile (client-side protected)
-  '/profile/edit',     // Profile edit (client-side protected)
 ];
 
 // Admin-only routes (Server-side role check)
