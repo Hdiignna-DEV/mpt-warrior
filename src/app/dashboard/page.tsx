@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
+import { CommanderArkaFullDisplay } from '@/components/ChatUIEnhancers';
 import { 
   TrendingUp, Target, DollarSign, Award, Edit2, X, Check, Zap, 
   TrendingDown, Calendar, BookOpen, Calculator, Bot, BarChart3, 
@@ -709,6 +710,36 @@ export default function Dashboard() {
           </motion.div>
         )}
 
+      </div>
+
+      {/* Touchpoint 2: Commander Arka Status Widget - Bottom Right */}
+      <div className="fixed bottom-8 right-8 z-40">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 md:p-6 shadow-2xl shadow-amber-500/20 max-w-xs"
+        >
+          <div className="flex items-start gap-4">
+            <div className="w-20 h-20 md:w-24 md:h-24 flex-shrink-0">
+              <CommanderArkaFullDisplay pose="vision" />
+            </div>
+            <div className="flex-1 space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-amber-400 font-bold text-sm md:text-base">Commander Online & Siaga</span>
+              </div>
+              <p className="text-slate-300 text-xs md:text-sm">
+                Siap membantu Anda dalam setiap trading decision
+              </p>
+              <Link href="/ai-mentor">
+                <button className="mt-2 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-lg transition-colors">
+                  Konsultasi Sekarang
+                </button>
+              </Link>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

@@ -679,9 +679,10 @@ export default function AIMentor() {
               </div>
             </div>
 
-            {/* Image Preview */}
+            {/* Image Preview - Touchpoint 3: Warrior Vision Scanning */}
             {imagePreview && (
-              <div className="px-3 md:px-4 pt-3 pb-2 md:py-3 border-b border-slate-800 relative w-fit">
+              <div className="px-3 md:px-4 pt-3 pb-2 md:py-3 border-b border-slate-800 relative flex items-center gap-3">
+                {/* Image thumbnail */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src={imagePreview} 
@@ -690,6 +691,21 @@ export default function AIMentor() {
                   width={80}
                   height={80}
                 />
+                
+                {/* Commander Arka Vision Scanning */}
+                {isLoading && aiProcessing === 'vision' && (
+                  <div className="flex-1 flex items-center gap-3">
+                    <div className="w-20 h-20">
+                      <CommanderArkaAvatar pose="vision" isThinking={true} />
+                    </div>
+                    <div>
+                      <p className="text-amber-400 font-bold text-sm">📸 Sedang memindai struktur market...</p>
+                      <p className="text-slate-400 text-xs">Tunggu sebentar, Warrior</p>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Close button */}
                 <button
                   onClick={() => {
                     setImagePreview(null);

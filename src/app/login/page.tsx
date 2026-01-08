@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Shield, Mail, KeyRound, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { CommanderArkaFullDisplay } from '@/components/ChatUIEnhancers';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -62,6 +63,15 @@ export default function LoginPage() {
       </div>
 
       <div className="relative max-w-md w-full">
+        {/* Commander Arka Greeting - Touchpoint 1 */}
+        <div className="text-center mb-8 flex flex-col items-center gap-4">
+          <div className="h-32 w-32 flex items-center justify-center">
+            <CommanderArkaFullDisplay pose="onboarding" />
+          </div>
+          <p className="text-amber-400 font-bold text-lg">Siap bertugas, Warrior!</p>
+          <p className="text-slate-300 text-sm">Masuk ke markas sekarang</p>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-block p-4 bg-amber-500/20 rounded-2xl mb-4">
