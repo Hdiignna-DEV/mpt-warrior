@@ -188,7 +188,7 @@ export async function POST(req: Request): Promise<Response> {
         result = await retryWithBackoff(async () => {
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
         const model = genAI.getGenerativeModel({ 
-          model: 'gemini-1.5-flash',
+          model: 'gemini-1.5-flash-latest',
           systemInstruction: GEMINI_VISION_INSTRUCTION,
         });
 
