@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Mail, KeyRound, LogIn, Shield } from 'lucide-react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
@@ -22,6 +23,7 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
   const [passwordFocus, setPasswordFocus] = useState(false);
   const [showSalute, setShowSalute] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const router = useRouter();
 
   // Hydration fix
   useEffect(() => {
@@ -34,13 +36,41 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
     setLoading(true);
 
     try {
-      if (onSubmit) onSubmit(formData);
+      // Call login API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle pending status
+        if (data.status === 'pending') {
+          setShowSalute(true);
+          setTimeout(() => {
+            router.push('/pending-approval');
+          }, 1500);
+          return;
+        }
+        throw new Error(data.error || 'Login gagal');
+      }
+
+      // Save token
+      localStorage.setItem('token', data.token);
+      
       // Trigger salute animation
       setShowSalute(true);
-      // Duration 500ms fade transition as specified
-      setTimeout(() => setShowSalute(false), 500);
+      
+      // Redirect ke dashboard setelah animasi
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1500);
+      
+      if (onSubmit) onSubmit(formData);
     } catch (err: any) {
-      setError(err?.message || 'Terjadi kesalahan');
+      setError(err?.message || 'Terjadi kesalahan saat login');
     } finally {
       setLoading(false);
     }
