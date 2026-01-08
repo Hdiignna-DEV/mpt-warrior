@@ -195,8 +195,7 @@ export async function POST(req: Request): Promise<Response> {
         result = await retryWithBackoff(async () => {
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
         const model = genAI.getGenerativeModel({ 
-          model: 'gemini-pro-vision',
-          systemInstruction: GEMINI_VISION_INSTRUCTION,
+          model: 'gemini-pro-vision'
         });
 
         const imagePart = {
@@ -206,7 +205,7 @@ export async function POST(req: Request): Promise<Response> {
           },
         };
 
-        const prompt = `${lastMessage}\n\nAnalisa chart ini dengan standar MPT Warrior. Fokus pada SNR, rejection pattern, dan validitas setup.`;
+        const prompt = `${GEMINI_VISION_INSTRUCTION}\n\nUSER REQUEST: ${lastMessage}\n\nAnalisa chart ini dengan standar MPT Warrior. Fokus pada SNR, rejection pattern, dan validitas setup.`;
         const geminiResult = await model.generateContent([prompt, imagePart]);
         const response = await geminiResult.response;
         
