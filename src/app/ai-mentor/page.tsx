@@ -117,10 +117,28 @@ export default function AIMentor() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('❌ Format file tidak didukung!\n\nGunakan: JPG, PNG, atau WEBP');
+      return;
+    }
+    
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      alert('❌ File terlalu besar!\n\nMaksimal: 5MB\nUkuran file Anda: ' + (file.size / 1024 / 1024).toFixed(2) + 'MB\n\n💡 Compress dulu gambarnya.');
+      return;
+    }
+    
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
       setSelectedImage((reader.result as string).split(',')[1]); 
+    };
+    reader.onerror = () => {
+      alert('❌ Gagal membaca file!\n\nCoba lagi atau gunakan gambar lain.');
     };
     reader.readAsDataURL(file);
   };
