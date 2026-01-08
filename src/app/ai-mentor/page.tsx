@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Bot, Send, Paperclip, X, Sparkles, Zap, Brain, TrendingUp, Shield, Target, Download, Trash2, RotateCw, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { MessageBubble, CommanderArkaAvatar } from '@/components/ChatUIEnhancers';
 
 // Risk Calculator Table Component
 function RiskCalculatorTable({ data }: { data: string }) {
@@ -556,16 +557,11 @@ export default function AIMentor() {
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                 {m.role === 'assistant' && (
                   <div className="flex gap-1.5 md:gap-3 max-w-[95%] md:max-w-[85%]">
-                    {/* AI Avatar - Dynamic based on model */}
-                    <div className="flex-shrink-0 pt-0.5">
-                      <div className="relative w-6 h-6 md:w-8 md:h-8">
-                        {/* Different colors for different AI models */}
-                        <div className={`absolute inset-0 ${(m as any).model?.includes('Vision') ? 'bg-blue-500/20' : 'bg-purple-500/20'} rounded-full animate-ping`} />
-                        <div className={`relative w-full h-full ${(m as any).model?.includes('Vision') ? 'bg-gradient-to-br from-blue-500/40 to-blue-600/40 border-blue-500/50' : 'bg-gradient-to-br from-purple-500/40 to-purple-600/40 border-purple-500/50'} rounded-full flex items-center justify-center border`}>
-                          <Bot className={`${(m as any).model?.includes('Vision') ? 'text-blue-300' : 'text-purple-300'} w-4 h-4 md:w-5 md:h-5`} />
-                        </div>
-                      </div>
-                    </div>
+                    {/* FASE 2.6: Commander Arka Avatar with pose-based styling */}
+                    <CommanderArkaAvatar 
+                      model={(m as any).model || 'Warrior Buddy'} 
+                      pose={(m as any).model?.includes('Vision') ? 'vision' : 'empty'}
+                    />
                     <div className="flex-1 relative">
                       {/* AI Model Badge + Emotion State */}
                       <div className="mb-1 text-[9px] font-mono text-slate-500 flex items-center gap-2">
@@ -643,15 +639,11 @@ export default function AIMentor() {
             ))}
             {isLoading && (
               <div className="flex justify-start animate-fade-in gap-1.5 md:gap-2">
-                <div className="flex-shrink-0 pt-0.5">
-                  <div className="relative w-6 h-6 md:w-8 md:h-8">
-                    {/* Dynamic color based on processing mode */}
-                    <div className={`absolute inset-0 ${aiProcessing === 'vision' ? 'bg-blue-500/20' : 'bg-purple-500/20'} rounded-full animate-ping`} />
-                    <div className={`relative w-full h-full ${aiProcessing === 'vision' ? 'bg-gradient-to-br from-blue-500/40 to-blue-600/40 border-blue-500/50' : 'bg-gradient-to-br from-purple-500/40 to-purple-600/40 border-purple-500/50'} rounded-full flex items-center justify-center border animate-pulse`}>
-                      <Bot className={`${aiProcessing === 'vision' ? 'text-blue-300' : 'text-purple-300'} w-4 h-4 md:w-5 md:h-5`} />
-                    </div>
-                  </div>
-                </div>
+                <CommanderArkaAvatar 
+                  isThinking={true}
+                  model={aiProcessing === 'vision' ? 'Warrior Vision' : 'Warrior Buddy'}
+                  pose={aiProcessing === 'vision' ? 'vision' : 'empty'}
+                />
                 <div className="bg-slate-900/60 backdrop-blur-sm border-l-2 border-amber-500/50 p-2.5 md:p-4 rounded-sm flex items-center gap-2">
                   <div className="flex gap-1">
                     <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
