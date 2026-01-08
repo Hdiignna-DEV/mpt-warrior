@@ -85,7 +85,8 @@ export function CommanderArkaAvatar({
   const style = getPoseStyle();
   return (
     <div className="flex-shrink-0 pt-0.5 pointer-events-none select-none z-0">
-      <div className="relative w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10">
+      {/* Responsive avatar sizing for mobile-first: 5x5 -> 6x6 sm -> 8x8 md -> 10x10 lg */}
+      <div className="relative w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 lg:w-10 lg:h-10">
         {/* Render image only (no background) to preserve PNG transparency */}
         <div className="relative w-full h-full flex items-center justify-center transition-all z-0">
           <Image
@@ -224,9 +225,9 @@ export function CommanderArkaFullDisplay({
   showLabel?: boolean;
 }) {
   const sizeMap = {
-    small: 'w-16 h-16 sm:w-20 sm:h-20',
-    medium: 'w-24 h-24 sm:w-40 sm:h-40',
-    large: 'w-40 h-40 sm:w-80 sm:h-80'
+    small: 'w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20',
+    medium: 'w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40',
+    large: 'w-32 h-32 sm:w-64 sm:h-64 md:w-80 md:h-80'
   };
 
   const getPoseLabel = (): string => {
