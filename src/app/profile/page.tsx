@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { BadgeDisplay, BadgeLevelDisplay, BadgeGrid, getAllBadges } from '@/components/BadgeSystem';
+import { CommanderArkaFullDisplay, type CommanderArkaPose } from '@/components/ChatUIEnhancers';
 import { Badge, UserStats, ProfileSettings } from '@/types';
 import { toast } from '@/utils/toast';
 
@@ -313,6 +314,47 @@ export default function ProfilePage() {
               <p className="text-gray-400">Start trading to earn badges!</p>
             </div>
           )}
+        </Card>
+
+        {/* Commander Arka Showcase */}
+        <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-amber-500/30 p-6 md:p-8">
+          <div className="flex items-center gap-3 mb-8">
+            <span className="text-3xl">🫡</span>
+            <h2 className="text-2xl font-black text-white">Meet Commander Arka</h2>
+          </div>
+          
+          <p className="text-slate-300 mb-8 text-sm md:text-base">
+            Your AI Mentor, a Level 4 Commander from the MPT hierarchy. Commander Arka adapts their demeanor based on different situations to guide your trading journey.
+          </p>
+
+          {/* All 5 Poses Showcase */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
+            {(['onboarding', 'vision', 'victory', 'warning', 'empty'] as const).map((pose) => (
+              <div key={pose} className="flex flex-col items-center gap-3">
+                <div className="bg-slate-900/50 rounded-lg p-4 md:p-6 w-full flex items-center justify-center min-h-[160px] md:min-h-[200px]">
+                  <CommanderArkaFullDisplay 
+                    pose={pose}
+                  />
+                </div>
+                <div className="text-center">
+                  <p className="font-bold text-amber-400 text-sm md:text-base capitalize">{pose}</p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    {pose === 'onboarding' && '🫡 Welcome Mode'}
+                    {pose === 'vision' && '📸 Analysis Mode'}
+                    {pose === 'victory' && '🎖️ Victory Mode'}
+                    {pose === 'warning' && '⚠️ Alert Mode'}
+                    {pose === 'empty' && '🤔 Thinking'}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+            <p className="text-sm text-amber-200">
+              <strong>💡 Pro Tip:</strong> Watch Commander Arka's pose change during your chat sessions. The pose indicates their current mode of operation and the type of guidance you'll receive.
+            </p>
+          </div>
         </Card>
 
         {/* Referral Box (Veteran Only) */}
