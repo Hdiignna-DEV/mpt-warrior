@@ -138,6 +138,13 @@ async function retryWithBackoff<T>(
 
 export async function POST(req: Request): Promise<Response> {
   try {
+    // Validate API keys first
+    if (!GROQ_API_KEY && !GEMINI_API_KEY) {
+      return NextResponse.json({ 
+        error: '🔑 API Keys belum dikonfigurasi di Vercel.\n\n**Setup Required:**\n1. Buka Vercel Dashboard → Project Settings → Environment Variables\n2. Tambahkan:\n   - `GROQ_API_KEY` (dari https://console.groq.com/keys)\n   - `GEMINI_API_KEY` (dari https://aistudio.google.com/app/apikey)\n3. Redeploy aplikasi\n\n📚 Lihat: HYBRID_AI_QUICK_REFERENCE.md' 
+      }, { status: 503 });
+    }
+
     const { messages, image, language, threadId = 'default' } = await req.json() as { 
       messages: Array<{ role: string; content: string }>, 
       image?: string,
@@ -259,10 +266,6 @@ export async function POST(req: Request): Promise<Response> {
       model: aiModel,
       threadId: threadId,
       contextAvailable: !!(threadContext.visionAnalysis || threadContext.journalData)
-    });
-    return NextResponse.json({ 
-      choices: [{ message: { role: 'assistant', content: result } }],
-      model: 'Gemini 2.0 Flash Experimental',
     });
     
   } catch (error: unknown) {
