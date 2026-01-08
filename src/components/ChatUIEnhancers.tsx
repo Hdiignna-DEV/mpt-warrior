@@ -282,3 +282,79 @@ export function CommanderArkaFullDisplay({
     </div>
   );
 }
+
+/**
+ * ResultNotificationModal Component
+ * Touchpoint 4: Shows trading results with appropriate mascot pose
+ */
+export function ResultNotificationModal({
+  isOpen,
+  result,
+  message,
+  onClose,
+}: {
+  isOpen: boolean;
+  result: 'WIN' | 'LOSS' | 'OVERTRADE' | null;
+  message: string;
+  onClose: () => void;
+}) {
+  if (!isOpen || !result) return null;
+
+  const isProfit = result === 'WIN';
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className={`relative max-w-md w-full rounded-2xl p-8 border-2 ${
+        isProfit 
+          ? 'bg-gradient-to-br from-green-900/40 to-emerald-900/40 border-green-500/50 shadow-2xl shadow-green-500/20' 
+          : 'bg-gradient-to-br from-red-900/40 to-orange-900/40 border-red-500/50 shadow-2xl shadow-red-500/20'
+      }`}>
+        
+        {/* Mascot Display */}
+        <div className="flex justify-center mb-6">
+          <div className="w-28 h-28">
+            <CommanderArkaFullDisplay 
+              pose={isProfit ? 'victory' : 'warning'}
+            />
+          </div>
+        </div>
+
+        {/* Result Text */}
+        <div className="text-center space-y-4">
+          <p className={`text-3xl font-black ${isProfit ? 'text-green-400' : 'text-red-400'}`}>
+            {isProfit ? '🎖️ Kemenangan! 🎖️' : '⚠️ Alert Disiplin ⚠️'}
+          </p>
+          
+          <div className={`p-4 rounded-lg border ${
+            isProfit
+              ? 'bg-green-500/10 border-green-500/30 text-green-200'
+              : 'bg-red-500/10 border-red-500/30 text-red-200'
+          }`}>
+            <p className="text-sm leading-relaxed font-mono">{message}</p>
+          </div>
+
+          {/* Motivational Message */}
+          <p className={`text-sm font-bold ${isProfit ? 'text-green-300' : 'text-red-300'}`}>
+            {isProfit 
+              ? '✨ Kemenangan yang layak! Lanjutkan konsistensi! ✨'
+              : '💡 Disiplin adalah kunci kesuksesan. Jangan ulangi kesalahan ini! 💡'
+            }
+          </p>
+        </div>
+
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className={`w-full mt-6 px-4 py-3 rounded-lg font-bold transition-colors ${
+            isProfit
+              ? 'bg-green-500 hover:bg-green-600 text-white'
+              : 'bg-red-500 hover:bg-red-600 text-white'
+          }`}
+        >
+          Lanjutkan Trading
+        </button>
+      </div>
+    </div>
+  );
+}
+

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { BookOpen, Plus, Trash2, Download, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { ResultNotificationModal } from './ChatUIEnhancers';
 
 interface Trade {
   id: string;
@@ -80,6 +81,11 @@ export default function JurnalTrading() {
     noPanicClose: false,
   });
   const [disciplineScore, setDisciplineScore] = useState(0);
+
+  // Touchpoint 4: Result notification modal
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [resultMessage, setResultMessage] = useState('');
+  const [resultType, setResultType] = useState<'WIN' | 'LOSS' | 'OVERTRADE' | null>(null);
 
   // Load trades from API
   useEffect(() => {
@@ -250,6 +256,20 @@ export default function JurnalTrading() {
       // Reload trades from API
       await loadTrades();
       
+      // Touchpoint 4: Show result notification modal
+      const hasil = getHasil();
+      const riskValue = riskPercent ? parseFloat(riskPercent) : 0;
+      const isOvertrade = riskValue > 2;
+      
+      if (hasil === 'WIN') {
+        setResultType('WIN');
+        setResultMessage(`Profit tercatat pada pair ${pair}!\n\nPips: +${pip} | Risk: ${riskPercent}%\n\nBagus sekali, pertahankan konsistensi!`);
+      } else {
+        setResultType(isOvertrade ? 'OVERTRADE' : 'LOSS');
+        setResultMessage(`Loss pada pair ${pair}.\n\nPips: ${pip} | Risk: ${riskPercent}%${isOvertrade ? '\n⚠️ RISK BERLEBIHAN!' : ''}\n\nReview dan perbaiki untuk trade selanjutnya.`);
+      }
+      setShowResultModal(true);
+      
       // FASE 2.4: If screenshot exists, automatically analyze it
       if (screenshotFile) {
         try {
@@ -280,27 +300,28 @@ export default function JurnalTrading() {
       // Emit event to notify other components (like Dashboard)
       window.dispatchEvent(new CustomEvent('tradesUpdated'));
       
-      // Reset form
-      setPair('XAUUSD');
-      setPip('');
-      setCatatan('');
-      setPosisi('BUY');
-      setScreenshotFile(null);
-      setScreenshotPreview(null);
-      setEmotion('Tenang');
-      setEntryPrice('');
-      setStopLoss('');
-      setTakeProfit('');
-      setRiskPercent('');
-      setMtaCheckList({
-        planReviewed: false,
-        noFearTrade: false,
-        risiBersih: false,
-        takeProfit: false,
-        noPanicClose: false,
-      });
-      
-      alert('✅ Trade berhasil disimpan!');
+      // Reset form after modal closes (automatically in the modal onClose handler)
+      // For now, we'll reset after a delay
+      setTimeout(() => {
+        setPair('XAUUSD');
+        setPip('');
+        setCatatan('');
+        setPosisi('BUY');
+        setScreenshotFile(null);
+        setScreenshotPreview(null);
+        setEmotion('Tenang');
+        setEntryPrice('');
+        setStopLoss('');
+        setTakeProfit('');
+        setRiskPercent('');
+        setMtaCheckList({
+          planReviewed: false,
+          noFearTrade: false,
+          risiBersih: false,
+          takeProfit: false,
+          noPanicClose: false,
+        });
+      }, 2000); // Reset after modal is visible for 2 seconds
     } else {
       const data = await response.json();
       alert('❌ ' + (data.error || 'Gagal menyimpan trade'));
@@ -1020,6 +1041,17 @@ export default function JurnalTrading() {
           </div>
         </div>
       )}
+
+      {/* Touchpoint 4: Result Notification Modal */}
+      <ResultNotificationModal
+        isOpen={showResultModal}
+        result={resultType}
+        message={resultMessage}
+        onClose={() => {
+          setShowResultModal(false);
+          // Form will be reset automatically by setTimeout in handleTradeResponse
+        }}
+      />
     </div>
   );
 }
