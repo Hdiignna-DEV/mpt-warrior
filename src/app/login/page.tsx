@@ -226,9 +226,9 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
                 <Image
                   src="/logo.png"
                   alt="MPT Warrior Logo"
-                  width={900}
-                  height={900}
-                  className="opacity-20 object-contain scale-150"
+                  width={700}
+                  height={700}
+                  className="opacity-20 object-contain scale-125"
                   priority
                 />
               </div>
