@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { X } from 'lucide-react';
+import { X, MessageCircle } from 'lucide-react';
 import { CommanderArkaPose } from './ChatUIEnhancers';
 
 interface FloatingAIMentorBubbleProps {

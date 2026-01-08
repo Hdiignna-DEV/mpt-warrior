@@ -558,7 +558,7 @@ export default function AIMentor() {
             
             {messages.map((m, i) => {
               // Dynamic pose logic for mascot
-              let pose = 'empty';
+              let pose: 'onboarding' | 'empty' | 'vision' | 'warning' | 'victory' = 'empty';
               if (i === 0 && m.role === 'assistant') {
                 pose = 'onboarding';
               } else if ((m as any).model?.includes('Vision')) {
@@ -594,56 +594,57 @@ export default function AIMentor() {
                             </span>
                           )}
                         </div>
-                      {/* Cek apakah ada risk calculation */}
-                      {m.content.includes('LOT SIZE') && m.content.includes('Balance') ? (
-                        <>
-                          <RiskCalculatorTable data={m.content} />
-                          <div className="bg-slate-800/40 border border-slate-700/50 p-3 md:p-4 rounded-lg md:rounded-xl text-slate-100">
+                        {/* Cek apakah ada risk calculation */}
+                        {m.content.includes('LOT SIZE') && m.content.includes('Balance') ? (
+                          <>
+                            <RiskCalculatorTable data={m.content} />
+                            <div className="bg-slate-800/40 border border-slate-700/50 p-3 md:p-4 rounded-lg md:rounded-xl text-slate-100">
+                              <ReactMarkdown 
+                                components={{ 
+                                  strong: ({...props}) => <span className="font-bold text-yellow-400" {...props} />,
+                                  em: ({...props}) => <em className="text-slate-300 italic" {...props} />,
+                                  code: ({...props}) => <code className="bg-slate-700/50 px-1.5 py-0.5 rounded text-xs font-mono text-yellow-300" {...props} />,
+                                  p: ({...props}) => <p className="text-sm md:text-base leading-relaxed mb-2 last:mb-0" {...props} />,
+                                  ul: ({...props}) => <ul className="list-disc list-inside text-sm md:text-base space-y-1 mb-2" {...props} />,
+                                  li: ({...props}) => <li className="text-sm md:text-base" {...props} />,
+                                  h3: ({...props}) => <h3 className="font-bold text-yellow-400 text-base mt-2 mb-1" {...props} />,
+                                  blockquote: ({...props}) => <blockquote className="border-l-4 border-yellow-500 pl-3 italic text-slate-300" {...props} />,
+                                  table: ({...props}) => <div className="hidden" {...props} />,
+                                  thead: ({...props}) => <div className="hidden" {...props} />,
+                                  tbody: ({...props}) => <div className="hidden" {...props} />,
+                                }}
+                              >
+                                {m.content.split('Balance')[0] + m.content.split('LOT SIZE')[1]?.split('\n').slice(1).join('\n')}
+                              </ReactMarkdown>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="relative bg-slate-900/40 backdrop-blur-sm border-l-2 md:border-l-4 border-amber-500 p-2.5 md:p-5 rounded-sm shadow-lg shadow-amber-500/10">
+                            {/* Intel Report Badge */}
+                            <div className="hidden md:block absolute top-2 right-2 text-[9px] font-mono text-amber-500/50 uppercase tracking-widest">
+                              INTEL-REPORT // SEC-ALPHA
+                            </div>
                             <ReactMarkdown 
                               components={{ 
-                                strong: ({...props}) => <span className="font-bold text-yellow-400" {...props} />,
-                                em: ({...props}) => <em className="text-slate-300 italic" {...props} />,
-                                code: ({...props}) => <code className="bg-slate-700/50 px-1.5 py-0.5 rounded text-xs font-mono text-yellow-300" {...props} />,
-                                p: ({...props}) => <p className="text-sm md:text-base leading-relaxed mb-2 last:mb-0" {...props} />,
-                                ul: ({...props}) => <ul className="list-disc list-inside text-sm md:text-base space-y-1 mb-2" {...props} />,
-                                li: ({...props}) => <li className="text-sm md:text-base" {...props} />,
-                                h3: ({...props}) => <h3 className="font-bold text-yellow-400 text-base mt-2 mb-1" {...props} />,
-                                blockquote: ({...props}) => <blockquote className="border-l-4 border-yellow-500 pl-3 italic text-slate-300" {...props} />,
-                                table: ({...props}) => <div className="hidden" {...props} />,
-                                thead: ({...props}) => <div className="hidden" {...props} />,
-                                tbody: ({...props}) => <div className="hidden" {...props} />,
+                                strong: ({...props}) => <span className="font-bold text-amber-400" {...props} />,
+                                em: ({...props}) => <em className="text-slate-300 italic font-mono" {...props} />,
+                                code: ({...props}) => <code className="bg-slate-800/60 px-1.5 py-0.5 rounded-sm text-[11px] md:text-xs font-mono text-green-400 border border-green-500/20" {...props} />,
+                                p: ({...props}) => <p className="text-[13px] leading-relaxed md:text-base font-mono mb-2 md:mb-3 last:mb-0 text-slate-100" {...props} />,
+                                ul: ({...props}) => <ul className="list-none text-[13px] md:text-base space-y-1.5 md:space-y-2 mb-2 md:mb-3 font-mono" {...props} />,
+                                li: ({...props}) => <li className="text-[13px] md:text-base before:content-['▸_'] before:text-amber-500 before:font-bold" {...props} />,
+                                h3: ({...props}) => <h3 className="font-mono font-bold text-amber-400 text-xs md:text-sm uppercase tracking-wider mt-2 md:mt-3 mb-1.5 md:mb-2 border-b border-amber-500/30 pb-1" {...props} />,
+                                blockquote: ({...props}) => <blockquote className="border-l-2 border-amber-500 pl-2 md:pl-4 italic text-slate-400 bg-amber-500/5 py-1.5 md:py-2 font-mono text-[13px] md:text-base" {...props} />,
                               }}
                             >
-                              {m.content.split('Balance')[0] + m.content.split('LOT SIZE')[1]?.split('\n').slice(1).join('\n')}
+                              {m.content}
                             </ReactMarkdown>
                           </div>
-                        </>
-                      ) : (
-                        <div className="relative bg-slate-900/40 backdrop-blur-sm border-l-2 md:border-l-4 border-amber-500 p-2.5 md:p-5 rounded-sm shadow-lg shadow-amber-500/10">
-                          {/* Intel Report Badge */}
-                          <div className="hidden md:block absolute top-2 right-2 text-[9px] font-mono text-amber-500/50 uppercase tracking-widest">
-                            INTEL-REPORT // SEC-ALPHA
-                          </div>
-                          <ReactMarkdown 
-                            components={{ 
-                              strong: ({...props}) => <span className="font-bold text-amber-400" {...props} />,
-                              em: ({...props}) => <em className="text-slate-300 italic font-mono" {...props} />,
-                              code: ({...props}) => <code className="bg-slate-800/60 px-1.5 py-0.5 rounded-sm text-[11px] md:text-xs font-mono text-green-400 border border-green-500/20" {...props} />,
-                              p: ({...props}) => <p className="text-[13px] leading-relaxed md:text-base font-mono mb-2 md:mb-3 last:mb-0 text-slate-100" {...props} />,
-                              ul: ({...props}) => <ul className="list-none text-[13px] md:text-base space-y-1.5 md:space-y-2 mb-2 md:mb-3 font-mono" {...props} />,
-                              li: ({...props}) => <li className="text-[13px] md:text-base before:content-['▸_'] before:text-amber-500 before:font-bold" {...props} />,
-                              h3: ({...props}) => <h3 className="font-mono font-bold text-amber-400 text-xs md:text-sm uppercase tracking-wider mt-2 md:mt-3 mb-1.5 md:mb-2 border-b border-amber-500/30 pb-1" {...props} />,
-                              blockquote: ({...props}) => <blockquote className="border-l-2 border-amber-500 pl-2 md:pl-4 italic text-slate-400 bg-amber-500/5 py-1.5 md:py-2 font-mono text-[13px] md:text-base" {...props} />,
-                            }}
-                          >
-                            {m.content}
-                          </ReactMarkdown>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   )}
-                {m.role === 'user' && (
-                  <div className="bg-transparent border-r-2 border-amber-500 text-slate-100 p-2.5 md:p-4 rounded-sm max-w-[95%] md:max-w-[85%] text-right">
+                  {m.role === 'user' && (
+                    <div className="bg-transparent border-r-2 border-amber-500 text-slate-100 p-2.5 md:p-4 rounded-sm max-w-[95%] md:max-w-[85%] text-right">
                     <ReactMarkdown 
                       components={{ 
                         p: ({...props}) => <p className="text-[13px] leading-relaxed md:text-base font-mono" {...props} />,
@@ -654,6 +655,7 @@ export default function AIMentor() {
                   </div>
                 )}
               </div>
+            );
             })}
             {isLoading && (
               <div className="flex justify-start animate-fade-in gap-1.5 md:gap-2">
