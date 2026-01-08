@@ -305,12 +305,6 @@ export default function JurnalTrading() {
       const data = await response.json();
       alert('❌ ' + (data.error || 'Gagal menyimpan trade'));
     }
-    } catch (error) {
-      console.error('Error adding trade:', error);
-      alert('❌ Terjadi kesalahan saat menyimpan trade');
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   const hapusTrade = async (id: string) => {
