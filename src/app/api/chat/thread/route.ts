@@ -4,21 +4,21 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAuth } from '@/lib/auth/jwt';
+import { verifyToken } from '@/lib/auth';
 import { createChatThread, updateChatThread } from '@/lib/db/chat-service';
 
 export async function PUT(request: NextRequest) {
   try {
     // Verify authentication
-    const authResult = await verifyAuth(request);
-    if (!authResult.success) {
+    const user = await verifyToken(request);
+    if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const userId = authResult.userId!;
+    const userId = user.userId;
     const { threadId, title } = await request.json();
 
     // Validate inputs

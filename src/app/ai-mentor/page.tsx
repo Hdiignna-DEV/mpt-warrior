@@ -717,7 +717,7 @@ export default function AIMentor() {
             
             {messages.map((m, i) => {
               // SPRINT 3: Dynamic pose detection based on message content
-              let pose = getPoseFromConversation(messages);
+              let pose = getPoseFromConversation(messages as Array<{ role: 'user' | 'assistant'; content: string }>);
               
               // Special case: first message is always onboarding
               if (i === 0 && m.role === 'assistant') {
