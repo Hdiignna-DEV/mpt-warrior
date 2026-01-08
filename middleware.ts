@@ -118,7 +118,15 @@ export async function middleware(request: NextRequest) {
   // LAYER 5: Protected Routes (Active Users Only)
   // ============================================
   if (PROTECTED_ROUTES.some(route => pathname.startsWith(route))) {
+    console.log('[MPT-MW] Protected route check:', {
+      path: pathname,
+      userStatus: user.status,
+      userRole: user.role,
+      isActive: user.status === 'active',
+    });
+    
     if (user.status !== 'active') {
+      console.log('[MPT-MW] User not active, redirecting to pending-approval. Status:', user.status);
       return NextResponse.redirect(new URL('/pending-approval', request.url));
     }
     
