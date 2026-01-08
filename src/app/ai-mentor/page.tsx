@@ -96,7 +96,8 @@ export default function AIMentor() {
   const [showHistory, setShowHistory] = useState(false);
   const [chatHistory, setChatHistory] = useState<Array<{ id: string; title: string; messages: typeof messages; date: string }>>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-  const [threadId] = useState(() => `thread_${Date.now()}`);
+  const [threadId, setThreadId] = useState<string | null>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -133,12 +134,40 @@ export default function AIMentor() {
     };
   }, []);
 
-  // Load chat history from localStorage
+  // Load chat history from Cosmos DB
   useEffect(() => {
-    const saved = localStorage.getItem('mpt_ai_chat_history');
-    if (saved) {
-      setChatHistory(JSON.parse(saved));
-    }
+    const loadChatHistory = async () => {
+      try {
+        setIsLoadingHistory(true);
+        const token = localStorage.getItem('mpt_token');
+        const response = await fetch('/api/chat/history', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Convert API response to local format
+          const formattedHistory = data.threads.map((thread: any) => ({
+            id: thread.id,
+            title: thread.title,
+            messages: [], // Will be loaded on-demand
+            date: new Date(thread.updatedAt).toLocaleString('id-ID'),
+          }));
+          setChatHistory(formattedHistory);
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+        // Fall back to localStorage
+        const saved = localStorage.getItem('mpt_ai_chat_history');
+        if (saved) {
+          setChatHistory(JSON.parse(saved));
+        }
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    loadChatHistory();
   }, []);
   
   // FASE 2.6: Load latest trades for AI context
@@ -167,10 +196,33 @@ export default function AIMentor() {
     loadLatestTrades();
   }, []);
 
-  // Save chat history
+  // Save chat history locally and to Cosmos DB
   const saveChatHistory = (newHistory: typeof chatHistory) => {
     setChatHistory(newHistory);
     localStorage.setItem('mpt_ai_chat_history', JSON.stringify(newHistory));
+  };
+
+  // Persist message to Cosmos DB (fire-and-forget)
+  const persistMessage = async (
+    threadId: string,
+    role: 'user' | 'assistant',
+    content: string,
+    model?: string
+  ) => {
+    try {
+      const token = localStorage.getItem('mpt_token');
+      await fetch('/api/chat/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ threadId, role, content, model }),
+      });
+    } catch (error) {
+      console.error('Background error persisting message:', error);
+      // Silently fail - message is already in UI
+    }
   };
 
   useEffect(() => { 
@@ -240,6 +292,35 @@ export default function AIMentor() {
     ];
 
     try {
+      // Create a new thread if none exists
+      if (!threadId) {
+        const token = localStorage.getItem('mpt_token');
+        const threadTitle = textToSend.substring(0, 50) + (textToSend.length > 50 ? '...' : '');
+        
+        const threadResponse = await fetch('/api/chat/thread', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ title: threadTitle }),
+        });
+
+        if (threadResponse.ok) {
+          const threadData = await threadResponse.json();
+          const newThreadId = threadData.thread.id;
+          setThreadId(newThreadId);
+          
+          // Persist user message to new thread
+          persistMessage(newThreadId, 'user', userMessageContent);
+        } else {
+          console.warn('Failed to create thread, continuing without persistence');
+        }
+      } else {
+        // Persist user message to existing thread
+        persistMessage(threadId, 'user', userMessageContent);
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -273,7 +354,12 @@ export default function AIMentor() {
       const finalMessages = [...updatedMessages, aiMessage];
       setMessages(finalMessages);
 
-      // Auto-save if this is a new conversation
+      // Persist AI response (fire-and-forget)
+      if (threadId) {
+        persistMessage(threadId, 'assistant', aiMessage.content, aiMessage.model);
+      }
+
+      // Auto-save to local history if this is a new conversation
       if (!currentChatId && updatedMessages.length === 1) {
         const newChatId = Date.now().toString();
         const newChat = {
@@ -396,18 +482,60 @@ export default function AIMentor() {
     setConversationMode('general');
   };
 
-  const loadChat = (chatId: string) => {
-    const chat = chatHistory.find(c => c.id === chatId);
-    if (chat) {
-      setMessages(chat.messages);
+  const loadChat = async (chatId: string) => {
+    // First check local history
+    const localChat = chatHistory.find(c => c.id === chatId);
+    if (localChat && localChat.messages.length > 0) {
+      setMessages(localChat.messages);
       setCurrentChatId(chatId);
+      setThreadId(chatId);
       setShowHistory(false);
+      return;
+    }
+
+    // Load from Cosmos DB
+    try {
+      const token = localStorage.getItem('mpt_token');
+      const response = await fetch(`/api/chat/history/${chatId}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const loadedMessages = data.messages.map((msg: any) => ({
+          role: msg.role,
+          content: msg.content,
+          model: msg.model,
+        }));
+
+        setMessages(loadedMessages);
+        setCurrentChatId(chatId);
+        setThreadId(chatId);
+        setShowHistory(false);
+      } else {
+        console.error('Failed to load chat from database');
+      }
+    } catch (error) {
+      console.error('Error loading chat:', error);
     }
   };
 
-  const deleteChat = (chatId: string) => {
+  const deleteChat = async (chatId: string) => {
+    // Delete from local history
     const newHistory = chatHistory.filter(c => c.id !== chatId);
     saveChatHistory(newHistory);
+
+    // Delete from Cosmos DB (fire-and-forget)
+    try {
+      const token = localStorage.getItem('mpt_token');
+      await fetch(`/api/chat/thread/${chatId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+    } catch (error) {
+      console.error('Error deleting chat from database:', error);
+    }
+
     if (currentChatId === chatId) {
       startNewChat();
     }
