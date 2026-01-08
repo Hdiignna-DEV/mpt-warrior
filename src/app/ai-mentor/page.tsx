@@ -156,6 +156,19 @@ export default function AIMentor() {
           language: i18n.language // Send current language to API
         }),
       });
+      
+      // Handle non-OK responses
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        // Display server error message to user
+        setMessages((prev) => [...prev, { 
+          role: 'assistant', 
+          content: errorData.error || `⚠️ Error ${response.status}: Gagal memproses permintaan.` 
+        }]);
+        return;
+      }
+      
       const data = await response.json();
       const aiMessage = data.choices[0].message;
       
@@ -175,10 +188,11 @@ export default function AIMentor() {
         saveChatHistory(newHistory);
         setCurrentChatId(newChatId);
       }
-    } catch {
+    } catch (error) {
+      console.error('AI Mentor error:', error);
       setMessages((prev) => [...prev, { 
         role: 'assistant', 
-        content: '⚠️ Gagal koneksi ke AI. Cek API Key atau koneksi internet.' 
+        content: '❌ Gagal koneksi ke AI Mentor.\n\n**Kemungkinan penyebab:**\n- Koneksi internet bermasalah\n- Server sedang maintenance\n- Quota API habis\n\nSilakan coba lagi dalam beberapa menit.' 
       }]);
     } finally {
       setIsLoading(false);

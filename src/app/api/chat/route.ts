@@ -16,6 +16,54 @@ RULES:
 // Get Gemini API Key
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
+// Rate limiting: Simple in-memory store (for serverless, use Redis/Upstash in production)
+const requestTimestamps = new Map<string, number[]>();
+
+function isRateLimited(userId: string): boolean {
+  const now = Date.now();
+  const userRequests = requestTimestamps.get(userId) || [];
+  
+  // Remove requests older than 1 minute
+  const recentRequests = userRequests.filter(timestamp => now - timestamp < 60000);
+  
+  // Limit: 10 requests per minute per user
+  if (recentRequests.length >= 10) {
+    return true;
+  }
+  
+  recentRequests.push(now);
+  requestTimestamps.set(userId, recentRequests);
+  return false;
+}
+
+// Retry with exponential backoff
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  baseDelay = 1000
+): Promise<T> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      const isLastAttempt = attempt === maxRetries - 1;
+      const isRetryable = error.message?.includes('RESOURCE_EXHAUSTED') || 
+                          error.message?.includes('quota') ||
+                          error.message?.includes('429');
+      
+      if (isLastAttempt || !isRetryable) {
+        throw error;
+      }
+      
+      // Exponential backoff: 1s, 2s, 4s
+      const delay = baseDelay * Math.pow(2, attempt);
+      console.log(`⏳ Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  throw new Error('Max retries exceeded');
+}
+
 export async function POST(req: Request): Promise<Response> {
   try {
     // Validate Gemini API Key
@@ -30,6 +78,14 @@ export async function POST(req: Request): Promise<Response> {
       image?: string, 
       language?: string 
     };
+    
+    // Simple rate limiting (use IP or user ID from auth in production)
+    const userId = req.headers.get('x-forwarded-for') || 'anonymous';
+    if (isRateLimited(userId)) {
+      return NextResponse.json({ 
+        error: 'Terlalu banyak request. Silakan tunggu 1 menit sebelum mencoba lagi.' 
+      }, { status: 429 });
+    }
     
     const lastMessage = messages[messages.length - 1].content;
     
@@ -63,7 +119,8 @@ RULES:
     
     let result: string;
 
-    try {
+    // Wrap Gemini calls with retry logic
+    result = await retryWithBackoff(async () => {
       const modelConfig = { 
         model: 'gemini-2.0-flash-exp',
         systemInstruction: fullSystemPrompt,
@@ -83,7 +140,7 @@ RULES:
 
         const geminiResult = await model.generateContent([lastMessage, imagePart]);
         const response = await geminiResult.response;
-        result = response.text();
+        return response.text();
       } else {
         // TEXT ONLY
         console.log("💬 Processing text with Gemini...");
@@ -91,46 +148,46 @@ RULES:
         
         const geminiResult = await model.generateContent(lastMessage);
         const response = await geminiResult.response;
-        result = response.text();
+        return response.text();
       }
+    });
 
-      console.log("✅ Response generated successfully with Gemini 2.0 Flash");
+    console.log("✅ Response generated successfully with Gemini 2.0 Flash");
 
-      return NextResponse.json({ 
-        choices: [{ message: { role: 'assistant', content: result } }],
-        model: 'Gemini 2.0 Flash Experimental',
-      });
-    } catch (geminiError: any) {
-      console.error("❌ Gemini API error:", geminiError);
-      
-      // Provide helpful error messages
-      if (geminiError.message?.includes('API_KEY_INVALID') || geminiError.message?.includes('API key')) {
-        return NextResponse.json({ 
-          error: 'Gemini API key tidak valid. Silakan periksa konfigurasi API key.' 
-        }, { status: 401 });
-      }
-      
-      if (geminiError.message?.includes('quota') || geminiError.message?.includes('RESOURCE_EXHAUSTED')) {
-        return NextResponse.json({ 
-          error: 'Quota Gemini API habis. Silakan coba lagi dalam beberapa menit atau upgrade ke paid plan.' 
-        }, { status: 429 });
-      }
-
-      if (geminiError.message?.includes('SAFETY')) {
-        return NextResponse.json({ 
-          error: 'Konten terdeteksi tidak aman. Mohon gunakan bahasa yang lebih profesional.' 
-        }, { status: 400 });
-      }
-      
-      throw geminiError;
-    }
+    return NextResponse.json({ 
+      choices: [{ message: { role: 'assistant', content: result } }],
+      model: 'Gemini 2.0 Flash Experimental',
+    });
+    return NextResponse.json({ 
+      choices: [{ message: { role: 'assistant', content: result } }],
+      model: 'Gemini 2.0 Flash Experimental',
+    });
     
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error("❌ AI Mentor Error:", error);
     
+    // Specific error handling
+    if (errorMessage.includes('API_KEY_INVALID') || errorMessage.includes('API key')) {
+      return NextResponse.json({ 
+        error: '🔑 API key tidak valid. Hubungi admin untuk konfigurasi ulang.' 
+      }, { status: 401 });
+    }
+    
+    if (errorMessage.includes('quota') || errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('429')) {
+      return NextResponse.json({ 
+        error: '⏰ Quota Gemini habis untuk hari ini. Coba lagi besok atau hubungi admin untuk upgrade ke paid plan.\n\n💡 Tip: Free tier = 1,500 requests/hari.' 
+      }, { status: 429 });
+    }
+
+    if (errorMessage.includes('SAFETY')) {
+      return NextResponse.json({ 
+        error: '⚠️ Pesan terdeteksi tidak aman. Gunakan bahasa yang lebih profesional.' 
+      }, { status: 400 });
+    }
+    
     return NextResponse.json({ 
-      error: `AI Mentor mengalami gangguan: ${errorMessage}. Silakan coba lagi.` 
+      error: `❌ AI Mentor error: ${errorMessage}\n\nSilakan coba lagi atau hubungi admin jika masalah berlanjut.` 
     }, { status: 500 });
   }
 }
