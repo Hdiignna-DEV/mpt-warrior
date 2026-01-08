@@ -8,6 +8,8 @@ import { Bot, Send, Paperclip, X, Sparkles, Zap, Brain, TrendingUp, Shield, Targ
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { MessageBubble, CommanderArkaAvatar } from '@/components/ChatUIEnhancers';
+import { FloatingAIMentorBubble } from '@/components/FloatingAIMentor';
+import { AIMentorSidebar } from '@/components/AIMentorSidebar';
 
 // Risk Calculator Table Component
 function RiskCalculatorTable({ data }: { data: string }) {
