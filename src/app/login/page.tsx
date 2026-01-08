@@ -64,13 +64,13 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
       ) : (
         <>
           {/* ========== MOBILE LAYOUT ========== */}
-          <div className="md:hidden flex flex-col items-center justify-center bg-slate-900 p-4 min-h-screen">
+          <div className="md:hidden flex flex-col items-center justify-center bg-slate-900 min-h-screen p-3">
             <div className="relative w-full max-w-sm">
               {/* Salute Animation - Smooth Fade Transition (0.5s) */}
               {showSalute && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-                  <div className="animate-fadeIn bg-black/60 rounded-lg p-6 flex flex-col items-center gap-3 backdrop-blur-sm">
-                    <div className="w-20 h-20">
+                  <div className="animate-fadeIn bg-black/70 rounded-2xl p-6 flex flex-col items-center gap-3 backdrop-blur-md border border-green-500/30">
+                    <div className="w-24 h-24">
                       {isClient && <CommanderArkaFullDisplay pose="onboarding" size="small" showLabel={false} />}
                     </div>
                     <p className="text-green-300 font-bold text-sm">✓ Akses Diterima</p>
@@ -78,28 +78,28 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
                 </div>
               )}
 
-              {/* Header */}
-              <div className="flex flex-col items-center gap-1 mb-6">
-                <div className="flex items-center gap-2">
-                  <Shield size={20} className="text-amber-400" />
-                  <p className="text-amber-400 font-black text-2xl">MPT WARRIOR</p>
+              {/* Header - Compact for mobile */}
+              <div className="flex flex-col items-center gap-0.5 mb-5">
+                <div className="flex items-center gap-1.5">
+                  <Shield size={18} className="text-amber-400" />
+                  <p className="text-amber-400 font-black text-xl">MPT WARRIOR</p>
                 </div>
-                <p className="text-slate-400 text-xs">Tactical Command Center</p>
+                <p className="text-slate-400 text-xs">Tactical Command</p>
               </div>
 
-              {/* Form Container */}
-              <div className="glass-premium rounded-2xl p-6 relative z-20 mb-6 border border-slate-700/50">
-                <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Form Container - Optimized for mobile */}
+              <div className="glass-premium rounded-2xl p-5 relative z-20 mb-4 border border-slate-700/50 shadow-lg">
+                <form onSubmit={handleSubmit} className="space-y-3">
                   {error && (
-                    <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 text-red-400 text-xs flex items-start gap-2">
-                      <span>⚠️</span>
-                      <span>{error}</span>
+                    <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-2.5 text-red-400 text-xs flex items-start gap-2">
+                      <span className="text-sm">⚠️</span>
+                      <span className="flex-1">{error}</span>
                     </div>
                   )}
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-2">
-                      <Mail size={14} /> Email
+                    <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                      <Mail size={13} /> Email
                     </label>
                     <Input
                       type="email"
@@ -107,13 +107,13 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
-                      className="w-full bg-slate-800/50 border-slate-700/50 text-white text-sm py-2 focus:border-amber-400/50 transition-colors"
+                      className="w-full bg-slate-800/50 border-slate-700/50 text-white text-sm py-2.5 px-3 focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/20 transition-all rounded-lg"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-2">
-                      <KeyRound size={14} /> Password
+                    <label className="block text-xs font-bold text-slate-300 mb-1 flex items-center gap-1.5">
+                      <KeyRound size={13} /> Password
                     </label>
                     <Input
                       type="password"
@@ -123,47 +123,50 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
                       onFocus={() => setPasswordFocus(true)}
                       onBlur={() => setPasswordFocus(false)}
                       required
-                      className="w-full bg-slate-800/50 border-slate-700/50 text-white text-sm py-2 focus:border-amber-400/50 transition-colors"
+                      className="w-full bg-slate-800/50 border-slate-700/50 text-white text-sm py-2.5 px-3 focus:border-amber-400/50 focus:ring-1 focus:ring-amber-400/20 transition-all rounded-lg"
                     />
                   </div>
 
                   <Button 
                     type="submit" 
                     disabled={loading} 
-                    className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm py-3 flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-amber-500/20"
+                    className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm py-2.5 flex items-center justify-center gap-2 transition-all duration-200 shadow-lg hover:shadow-amber-500/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
                   >
                     {loading ? (
                       <>
-                        <div className="animate-spin">⏳</div> Logging in...
+                        <div className="animate-spin">⏳</div> Masuk...
                       </>
                     ) : (
                       <>
-                        <LogIn size={16} /> LOGIN
+                        <LogIn size={15} /> LOGIN
                       </>
                     )}
                   </Button>
 
-                  <div className="text-center text-xs text-slate-400">
+                  <div className="text-center text-xs text-slate-400 pt-1">
                     Belum punya akun?{' '}
                     <a href="/register" className="text-amber-400 hover:text-amber-300 font-bold transition-colors">
-                      Register di sini
+                      Register
                     </a>
                   </div>
                 </form>
               </div>
 
-              {/* Mascot Peeking Area (Bottom) - Mobile Only */}
-              <div className="flex gap-3 items-end">
-                <div className="flex-1 bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                  <p className="font-bold text-blue-400 text-xs mb-1">🔒 Secure</p>
-                  <p className="text-xs text-slate-400 leading-tight">
+              {/* Info + Mascot Peeking Section */}
+              <div className="relative">
+                {/* Info Box */}
+                <div className="bg-gradient-to-r from-blue-500/15 to-blue-500/5 border border-blue-500/30 rounded-lg p-3 mb-0 relative z-10">
+                  <p className="font-bold text-blue-400 text-xs mb-0.5 flex items-center gap-1">
+                    <Shield size={12} /> Secure
+                  </p>
+                  <p className="text-xs text-slate-300 leading-snug font-medium">
                     {passwordFocus ? '✓ Keamanan adalah prioritas utama!' : 'Siap bertugas, Warrior?'}
                   </p>
                 </div>
 
-                {/* Mascot - Peeking from bottom-right */}
-                <div className="w-[80px] h-[100px] relative flex-shrink-0 pointer-events-none">
-                  <div className="drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]">
+                {/* Mascot - Peeking from bottom-right with absolute positioning */}
+                <div className="absolute -bottom-2 right-0 w-24 h-32 pointer-events-none">
+                  <div className="drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)] h-full flex items-end justify-end">
                     {isClient && <CommanderArkaFullDisplay pose="onboarding" size="small" showLabel={false} />}
                   </div>
                 </div>
