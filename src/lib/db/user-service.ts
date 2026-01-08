@@ -216,6 +216,25 @@ export async function updateUserLogin(userId: string): Promise<void> {
 }
 
 /**
+ * Update user with partial updates (merge with existing data)
+ */
+export async function updateUser(user: User): Promise<User> {
+  const container = getUsersContainer();
+  
+  if (!user.id) {
+    throw new Error("User ID is required for update");
+  }
+
+  const updatedUser: User = {
+    ...user,
+    updatedAt: new Date(),
+  };
+
+  const { resource } = await container.item(user.id, user.id).replace(updatedUser);
+  return resource as User;
+}
+
+/**
  * Get active users
  * SUPER_ADMIN sees all active users (including ADMINs)
  * ADMIN only sees active WARRIORs
