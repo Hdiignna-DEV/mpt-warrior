@@ -66,7 +66,7 @@ export async function middleware(request: NextRequest) {
   // ============================================
   // LAYER 2: Public Routes (Landing + Auth only)
   // ============================================
-  if (PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/_next') || pathname.startsWith('/api')) {
+  if (PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/_next') || pathname.startsWith('/api/auth')) {
     return response;
   }
 
