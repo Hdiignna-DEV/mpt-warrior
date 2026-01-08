@@ -459,7 +459,8 @@ export default function AIMentor() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      {/* Main Chat Area - Proper z-index and layout */}
+      <div className="flex flex-1 overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         {/* Chat History Sidebar - Mobile Modal & Desktop Sidebar */}
         {showHistory && (
           <>
@@ -540,8 +541,8 @@ export default function AIMentor() {
             </button>
           </div>
 
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto px-2 py-3 md:p-6 space-y-3 md:space-y-4 flex flex-col pb-32 md:pb-40">
+          {/* Messages Area - Responsive: flex-col on mobile, grid on desktop to prevent overlap */}
+          <div className="flex-1 overflow-y-auto px-2 py-3 md:p-6 space-y-3 md:space-y-4 flex flex-col pb-32 md:pb-40 scroll-smooth">
             {/* FASE 2.6: Show MTA Violations Banner */}
             {checkMTAViolations() && messages.length > 1 && (
               <div className="bg-red-500/20 border border-red-500/40 rounded-lg p-3 md:p-4 text-red-200 text-sm">
@@ -573,9 +574,9 @@ export default function AIMentor() {
                 pose = 'empty';
               }
               return (
-                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
+                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in relative z-10`}>
                   {m.role === 'assistant' && (
-                    <div className="flex gap-1.5 md:gap-3 max-w-[95%] md:max-w-[85%]">
+                    <div className="flex gap-1.5 md:gap-3 max-w-[95%] md:max-w-[85%] relative z-20">
                       {/* Dynamic Commander Arka Avatar pose */}
                       <CommanderArkaAvatar 
                         model={(m as any).model || 'Warrior Buddy'} 
