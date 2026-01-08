@@ -195,7 +195,7 @@ export async function POST(req: Request): Promise<Response> {
         result = await retryWithBackoff(async () => {
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
         const model = genAI.getGenerativeModel({ 
-          model: 'gemini-pro-vision'
+          model: 'gemini-1.5-flash-002'
         });
 
         const imagePart = {
@@ -230,9 +230,10 @@ export async function POST(req: Request): Promise<Response> {
         aiModel = '⚠️ Debug Mode';
       }
 
+      
     } else if (image && !GEMINI_API_KEY) {
       // Image uploaded but no Gemini key
-      result = `⚠️ **Analisa gambar tidak tersedia.**\n\nGemini Vision belum dikonfigurasi. Untuk menggunakan fitur analisa chart:\n\n1. Admin perlu menambahkan GEMINI_API_KEY di Vercel\n2. Dapatkan key dari: https://aistudio.google.com/app/apikey\n\nUntuk sementara, kirim pertanyaan tanpa gambar. ⚡ Groq Buddy siap membantu!`;
+      result = `⚠️ **Analisa gambar tidak tersedia.**\n\nGemini Vision belum dikonfigurasi. Admin perlu menambahkan GEMINI_API_KEY.\n\nUntuk sementara, kirim pertanyaan tanpa gambar. ⚡ Groq Buddy siap membantu!`;
       aiModel = '⚠️ Config Required';
       
     } else {
