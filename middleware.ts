@@ -33,6 +33,7 @@ const PROTECTED_ROUTES = [
   '/achievements',      // Achievements
   '/analytics',         // Analytics Dashboard
   '/tutorial',          // The MPT Way (PDF Module)
+  '/academy',           // Warrior Academy (Education Hub)
 ];
 
 // Middleware untuk auth dan security
