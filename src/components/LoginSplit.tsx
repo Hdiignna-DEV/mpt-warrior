@@ -62,22 +62,22 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
             </div>
           )}
 
-          {/* Mobile peeking mascot: positioned at top-left, visible above form */}
-          <div className="md:hidden fixed top-0 left-0 w-full h-screen pointer-events-none z-10" aria-hidden="true">
-            <div className="absolute top-12 left-0 w-[180px] h-[220px] transform drop-shadow-[0_12px_24px_rgba(2,6,23,0.8)]">
+          {/* Mobile peeking mascot: positioned at bottom-right corner, peeking */}
+          <div className="md:hidden fixed bottom-0 right-0 w-full h-screen pointer-events-none z-0" aria-hidden="true">
+            <div className="absolute bottom-0 right-2 w-[160px] h-[200px] transform drop-shadow-[0_12px_24px_rgba(2,6,23,0.8)]">
               <Image
                 src="/images/mascots/commander-arka-onboarding.png"
                 alt="Commander Arka"
-                width={180}
-                height={220}
-                className="w-full h-full object-contain object-top"
+                width={160}
+                height={200}
+                className="w-full h-full object-contain object-bottom"
                 priority={false}
               />
             </div>
           </div>
 
-          {/* Tooltip - positioned above form on mobile */}
-          <div className="md:hidden absolute top-16 left-4 bg-slate-800/90 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-lg z-30 max-w-[120px]">
+          {/* Tooltip - positioned near mascot on mobile */}
+          <div className="md:hidden fixed bottom-24 right-2 bg-slate-800/90 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow-lg z-30 max-w-[140px]">
             {passwordFocus ? 'Keamanan adalah prioritas utama!' : tooltip}
           </div>
 
