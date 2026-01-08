@@ -42,34 +42,34 @@ export function AIMentorSidebar({
 
   return (
     <aside
-      className={`hidden lg:flex fixed right-0 top-0 h-screen w-1/5 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-l border-slate-700/50 flex-col items-center justify-center p-4 transition-all duration-300 z-30 ${
+      className={`hidden lg:flex fixed right-0 top-0 h-screen w-1/5 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border-l border-slate-700/50 flex-col items-center justify-center p-4 transition-all duration-300 z-40 ${
         isHovering || isActive ? 'pointer-events-auto' : 'pointer-events-none'
       }`}
       style={{
-        opacity: `${currentOpacity}%`
+        opacity: currentOpacity / 100,
+        zIndex: 40
       }}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      {/* Mascot Display - Full body */}
+      {/* Mascot Display - Half body, scaling dinamis, lazy loading */}
       <div className="flex flex-col items-center gap-6">
-        
         {/* Mascot Image Container */}
-        <div className="relative w-32 h-48 flex items-center justify-center">
+        <div className="relative w-28 h-40 flex items-center justify-center">
           <Image
             src={`/images/mascots/commander-arka-${pose}.png`}
             alt="Commander Arka"
             fill
-            className="object-contain"
+            className="object-contain drop-shadow-xl"
+            loading="lazy"
             priority={false}
+            style={{ background: 'transparent' }}
           />
         </div>
-
         {/* Status Indicator */}
         <div className="text-center space-y-2">
           <p className="text-sm font-bold text-blue-400">Warrior Buddy</p>
           <p className="text-xs text-slate-400">⚡ AI Mentor Ready</p>
-          
           {/* Pulse dot when active */}
           {isActive && (
             <div className="flex items-center justify-center gap-2">
@@ -78,14 +78,12 @@ export function AIMentorSidebar({
             </div>
           )}
         </div>
-
         {/* Children content if provided */}
         {children && (
           <div className="w-full mt-4 text-sm text-slate-300">
             {children}
           </div>
         )}
-
         {/* Hint text */}
         <div className="text-xs text-slate-500 text-center mt-4 italic">
           Hover to interact

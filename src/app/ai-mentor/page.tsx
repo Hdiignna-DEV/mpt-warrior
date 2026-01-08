@@ -556,28 +556,44 @@ export default function AIMentor() {
               </div>
             )}
             
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-                {m.role === 'assistant' && (
-                  <div className="flex gap-1.5 md:gap-3 max-w-[95%] md:max-w-[85%]">
-                    {/* FASE 2.6: Commander Arka Avatar with pose-based styling */}
-                    <CommanderArkaAvatar 
-                      model={(m as any).model || 'Warrior Buddy'} 
-                      pose={(m as any).model?.includes('Vision') ? 'vision' : 'empty'}
-                    />
-                    <div className="flex-1 relative">
-                      {/* AI Model Badge + Emotion State */}
-                      <div className="mb-1 text-[9px] font-mono text-slate-500 flex items-center gap-2">
-                        {(m as any).model && <span>{(m as any).model}</span>}
-                        {/* FASE 2.6: Show emotion emoji in conversation */}
-                        {userEmotionState && m.role === 'assistant' && (
-                          <span className="flex items-center gap-1 text-slate-400">
-                            {userEmotionState === 'Tenang' && '😌 Tenang'}
-                            {userEmotionState === 'Takut' && '😨 Takut'}
-                            {userEmotionState === 'Serakah' && '🤑 Serakah'}
-                          </span>
-                        )}
-                      </div>
+            {messages.map((m, i) => {
+              // Dynamic pose logic for mascot
+              let pose = 'empty';
+              if (i === 0 && m.role === 'assistant') {
+                pose = 'onboarding';
+              } else if ((m as any).model?.includes('Vision')) {
+                pose = 'vision';
+              } else if (m.content?.toLowerCase().includes('kemenangan') || m.content?.toLowerCase().includes('victory') || m.content?.toLowerCase().includes('selamat')) {
+                pose = 'victory';
+              } else if (checkMTAViolations() && m.role === 'assistant') {
+                pose = 'warning';
+              } else if ((m as any).model?.toLowerCase().includes('error') || m.content?.toLowerCase().includes('gagal') || m.content?.toLowerCase().includes('error')) {
+                pose = 'warning';
+              } else if ((m as any).model?.includes('Buddy')) {
+                pose = 'empty';
+              }
+              return (
+                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
+                  {m.role === 'assistant' && (
+                    <div className="flex gap-1.5 md:gap-3 max-w-[95%] md:max-w-[85%]">
+                      {/* Dynamic Commander Arka Avatar pose */}
+                      <CommanderArkaAvatar 
+                        model={(m as any).model || 'Warrior Buddy'} 
+                        pose={pose}
+                      />
+                      <div className="flex-1 relative">
+                        {/* AI Model Badge + Emotion State */}
+                        <div className="mb-1 text-[9px] font-mono text-slate-500 flex items-center gap-2">
+                          {(m as any).model && <span>{(m as any).model}</span>}
+                          {/* FASE 2.6: Show emotion emoji in conversation */}
+                          {userEmotionState && m.role === 'assistant' && (
+                            <span className="flex items-center gap-1 text-slate-400">
+                              {userEmotionState === 'Tenang' && '😌 Tenang'}
+                              {userEmotionState === 'Takut' && '😨 Takut'}
+                              {userEmotionState === 'Serakah' && '🤑 Serakah'}
+                            </span>
+                          )}
+                        </div>
                       {/* Cek apakah ada risk calculation */}
                       {m.content.includes('LOT SIZE') && m.content.includes('Balance') ? (
                         <>
@@ -645,7 +661,7 @@ export default function AIMentor() {
                 <CommanderArkaAvatar 
                   isThinking={true}
                   model={aiProcessing === 'vision' ? 'Warrior Vision' : 'Warrior Buddy'}
-                  pose={aiProcessing === 'vision' ? 'vision' : 'empty'}
+                  pose={aiProcessing === 'vision' ? 'vision' : aiProcessing === 'buddy' ? 'empty' : 'onboarding'}
                 />
                 <div className="bg-slate-900/60 backdrop-blur-sm border-l-2 border-amber-500/50 p-2.5 md:p-4 rounded-sm flex items-center gap-2">
                   <div className="flex gap-1">
