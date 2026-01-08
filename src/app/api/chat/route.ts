@@ -180,17 +180,12 @@ export async function POST(req: Request): Promise<Response> {
     // HYBRID LOGIC: Route to appropriate AI based on input type
     // ============================================================
     
-    if (image) {
+    if (image && GEMINI_API_KEY) {
       // ========== SCENARIO A: VISION ANALYSIS (GEMINI) ==========
-      if (!GEMINI_API_KEY) {
-        return NextResponse.json({ 
-          error: 'Gemini API key not configured for image analysis.' 
-        }, { status: 500 });
-      }
-
       console.log("📸 [WARRIOR VISION] Analyzing chart with Gemini...");
       
-      result = await retryWithBackoff(async () => {
+      try {
+        result = await retryWithBackoff(async () => {
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
         const model = genAI.getGenerativeModel({ 
           model: 'gemini-1.5-flash',
@@ -216,7 +211,20 @@ export async function POST(req: Request): Promise<Response> {
       
       aiModel = '📸 Warrior Vision (Gemini 1.5 Flash)';
       console.log("✅ [WARRIOR VISION] Chart analysis complete");
+      
+      } catch (geminiError: any) {
+        console.error("❌ Gemini Vision failed:", geminiError.message);
+        // Fallback to Groq with image disclaimer
+        console.log("⚠️ Falling back to Groq (text-only mode)...");
+        result = `⚠️ **Gemini Vision sedang tidak tersedia.**\n\nMaaf Warrior, saat ini sistem analisa chart via Gemini Vision mengalami gangguan.\n\n💡 **Alternatif:**\n1. Kirim tanpa gambar untuk konsultasi text\n2. Atau hubungi admin untuk perbaikan Gemini API\n\nCoba lagi nanti, atau tanya sesuatu tanpa upload gambar. 🙏`;
+        aiModel = '⚠️ System Notice';
+      }
 
+    } else if (image && !GEMINI_API_KEY) {
+      // Image uploaded but no Gemini key
+      result = `⚠️ **Analisa gambar tidak tersedia.**\n\nGemini Vision belum dikonfigurasi. Untuk menggunakan fitur analisa chart:\n\n1. Admin perlu menambahkan GEMINI_API_KEY di Vercel\n2. Dapatkan key dari: https://aistudio.google.com/app/apikey\n\nUntuk sementara, kirim pertanyaan tanpa gambar. ⚡ Groq Buddy siap membantu!`;
+      aiModel = '⚠️ Config Required';
+      
     } else {
       // ========== SCENARIO B: TEXT CONSULTATION (GROQ) ==========
       if (!GROQ_API_KEY) {
