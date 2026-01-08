@@ -641,7 +641,7 @@ export default function AIMentor() {
                         </div>
                       )}
                     </div>
-                )}
+                  )}
                 {m.role === 'user' && (
                   <div className="bg-transparent border-r-2 border-amber-500 text-slate-100 p-2.5 md:p-4 rounded-sm max-w-[95%] md:max-w-[85%] text-right">
                     <ReactMarkdown 
