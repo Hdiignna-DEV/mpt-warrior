@@ -131,7 +131,7 @@ export default function AIMentor() {
     if ((!textToSend.trim() && !selectedImage) || isLoading) return;
 
     const userMessageContent = selectedImage ? `[IMAGE]\n${textToSend}` : textToSend;
-    const userMessage = { role: 'user', content: userMessageContent };
+    const userMessage = { role: 'user', content: userMessageContent, model: '' };
     
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
