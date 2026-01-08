@@ -302,9 +302,9 @@ export default function JurnalTrading() {
       
       alert('✅ Trade berhasil disimpan!');
     } else {
-        const data = await response.json();
-        alert('❌ ' + (data.error || 'Gagal menyimpan trade'));
-      }
+      const data = await response.json();
+      alert('❌ ' + (data.error || 'Gagal menyimpan trade'));
+    }
     } catch (error) {
       console.error('Error adding trade:', error);
       alert('❌ Terjadi kesalahan saat menyimpan trade');
