@@ -81,16 +81,18 @@ export default function AIMentor() {
   const { t, i18n } = useTranslation();
   const { loading: authLoading } = useAuth();
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Siap, Bro! 🚀 **MPT Warrior AI** aktif. Gue ready untuk:\n\n✅ **Analisa Chart** - Struktur, key level, entry points\n✅ **Hitung Risk** - Lot size dengan manajemen risk\n✅ **Reset Mental** - Mindset, affirmation, motivasi\n✅ **Strategy Review** - Evaluasi strategi trading Anda\n\nKirim chart atau tanya strategi. Mari kita menang! 💪' }
+    { role: 'assistant', content: '🎯 **Warrior Buddy** siap mendampingi, Bro!\n\n**HYBRID AI SYSTEM ACTIVE:**\n📸 **Warrior Vision** (Gemini) - Upload chart untuk analisa visual\n⚡ **Warrior Buddy** (Groq) - Chat cepat untuk konsultasi\n\n**Fitur:**\n✅ Analisa Chart Visual (SNR, Trendline, Setup)\n✅ Hitung Risk & Lot Size\n✅ Double-Check Discipline (cross-validate jurnal vs chart)\n✅ Reset Mental & Motivasi\n\nUpload chart atau tanya apa aja. Mari menang bersama! 💪', model: '⚡ Warrior Buddy' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [aiProcessing, setAiProcessing] = useState<'vision' | 'buddy' | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [conversationMode, setConversationMode] = useState<'analysis' | 'strategy' | 'mindset' | 'general'>('general');
   const [showHistory, setShowHistory] = useState(false);
   const [chatHistory, setChatHistory] = useState<Array<{ id: string; title: string; messages: typeof messages; date: string }>>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [threadId] = useState(() => `thread_${Date.now()}`);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -138,6 +140,9 @@ export default function AIMentor() {
     setSelectedImage(null); 
     setImagePreview(null); 
     setIsLoading(true);
+    
+    // Set AI processing indicator
+    setAiProcessing(currentImage ? 'vision' : 'buddy');
 
     // Add system context based on mode
     const systemContext = getSystemContext();
@@ -153,7 +158,8 @@ export default function AIMentor() {
         body: JSON.stringify({ 
           messages: contextualMessages, 
           image: currentImage,
-          language: i18n.language // Send current language to API
+          language: i18n.language,
+          threadId: threadId // Send thread ID for context sharing
         }),
       });
       
@@ -164,13 +170,17 @@ export default function AIMentor() {
         // Display server error message to user
         setMessages((prev) => [...prev, { 
           role: 'assistant', 
-          content: errorData.error || `⚠️ Error ${response.status}: Gagal memproses permintaan.` 
+          content: errorData.error || `⚠️ Error ${response.status}: Gagal memproses permintaan.`,
+          model: '❌ Error'
         }]);
         return;
       }
       
       const data = await response.json();
-      const aiMessage = data.choices[0].message;
+      const aiMessage = {
+        ...data.choices[0].message,
+        model: data.model // Include which AI responded
+      };
       
       const finalMessages = [...updatedMessages, aiMessage];
       setMessages(finalMessages);
@@ -192,10 +202,12 @@ export default function AIMentor() {
       console.error('AI Mentor error:', error);
       setMessages((prev) => [...prev, { 
         role: 'assistant', 
-        content: '❌ Gagal koneksi ke AI Mentor.\n\n**Kemungkinan penyebab:**\n- Koneksi internet bermasalah\n- Server sedang maintenance\n- Quota API habis\n\nSilakan coba lagi dalam beberapa menit.' 
+        content: '❌ Gagal koneksi ke AI Mentor.\n\n**Kemungkinan penyebab:**\n- Koneksi internet bermasalah\n- Server sedang maintenance\n- Quota API habis\n\nSilakan coba lagi dalam beberapa menit.',
+        model: '❌ Error'
       }]);
     } finally {
       setIsLoading(false);
+      setAiProcessing(null);
     }
   };
 
@@ -283,9 +295,19 @@ export default function AIMentor() {
           
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="font-mono font-black text-sm md:text-lg text-amber-400 tracking-wider uppercase">AI TACTICAL MENTOR</h1>
-              {/* System Status LED */}
+              <h1 className="font-mono font-black text-sm md:text-lg text-amber-400 tracking-wider uppercase">HYBRID AI MENTOR</h1>
+              {/* Dual System Status LED */}
               <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 border border-green-500/30 rounded text-[10px] font-mono uppercase tracking-widest">
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-green-400">DUAL-AI: {aiProcessing === 'vision' ? '📸 VISION' : aiProcessing === 'buddy' ? '⚡ BUDDY' : 'STANDBY'}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-[9px] md:text-[10px] text-slate-500 font-mono uppercase tracking-widest">
+              <span className="px-1.5 py-0.5 bg-blue-500/10 border border-blue-500/30 rounded text-blue-400">📸 Gemini Vision</span>
+              <span className="text-slate-600">+</span>
+              <span className="px-1.5 py-0.5 bg-purple-500/10 border border-purple-500/30 rounded text-purple-400">⚡ Groq Brain</span>
+            </div>
+          </div>
                 <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                 <span className="text-green-400">SYSTEM: ACTIVE</span>
               </div>
@@ -411,16 +433,23 @@ export default function AIMentor() {
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
                 {m.role === 'assistant' && (
                   <div className="flex gap-1.5 md:gap-3 max-w-[95%] md:max-w-[85%]">
-                    {/* Radar Avatar for AI */}
+                    {/* AI Avatar - Dynamic based on model */}
                     <div className="flex-shrink-0 pt-0.5">
                       <div className="relative w-6 h-6 md:w-8 md:h-8">
-                        <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping" />
-                        <div className="relative w-full h-full bg-gradient-to-br from-green-500/40 to-green-600/40 rounded-full flex items-center justify-center border border-green-500/50">
-                          <Bot className="text-green-300 w-4 h-4 md:w-5 md:h-5" />
+                        {/* Different colors for different AI models */}
+                        <div className={`absolute inset-0 ${(m as any).model?.includes('Vision') ? 'bg-blue-500/20' : 'bg-purple-500/20'} rounded-full animate-ping`} />
+                        <div className={`relative w-full h-full ${(m as any).model?.includes('Vision') ? 'bg-gradient-to-br from-blue-500/40 to-blue-600/40 border-blue-500/50' : 'bg-gradient-to-br from-purple-500/40 to-purple-600/40 border-purple-500/50'} rounded-full flex items-center justify-center border`}>
+                          <Bot className={`${(m as any).model?.includes('Vision') ? 'text-blue-300' : 'text-purple-300'} w-4 h-4 md:w-5 md:h-5`} />
                         </div>
                       </div>
                     </div>
                     <div className="flex-1 relative">
+                      {/* AI Model Badge */}
+                      {(m as any).model && (
+                        <div className="mb-1 text-[9px] font-mono text-slate-500 flex items-center gap-1">
+                          <span>{(m as any).model}</span>
+                        </div>
+                      )}
                       {/* Cek apakah ada risk calculation */}
                       {m.content.includes('LOT SIZE') && m.content.includes('Balance') ? (
                         <>
@@ -487,8 +516,25 @@ export default function AIMentor() {
               <div className="flex justify-start animate-fade-in gap-1.5 md:gap-2">
                 <div className="flex-shrink-0 pt-0.5">
                   <div className="relative w-6 h-6 md:w-8 md:h-8">
-                    <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping" />
-                    <div className="relative w-full h-full bg-gradient-to-br from-green-500/40 to-green-600/40 rounded-full flex items-center justify-center border border-green-500/50">
+                    {/* Dynamic color based on processing mode */}
+                    <div className={`absolute inset-0 ${aiProcessing === 'vision' ? 'bg-blue-500/20' : 'bg-purple-500/20'} rounded-full animate-ping`} />
+                    <div className={`relative w-full h-full ${aiProcessing === 'vision' ? 'bg-gradient-to-br from-blue-500/40 to-blue-600/40 border-blue-500/50' : 'bg-gradient-to-br from-purple-500/40 to-purple-600/40 border-purple-500/50'} rounded-full flex items-center justify-center border animate-pulse`}>
+                      <Bot className={`${aiProcessing === 'vision' ? 'text-blue-300' : 'text-purple-300'} w-4 h-4 md:w-5 md:h-5`} />
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-slate-900/60 backdrop-blur-sm border-l-2 border-amber-500/50 p-2.5 md:p-4 rounded-sm flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                  <span className="text-amber-400 text-xs md:text-sm font-mono">
+                    {aiProcessing === 'vision' ? '📸 Scanning Chart via Warrior Vision...' : '⚡ Warrior Buddy is typing fast...'}
+                  </span>
+                </div>
+              </div>
+            )}
                       <Bot className="text-green-300 w-3.5 h-3.5 md:w-5 md:h-5 animate-pulse" />
                     </div>
                   </div>
@@ -592,10 +638,18 @@ export default function AIMentor() {
             {/* SYSTEM STATUS */}
             <div className="text-[9px] md:text-[10px] text-slate-600 px-2 md:px-4 py-1.5 md:py-3 text-center border-t border-amber-500/10 font-mono uppercase tracking-widest bg-slate-950">
               <span className="text-amber-500/50">[ MODE:</span> <span className="font-bold text-amber-400">{conversationMode.toUpperCase()}</span> <span className="text-amber-500/50">] [ STATUS:</span> <span className="text-green-400">OPERATIONAL</span> <span className="text-amber-500/50">]</span>
-              <div className="mt-1 flex items-center justify-center gap-1 text-[8px] md:text-[9px]">
-                <span className="text-slate-500">POWERED BY</span>
-                <span className="text-purple-400 font-bold">GROQ LLAMA 3.3 70B</span>
-                <Zap size={10} className="text-purple-400" />
+              <div className="mt-1 flex items-center justify-center gap-2 text-[8px] md:text-[9px] flex-wrap">
+                <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 border border-blue-500/30 rounded">
+                  <span className="text-slate-500">VISION:</span>
+                  <span className="text-blue-400 font-bold">GEMINI 1.5</span>
+                  <Sparkles size={8} className="text-blue-400" />
+                </div>
+                <span className="text-slate-600">+</span>
+                <div className="flex items-center gap-1 px-2 py-0.5 bg-purple-500/10 border border-purple-500/30 rounded">
+                  <span className="text-slate-500">BRAIN:</span>
+                  <span className="text-purple-400 font-bold">GROQ LLAMA 3.3</span>
+                  <Zap size={8} className="text-purple-400" />
+                </div>
               </div>
             </div>
           </div>

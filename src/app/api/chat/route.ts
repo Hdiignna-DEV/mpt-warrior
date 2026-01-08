@@ -1,23 +1,95 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const SYSTEM_INSTRUCTION = `
-ROLE: Anda adalah "MPT Bot", asisten mentor Mindset Plan Trader (MPT).
-TONE: Profesional, Tegas, Maskulin, Supportif (Bro-to-Bro).
-BAHASA: Indonesia yang luwes tapi berwibawa.
+// HYBRID AI MENTOR SYSTEM - MPT WARRIOR
+// Vision: Gemini 1.5 Flash | Brain: Groq Llama 3.3 70B
+
+const WARRIOR_BUDDY_INSTRUCTION = `
+ROLE: Anda adalah "Warrior Buddy" - AI Mentor MPT yang tegas dan supportif.
+TONE: Maskulin, Bro-to-Bro, seperti senior trader yang peduli.
+BAHASA: Indonesia casual tapi tetap profesional.
+
+PERSONALITY:
+- Panggil user dengan "Warrior" atau "Bro"
+- Jujur dan blak-blakan kalau ada yang salah
+- Kasih pujian kalau user disiplin
+- Tegas tapi tetap motivating
+
+4 PILAR MPT:
+1. MINDSET: Mental warrior yang tangguh
+2. PLAN: Setup harus jelas sebelum entry
+3. RISK: Maksimal 1% per trade, no nego!
+4. DISCIPLINE: Stick to the plan, no FOMO
 
 RULES:
-1. JIKA USER MENGIRIM GAMBAR CHART: Analisa struktur marketnya (Trend, Support/Resistance). Berikan pandangan objektif. JANGAN BERIKAN SINYAL BUY/SELL LANGSUNG, tapi tanya: "Apa plan lo di area ini?" atau "Dimana SL lo?".
-2. Selalu rujuk ke 4 Pilar: Mindset, Plan, Risk (1%), Discipline.
-3. Jawab ringkas (maksimal 3 paragraf).
-4. Untuk risk calculation, SELALU berikan output dalam format table yang terstruktur dengan parameter: Balance, Risk %, SL (pips), Maksimal Kerugian, Nilai Per Pip, dan LOT SIZE.
+- Kalau lihat chart (via Gemini Vision), analisa SNR, trendline, rejection pattern
+- Kalau dapat data jurnal, cek apakah RRR sudah masuk akal
+- Cross-check: Apakah yang ditulis di jurnal sesuai dengan chart?
+- Tegur kalau ada inkonsistensi: "Warrior, di jurnal RRR 1:2 tapi chart saya lihat TP melewati resisten H4!"
+- Untuk risk calculation, kasih output dalam format table terstruktur
 `;
 
-// Get Groq API Key
-const GROQ_API_KEY = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
+const GEMINI_VISION_INSTRUCTION = `
+ROLE: Anda adalah "Warrior Vision" - AI yang menganalisa chart trading.
+TASK: Bedah visual chart dengan standar MPT.
 
-// Rate limiting: Simple in-memory store (for serverless, use Redis/Upstash in production)
+ANALISA:
+1. SNR (Supply & Demand Zone): Apakah sudah valid?
+2. Trendline: Apakah sudah benar penempatannya?
+3. Rejection Pattern: Apakah ada konfirmasi (pin bar, engulfing)?
+4. Entry Point: Apakah sesuai dengan "The Plan Warrior"?
+5. Risk/Reward: Apakah realistis dengan market structure?
+
+OUTPUT FORMAT:
+✅ Yang Sudah Benar: [list]
+⚠️ Yang Perlu Diperbaiki: [list]
+💡 Saran: [actionable advice]
+
+TONE: Objektif, technical, tapi tetap supportif.
+`;
+
+// Get API Keys
+const GROQ_API_KEY = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+// Rate limiting: Simple in-memory store
 const requestTimestamps = new Map<string, number[]>();
+
+// Context Thread Storage: Share context between Gemini and Groq
+interface ThreadContext {
+  visionAnalysis?: string; // Result from Gemini Vision
+  journalData?: string; // User's trading journal
+  lastInteraction: number;
+}
+
+const threadContexts = new Map<string, ThreadContext>();
+
+function getThreadContext(threadId: string): ThreadContext {
+  const context = threadContexts.get(threadId);
+  if (!context) {
+    const newContext: ThreadContext = { lastInteraction: Date.now() };
+    threadContexts.set(threadId, newContext);
+    return newContext;
+  }
+  return context;
+}
+
+function updateThreadContext(threadId: string, updates: Partial<ThreadContext>) {
+  const context = getThreadContext(threadId);
+  Object.assign(context, updates, { lastInteraction: Date.now() });
+  threadContexts.set(threadId, context);
+}
+
+// Clean old threads (older than 1 hour)
+setInterval(() => {
+  const now = Date.now();
+  for (const [threadId, context] of threadContexts.entries()) {
+    if (now - context.lastInteraction > 3600000) {
+      threadContexts.delete(threadId);
+    }
+  }
+}, 300000); // Check every 5 minutes
 
 function isRateLimited(userId: string): boolean {
   const now = Date.now();
@@ -26,8 +98,8 @@ function isRateLimited(userId: string): boolean {
   // Remove requests older than 1 minute
   const recentRequests = userRequests.filter(timestamp => now - timestamp < 60000);
   
-  // Limit: 15 requests per minute per user (Groq allows 30/min)
-  if (recentRequests.length >= 15) {
+  // Limit: 20 requests per minute (increased for hybrid system)
+  if (recentRequests.length >= 20) {
     return true;
   }
   
@@ -66,27 +138,14 @@ async function retryWithBackoff<T>(
 
 export async function POST(req: Request): Promise<Response> {
   try {
-    // Validate Groq API Key
-    if (!GROQ_API_KEY) {
-      return NextResponse.json({ 
-        error: 'Groq API key not configured. Please add GROQ_API_KEY to environment variables.' 
-      }, { status: 500 });
-    }
-
-    const { messages, image, language } = await req.json() as { 
+    const { messages, image, language, threadId = 'default' } = await req.json() as { 
       messages: Array<{ role: string; content: string }>, 
-      image?: string, 
-      language?: string 
+      image?: string,
+      language?: string,
+      threadId?: string
     };
     
-    // Image not supported by Groq
-    if (image) {
-      return NextResponse.json({ 
-        error: '📸 Groq tidak support analisa gambar. Silakan kirim chart dalam bentuk deskripsi text.\n\nContoh: "Analisa EURUSD di TF H1, price di 1.0950, ada resistance di 1.1000"' 
-      }, { status: 400 });
-    }
-    
-    // Simple rate limiting (use IP or user ID from auth in production)
+    // Rate limiting
     const userId = req.headers.get('x-forwarded-for') || 'anonymous';
     if (isRateLimited(userId)) {
       return NextResponse.json({ 
@@ -95,59 +154,111 @@ export async function POST(req: Request): Promise<Response> {
     }
     
     const lastMessage = messages[messages.length - 1].content;
+    const threadContext = getThreadContext(threadId);
     
     // Language-aware system instruction
     const languageInstruction = language === 'id'
-      ? 'User menggunakan bahasa Indonesia. Jawab dalam bahasa Indonesia yang baik, NAMUN istilah trading (BUY, SELL, WIN, LOSS, pips, SL, TP, leverage, margin, entry, exit) TETAP gunakan bahasa Inggris sesuai standar MPT Warrior.'
+      ? 'User menggunakan bahasa Indonesia. Jawab dalam bahasa Indonesia yang casual tapi profesional, istilah trading tetap bahasa Inggris.'
       : 'User is using English. Respond in English while maintaining professional trading terminology.';
     
-    const systemPrompt = language === 'id' ? SYSTEM_INSTRUCTION : `
-ROLE: You are "MPT Bot", a Mindset Plan Trader (MPT) mentor assistant.
-TONE: Professional, Firm, Masculine, Supportive (Bro-to-Bro).
-LANGUAGE: English.
-
-RULES:
-1. IF USER SENDS CHART IMAGE: Analyze market structure (Trend, Support/Resistance). Give objective view. DON'T GIVE BUY/SELL SIGNALS DIRECTLY, but ask: "What's your plan in this area?" or "Where's your SL?".
-2. Always refer to 4 Pillars: Mindset, Plan, Risk (1%), Discipline.
-3. Answer concisely (max 3 paragraphs).
-4. For risk calculation, ALWAYS provide output in structured table format with parameters: Balance, Risk %, SL (pips), Maximum Loss, Pip Value, and LOT SIZE.
-`;
-
     // Build conversation history
     const conversationHistory = messages.slice(0, -1).map((m) => 
-      `${m.role === 'user' ? 'User' : 'MPT Bot'}: ${m.content}`
+      `${m.role === 'user' ? 'User' : 'Warrior Buddy'}: ${m.content}`
     ).join('\n');
 
-    const fullSystemPrompt = `${systemPrompt}\n${languageInstruction}\n\nHISTORY CHAT:\n${conversationHistory}`;
-
-    // Initialize Groq AI
-    console.log("⚡ Processing with Groq Llama 3.3 70B...");
-    const groq = new Groq({ apiKey: GROQ_API_KEY });
-    
     let result: string;
+    let aiModel: string;
 
-    // Wrap Groq calls with retry logic
-    result = await retryWithBackoff(async () => {
-      const completion = await groq.chat.completions.create({
-        messages: [
-          { role: 'system', content: fullSystemPrompt },
-          { role: 'user', content: lastMessage }
-        ],
-        model: 'llama-3.3-70b-versatile',
-        temperature: 0.7,
-        max_tokens: 2048,
-        top_p: 1,
-        stream: false,
+    // ============================================================
+    // HYBRID LOGIC: Route to appropriate AI based on input type
+    // ============================================================
+    
+    if (image) {
+      // ========== SCENARIO A: VISION ANALYSIS (GEMINI) ==========
+      if (!GEMINI_API_KEY) {
+        return NextResponse.json({ 
+          error: 'Gemini API key not configured for image analysis.' 
+        }, { status: 500 });
+      }
+
+      console.log("📸 [WARRIOR VISION] Analyzing chart with Gemini...");
+      
+      result = await retryWithBackoff(async () => {
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY!);
+        const model = genAI.getGenerativeModel({ 
+          model: 'gemini-1.5-flash',
+          systemInstruction: GEMINI_VISION_INSTRUCTION,
+        });
+
+        const imagePart = {
+          inlineData: {
+            data: image.replace(/^data:image\/\w+;base64,/, ''),
+            mimeType: 'image/png',
+          },
+        };
+
+        const prompt = `${lastMessage}\n\nAnalisa chart ini dengan standar MPT Warrior. Fokus pada SNR, rejection pattern, dan validitas setup.`;
+        const geminiResult = await model.generateContent([prompt, imagePart]);
+        const response = await geminiResult.response;
+        
+        return response.text();
       });
 
-      return completion.choices[0]?.message?.content || '';
-    });
+      // Save vision analysis to thread context
+      updateThreadContext(threadId, { visionAnalysis: result });
+      
+      aiModel = '📸 Warrior Vision (Gemini 1.5 Flash)';
+      console.log("✅ [WARRIOR VISION] Chart analysis complete");
 
-    console.log("✅ Response generated successfully with Groq Llama 3.3 70B");
+    } else {
+      // ========== SCENARIO B: TEXT CONSULTATION (GROQ) ==========
+      if (!GROQ_API_KEY) {
+        return NextResponse.json({ 
+          error: 'Groq API key not configured for chat.' 
+        }, { status: 500 });
+      }
+
+      console.log("⚡ [WARRIOR BUDDY] Processing with Groq...");
+      
+      // Build enhanced context with previous vision analysis
+      let enhancedPrompt = lastMessage;
+      if (threadContext.visionAnalysis) {
+        enhancedPrompt = `KONTEKS DARI ANALISA CHART SEBELUMNYA:\n${threadContext.visionAnalysis}\n\nPERTANYAAN USER SEKARANG:\n${lastMessage}\n\nJawab dengan mempertimbangkan analisa chart di atas. Jika ada inkonsistensi dengan data yang user kasih, TEGUR dengan tegas tapi supportif!`;
+      }
+
+      const fullSystemPrompt = `${WARRIOR_BUDDY_INSTRUCTION}\n${languageInstruction}\n\nHISTORY CHAT:\n${conversationHistory}`;
+
+      result = await retryWithBackoff(async () => {
+        const groq = new Groq({ apiKey: GROQ_API_KEY! });
+        const completion = await groq.chat.completions.create({
+          messages: [
+            { role: 'system', content: fullSystemPrompt },
+            { role: 'user', content: enhancedPrompt }
+          ],
+          model: 'llama-3.3-70b-versatile',
+          temperature: 0.7,
+          max_tokens: 2048,
+          top_p: 1,
+          stream: false,
+        });
+
+        return completion.choices[0]?.message?.content || '';
+      });
+
+      // Save journal data if detected
+      if (lastMessage.toLowerCase().includes('jurnal') || lastMessage.toLowerCase().includes('rr')) {
+        updateThreadContext(threadId, { journalData: lastMessage });
+      }
+
+      aiModel = '⚡ Warrior Buddy (Groq Llama 3.3 70B)';
+      console.log("✅ [WARRIOR BUDDY] Response generated");
+    }
 
     return NextResponse.json({ 
       choices: [{ message: { role: 'assistant', content: result } }],
-      model: 'Groq Llama 3.3 70B',
+      model: aiModel,
+      threadId: threadId,
+      contextAvailable: !!(threadContext.visionAnalysis || threadContext.journalData)
     });
     return NextResponse.json({ 
       choices: [{ message: { role: 'assistant', content: result } }],
