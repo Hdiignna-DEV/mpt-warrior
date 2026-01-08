@@ -62,12 +62,19 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
             </div>
           )}
 
-          {/* Mobile peeking mascot */}
-          <div className="md:hidden absolute -bottom-6 right-4 w-28 h-28 overflow-hidden pointer-events-none">
-            <div className="absolute bottom-0 right-0 w-[160px] h-[180px] transform translate-y-6">
-              <CommanderArkaFullDisplay pose="onboarding" size="large" showLabel={false} />
+          {/* Mobile peeking mascot: clipped, smaller, behind the form to avoid overlap */}
+          <div className="md:hidden absolute -bottom-2 right-2 w-24 h-24 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+            <div className="absolute bottom-0 right-0 w-[140px] h-[160px] -translate-y-8 transform drop-shadow-[0_6px_12px_rgba(2,6,23,0.6)]">
+              <Image
+                src="/images/mascots/commander-arka-onboarding.png"
+                alt="Commander Arka"
+                width={140}
+                height={160}
+                className="object-contain"
+                priority={false}
+              />
             </div>
-            <div className="absolute -top-8 right-0 bg-slate-800/90 text-white text-xs font-semibold px-2 py-1 rounded-md shadow">
+            <div className="absolute -top-7 right-0 bg-slate-800/90 text-white text-xs font-semibold px-2 py-1 rounded-md shadow z-10">
               {passwordFocus ? 'Keamanan adalah prioritas utama!' : tooltip}
             </div>
           </div>
@@ -77,7 +84,7 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
             <p className="text-slate-300 text-sm text-center">Access your tactical dashboard</p>
           </div>
 
-          <div className="glass-premium rounded-3xl p-8 mt-6">
+          <div className="glass-premium rounded-3xl p-8 mt-6 relative z-20">
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
                 <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm">
