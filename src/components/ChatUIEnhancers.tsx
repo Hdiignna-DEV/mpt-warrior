@@ -292,12 +292,12 @@ export function ResultNotificationModal({
           : 'bg-gradient-to-br from-red-900/40 to-orange-900/40 border-red-500/50 shadow-2xl shadow-red-500/20'
       }`}>
         
-        {/* Mascot Display - Responsive sizing */}
-        <div className="flex justify-center mb-4 md:mb-6">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 relative">
+        {/* Mascot Display - Responsive sizing, smaller to avoid text overlap */}
+        <div className="flex justify-center mb-6 md:mb-8">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 relative">
             <CommanderArkaFullDisplay 
               pose={isProfit ? 'victory' : 'warning'}
-              size="large"
+              size="medium"
               showLabel={false}
             />
           </div>
