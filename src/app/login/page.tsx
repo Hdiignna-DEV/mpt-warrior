@@ -58,11 +58,18 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
         throw new Error(data.error || 'Login gagal');
       }
 
+      // Save token dan user ke localStorage untuk client-side hooks (useAuth)
+      localStorage.setItem('mpt_token', data.token);
+      localStorage.setItem('mpt_user', JSON.stringify(data.user));
+      
       // Trigger salute animation
       setShowSalute(true);
       
       // Redirect ke dashboard setelah animasi
-      // Token sudah di-set sebagai HTTP-only cookie di API response
+      // Token di-set juga sebagai HTTP-only cookie di API response untuk middleware
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1500);
       setTimeout(() => {
         router.push('/dashboard');
       }, 1500);
