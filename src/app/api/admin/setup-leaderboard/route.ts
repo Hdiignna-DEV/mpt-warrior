@@ -18,31 +18,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check user role in database
-    const client = getCosmosClient();
-    const userAuthDb = client.database('mpt-db');
-    const usersContainer = userAuthDb.container('users');
-    
-    try {
-      const { resource: userDoc } = await usersContainer
-        .item(decoded.userId, decoded.userId)
-        .read<any>();
-      
-      if (!userDoc || userDoc.role !== 'SUPER_ADMIN') {
-        return NextResponse.json(
-          { error: 'Unauthorized - Super Admin access required' },
-          { status: 403 }
-        );
-      }
-    } catch (error) {
+    // Check role from token (simplified - no DB lookup)
+    if (decoded.role !== 'SUPER_ADMIN') {
       return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: 'Unauthorized - Super Admin access required' },
+        { status: 403 }
       );
     }
 
     console.log('🚀 Starting leaderboard container setup...');
+    console.log('User:', decoded.email, 'Role:', decoded.role);
 
+    const client = getCosmosClient();
     const educationDb = client.database('mpt-warrior');
 
     const results = {
