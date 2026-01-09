@@ -653,12 +653,12 @@ export interface UserRankingData {
 }
 
 function getLeaderboardContainer(): Container {
-  const database = getCosmosClient().database('mpt-db');
+  const database = getCosmosClient().database('mpt-warrior');
   return database.container('user-leaderboard');
 }
 
 function getLeaderboardHistoryContainer(): Container {
-  const database = getCosmosClient().database('mpt-db');
+  const database = getCosmosClient().database('mpt-warrior');
   return database.container('leaderboard-history');
 }
 
@@ -763,7 +763,7 @@ async function calculateQuizPoints(userId: string): Promise<number> {
  */
 async function calculateConsistencyPoints(userId: string): Promise<number> {
   try {
-    const database = getCosmosClient().database('mpt-db');
+    const database = getCosmosClient().database('mpt-warrior');
     const tradesContainer = database.container('trades');
     
     // Get last 7 days
@@ -851,7 +851,7 @@ async function calculateCommunityPoints(userId: string): Promise<number> {
  */
 async function calculateWinRate(userId: string): Promise<number> {
   try {
-    const database = getCosmosClient().database('mpt-db');
+    const database = getCosmosClient().database('mpt-warrior');
     const tradesContainer = database.container('trades');
 
     const { resources: trades } = await tradesContainer.items
@@ -903,7 +903,7 @@ function getBadgeFromPoints(points: number): 'Recruit' | 'Elite Warrior' | 'Comm
  */
 export async function updateLeaderboardRanking(): Promise<void> {
   try {
-    const database = getCosmosClient().database('mpt-db');
+    const database = getCosmosClient().database('mpt-warrior');
     const usersContainer = database.container('users');
     
     // Ensure leaderboard containers exist before using them
@@ -1039,7 +1039,7 @@ export async function getUserLeaderboardData(userId: string): Promise<UserRankin
     if (!leaderboardEntry) {
       // User not in leaderboard yet, calculate now
       const scores = await calculateUserLeaderboardScore(userId);
-      const database = getCosmosClient().database('mpt-db');
+      const database = getCosmosClient().database('mpt-warrior');
       const usersContainer = database.container('users');
       const { resource: user } = await usersContainer.item(userId, userId).read<any>();
 
@@ -1210,7 +1210,7 @@ export async function calculateRadarChartData(userId: string): Promise<{
  */
 export async function getMentorNotes(userId: string): Promise<string | null> {
   try {
-    const database = getCosmosClient().database('mpt-db');
+    const database = getCosmosClient().database('mpt-warrior');
     const usersContainer = database.container('users');
 
     // Try to get user document with manual mentor notes
