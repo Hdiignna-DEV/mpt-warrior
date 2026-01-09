@@ -611,3 +611,368 @@ export async function canAccessModule(userId: string, moduleId: string, level: L
   
   return true;
 }
+// ==================== LEADERBOARD SYSTEM ====================
+
+export interface LeaderboardEntry {
+  id: string;
+  userId: string;
+  email: string;
+  userName: string;
+  totalPoints: number;
+  quizPoints: number;
+  consistencyPoints: number;
+  communityPoints: number;
+  badge: 'Recruit' | 'Elite Warrior' | 'Commander' | 'Legendary Mentor';
+  winRate: number;
+  rank: number;
+  previousRank: number | null;
+  rankTrend: 'UP' | 'DOWN' | 'STABLE';
+  lastUpdated: string;
+  updatedAt: string;
+}
+
+export interface UserRankingData {
+  userId: string;
+  userName: string;
+  email: string;
+  totalPoints: number;
+  rank: number;
+  badge: string;
+  quizPoints: number;
+  consistencyPoints: number;
+  communityPoints: number;
+  winRate: number;
+  radarChartData: {
+    technicalAnalysis: number;
+    riskManagement: number;
+    psychology: number;
+    discipline: number;
+    knowledge: number;
+  };
+  mentorNotes: string | null;
+}
+
+function getLeaderboardContainer(): Container {
+  const database = getCosmosClient().database('mpt-db');
+  return database.container('user-leaderboard');
+}
+
+function getLeaderboardHistoryContainer(): Container {
+  const database = getCosmosClient().database('mpt-db');
+  return database.container('leaderboard-history');
+}
+
+/**
+ * Calculate leaderboard score for a user
+ * Score = Quiz Points + Consistency Points + Community Points
+ */
+export async function calculateUserLeaderboardScore(userId: string): Promise<{
+  quizPoints: number;
+  consistencyPoints: number;
+  communityPoints: number;
+  totalPoints: number;
+  winRate: number;
+}> {
+  try {
+    // 1. Quiz Points: Average dari semua modul quiz scores
+    const allModules = await getAllModules();
+    let totalQuizScore = 0;
+    let quizCount = 0;
+
+    for (const module of allModules) {
+      const score = await getUserQuizScore(userId, module.id);
+      if (score.percentage > 0) {
+        totalQuizScore += score.percentage;
+        quizCount++;
+      }
+    }
+
+    const quizPoints = quizCount > 0 ? Math.round((totalQuizScore / quizCount) * 1) : 0;
+
+    // 2. Consistency Points: 5 poin per hari menulis jurnal (max 35/minggu)
+    const database = getCosmosClient().database('mpt-db');
+    const tradesContainer = database.container('trades');
+    
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const { resources: trades } = await tradesContainer.items
+      .query({
+        query: `SELECT DISTINCT DATE(c.createdAt) as tradeDate FROM c WHERE c.userId = @userId AND c.createdAt > @date`,
+        parameters: [
+          { name: '@userId', value: userId },
+          { name: '@date', value: sevenDaysAgo.toISOString() }
+        ]
+      })
+      .fetchAll();
+
+    const consistencyPoints = Math.min(trades.length * 5, 35); // Max 35/minggu
+
+    // 3. Community Points: Akan di-integrate dengan forum/discussion feature
+    // For now, default 0 (dapat di-expand kemudian)
+    const communityPoints = 0;
+
+    const totalPoints = quizPoints + consistencyPoints + communityPoints;
+    const winRate = quizPoints; // Simplified: using quiz score as win rate
+
+    return {
+      quizPoints,
+      consistencyPoints,
+      communityPoints,
+      totalPoints,
+      winRate
+    };
+  } catch (error) {
+    console.error('Error calculating leaderboard score:', error);
+    return {
+      quizPoints: 0,
+      consistencyPoints: 0,
+      communityPoints: 0,
+      totalPoints: 0,
+      winRate: 0
+    };
+  }
+}
+
+/**
+ * Get badge based on total points
+ */
+function getBadgeFromPoints(points: number): 'Recruit' | 'Elite Warrior' | 'Commander' | 'Legendary Mentor' {
+  if (points >= 3001) return 'Legendary Mentor';
+  if (points >= 1501) return 'Commander';
+  if (points >= 501) return 'Elite Warrior';
+  return 'Recruit';
+}
+
+/**
+ * Update leaderboard rankings for all users
+ * Should be called periodically (e.g., every hour)
+ */
+export async function updateLeaderboardRanking(): Promise<void> {
+  try {
+    const database = getCosmosClient().database('mpt-db');
+    const usersContainer = database.container('users');
+    const leaderboardContainer = getLeaderboardContainer();
+
+    // Get all active users
+    const { resources: users } = await usersContainer.items
+      .query({
+        query: `SELECT c.id, c.email, c.name FROM c WHERE c.status = 'active'`
+      })
+      .fetchAll();
+
+    // Calculate scores for each user
+    const leaderboardEntries: LeaderboardEntry[] = [];
+
+    for (const user of users) {
+      const scores = await calculateUserLeaderboardScore(user.id);
+      const badge = getBadgeFromPoints(scores.totalPoints);
+
+      // Get previous rank
+      let previousRank = null;
+      try {
+        const { resource: existing } = await leaderboardContainer.item(user.id, user.id).read<LeaderboardEntry>();
+        previousRank = existing?.rank || null;
+      } catch {
+        // User not in leaderboard yet
+      }
+
+      leaderboardEntries.push({
+        id: user.id,
+        userId: user.id,
+        email: user.email,
+        userName: user.name,
+        totalPoints: scores.totalPoints,
+        quizPoints: scores.quizPoints,
+        consistencyPoints: scores.consistencyPoints,
+        communityPoints: scores.communityPoints,
+        badge,
+        winRate: scores.winRate,
+        rank: 0, // Will be set after sorting
+        previousRank,
+        rankTrend: 'STABLE',
+        lastUpdated: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }
+
+    // Sort by total points (descending)
+    leaderboardEntries.sort((a, b) => b.totalPoints - a.totalPoints);
+
+    // Assign ranks and determine trend
+    leaderboardEntries.forEach((entry, index) => {
+      entry.rank = index + 1;
+      if (entry.previousRank === null) {
+        entry.rankTrend = 'STABLE';
+      } else if (entry.rank < entry.previousRank) {
+        entry.rankTrend = 'UP';
+      } else if (entry.rank > entry.previousRank) {
+        entry.rankTrend = 'DOWN';
+      } else {
+        entry.rankTrend = 'STABLE';
+      }
+    });
+
+    // Save/update leaderboard entries
+    for (const entry of leaderboardEntries) {
+      try {
+        await leaderboardContainer.item(entry.id, entry.userId).replace(entry);
+      } catch (error: any) {
+        if (error.code === 404) {
+          // Create new entry
+          await leaderboardContainer.items.create(entry);
+        } else {
+          console.error(`Error updating leaderboard for user ${entry.userId}:`, error);
+        }
+      }
+    }
+
+    console.log(`✅ Leaderboard updated for ${leaderboardEntries.length} users`);
+  } catch (error) {
+    console.error('Error updating leaderboard ranking:', error);
+  }
+}
+
+/**
+ * Get top N users from leaderboard
+ */
+export async function getLeaderboardTop(limit: number = 100, offset: number = 0): Promise<LeaderboardEntry[]> {
+  const container = getLeaderboardContainer();
+
+  const { resources } = await container.items
+    .query({
+      query: `SELECT * FROM c ORDER BY c.rank ASC OFFSET @offset LIMIT @limit`,
+      parameters: [
+        { name: '@offset', value: offset },
+        { name: '@limit', value: limit }
+      ]
+    })
+    .fetchAll();
+
+  return resources;
+}
+
+/**
+ * Get user ranking data with radar chart information
+ */
+export async function getUserLeaderboardData(userId: string): Promise<UserRankingData | null> {
+  try {
+    const leaderboardContainer = getLeaderboardContainer();
+    
+    let leaderboardEntry: LeaderboardEntry | null = null;
+    try {
+      const { resource } = await leaderboardContainer.item(userId, userId).read<LeaderboardEntry>();
+      leaderboardEntry = resource || null;
+    } catch (error: any) {
+      if (error.code !== 404) throw error;
+    }
+
+    if (!leaderboardEntry) {
+      // User not in leaderboard yet, calculate now
+      const scores = await calculateUserLeaderboardScore(userId);
+      const database = getCosmosClient().database('mpt-db');
+      const usersContainer = database.container('users');
+      const { resource: user } = await usersContainer.item(userId, userId).read<any>();
+
+      return {
+        userId,
+        userName: user?.name || 'Unknown',
+        email: user?.email || '',
+        totalPoints: scores.totalPoints,
+        rank: 99999, // Not yet ranked
+        badge: getBadgeFromPoints(scores.totalPoints),
+        quizPoints: scores.quizPoints,
+        consistencyPoints: scores.consistencyPoints,
+        communityPoints: scores.communityPoints,
+        winRate: scores.winRate,
+        radarChartData: {
+          technicalAnalysis: Math.min(100, (scores.quizPoints / 100) * 80),
+          riskManagement: Math.min(100, (scores.consistencyPoints / 35) * 100),
+          psychology: Math.min(100, Math.random() * 100), // TODO: Get from assessments
+          discipline: Math.min(100, (scores.consistencyPoints / 35) * 100),
+          knowledge: Math.min(100, (scores.quizPoints / 100) * 100)
+        },
+        mentorNotes: null
+      };
+    }
+
+    // Return full data
+    return {
+      userId: leaderboardEntry.userId,
+      userName: leaderboardEntry.userName,
+      email: leaderboardEntry.email,
+      totalPoints: leaderboardEntry.totalPoints,
+      rank: leaderboardEntry.rank,
+      badge: leaderboardEntry.badge,
+      quizPoints: leaderboardEntry.quizPoints,
+      consistencyPoints: leaderboardEntry.consistencyPoints,
+      communityPoints: leaderboardEntry.communityPoints,
+      winRate: leaderboardEntry.winRate,
+      radarChartData: {
+        technicalAnalysis: Math.min(100, (leaderboardEntry.quizPoints / 100) * 80),
+        riskManagement: Math.min(100, (leaderboardEntry.consistencyPoints / 35) * 100),
+        psychology: Math.min(100, 60 + Math.random() * 40), // TODO
+        discipline: Math.min(100, (leaderboardEntry.consistencyPoints / 35) * 100),
+        knowledge: Math.min(100, (leaderboardEntry.quizPoints / 100) * 100)
+      },
+      mentorNotes: null
+    };
+  } catch (error) {
+    console.error('Error getting user leaderboard data:', error);
+    return null;
+  }
+}
+
+/**
+ * Save weekly leaderboard snapshot
+ */
+export async function saveLeaderboardSnapshot(): Promise<void> {
+  try {
+    const leaderboardEntries = await getLeaderboardTop(1000, 0);
+    
+    const now = new Date();
+    const weekNumber = Math.ceil((now.getDate()) / 7);
+    const year = now.getFullYear();
+
+    const snapshot = {
+      id: `${year}-w${weekNumber}`,
+      week: weekNumber,
+      year,
+      rankings: leaderboardEntries.map(entry => ({
+        userId: entry.userId,
+        userName: entry.userName,
+        rank: entry.rank,
+        totalPoints: entry.totalPoints,
+        badge: entry.badge
+      })),
+      timestamp: now.toISOString()
+    };
+
+    const historyContainer = getLeaderboardHistoryContainer();
+    try {
+      await historyContainer.item(snapshot.id, snapshot.id).replace(snapshot);
+    } catch (error: any) {
+      if (error.code === 404) {
+        await historyContainer.items.create(snapshot);
+      }
+    }
+
+    console.log(`📊 Leaderboard snapshot saved for week ${weekNumber}`);
+  } catch (error) {
+    console.error('Error saving leaderboard snapshot:', error);
+  }
+}
+
+/**
+ * Get leaderboard history for specific week
+ */
+export async function getLeaderboardHistory(week: number, year: number = new Date().getFullYear()) {
+  try {
+    const historyContainer = getLeaderboardHistoryContainer();
+    const { resource } = await historyContainer.item(`${year}-w${week}`, `${year}-w${week}`).read<any>();
+    return resource || null;
+  } catch (error: any) {
+    if (error.code === 404) return null;
+    throw error;
+  }
+}
