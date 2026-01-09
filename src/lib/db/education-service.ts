@@ -616,7 +616,8 @@ export async function canAccessModule(userId: string, moduleId: string, level: L
 export interface LeaderboardEntry {
   id: string;
   userId: string;
-  email: string;
+  email?: string; // Optional, kept for backward compatibility
+  whatsapp?: string; // WhatsApp contact for public display
   userName: string;
   totalPoints: number;
   quizPoints: number;
@@ -634,7 +635,8 @@ export interface LeaderboardEntry {
 export interface UserRankingData {
   userId: string;
   userName: string;
-  email: string;
+  email?: string; // Optional, kept for backward compatibility
+  whatsapp?: string; // WhatsApp contact
   totalPoints: number;
   rank: number;
   badge: string;
@@ -933,7 +935,7 @@ export async function updateLeaderboardRanking(): Promise<void> {
     // Get all active users
     const { resources: users } = await usersContainer.items
       .query({
-        query: `SELECT c.id, c.email, c.name FROM c WHERE c.status = 'active'`
+        query: `SELECT c.id, c.email, c.name, c.whatsapp FROM c WHERE c.status = 'active'`
       })
       .fetchAll();
 
@@ -957,6 +959,7 @@ export async function updateLeaderboardRanking(): Promise<void> {
         id: user.id,
         userId: user.id,
         email: user.email,
+        whatsapp: user.whatsapp,
         userName: user.name,
         totalPoints: scores.totalPoints,
         quizPoints: scores.quizPoints,

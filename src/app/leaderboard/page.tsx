@@ -13,7 +13,8 @@ import Image from 'next/image';
 interface LeaderboardEntry {
   userId: string;
   userName: string;
-  email: string;
+  email?: string; // Optional, kept for backward compatibility
+  whatsapp?: string; // WhatsApp contact
   totalPoints: number;
   quizPoints: number;
   consistencyPoints: number;
@@ -300,7 +301,20 @@ export default function LeaderboardPage() {
                     <td className="px-6 py-4">
                       <div>
                         <p className="text-white font-semibold">{entry.userName}</p>
-                        <p className="text-gray-500 text-sm">{entry.email}</p>
+                        <p className="text-gray-500 text-sm">
+                          {entry.whatsapp ? (
+                            <a 
+                              href={`https://wa.me/${entry.whatsapp.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-green-400 hover:text-green-300"
+                            >
+                              💬 {entry.whatsapp}
+                            </a>
+                          ) : (
+                            <span className="text-gray-600">No WhatsApp</span>
+                          )}
+                        </p>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -354,7 +368,20 @@ export default function LeaderboardPage() {
                   </div>
                 </div>
                 <p className="text-white font-semibold">{entry.userName}</p>
-                <p className="text-gray-500 text-xs mb-2">{entry.email}</p>
+                <p className="text-gray-500 text-xs mb-2">
+                  {entry.whatsapp ? (
+                    <a 
+                      href={`https://wa.me/${entry.whatsapp.replace(/\D/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-green-400 hover:text-green-300"
+                    >
+                      💬 {entry.whatsapp}
+                    </a>
+                  ) : (
+                    <span className="text-gray-600">No WhatsApp</span>
+                  )}
+                </p>
                 <div className="flex justify-between items-center">
                   <Badge className={getBadgeColor(entry.badge)}>{entry.badge}</Badge>
                   <span className="text-cyan-400 font-bold">{entry.totalPoints} pts</span>
