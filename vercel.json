@@ -5,5 +5,11 @@
     "deploymentEnabled": {
       "main": true
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/leaderboard/cron-update",
+      "schedule": "0 * * * *"
+    }
+  ]
 }

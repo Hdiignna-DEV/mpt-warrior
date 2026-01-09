@@ -12,6 +12,13 @@
  * 4. Populates user-leaderboard container
  */
 
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+// Load .env.local for local development
+const envPath = path.resolve(process.cwd(), '.env.local');
+dotenv.config({ path: envPath });
+
 import { getCosmosClient } from '../src/lib/db/cosmos-client';
 import { updateLeaderboardRanking } from '../src/lib/db/education-service';
 
