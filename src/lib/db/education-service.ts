@@ -666,6 +666,16 @@ function getLeaderboardHistoryContainer(): Container {
  * Calculate leaderboard score for a user
  * Score = Quiz Points + Consistency Points + Community Points
  */
+/**
+ * Calculate leaderboard score for a user using weighted formula
+ * 
+ * Formula: Total Points = (Quiz Score × 0.40) + (Consistency Score × 0.35) + (Community Score × 0.25)
+ * 
+ * Weights:
+ * - Quiz Points (40%): Average of all module quiz scores (max 100)
+ * - Consistency Points (35%): 5 points per day journaling (max 35/week)
+ * - Community Points (25%): 2 points per meaningful comment (max 20/week)
+ */
 export async function calculateUserLeaderboardScore(userId: string): Promise<{
   quizPoints: number;
   consistencyPoints: number;
@@ -674,46 +684,23 @@ export async function calculateUserLeaderboardScore(userId: string): Promise<{
   winRate: number;
 }> {
   try {
-    // 1. Quiz Points: Average dari semua modul quiz scores
-    const allModules = await getAllModules();
-    let totalQuizScore = 0;
-    let quizCount = 0;
-
-    for (const module of allModules) {
-      const score = await getUserQuizScore(userId, module.id);
-      if (score.percentage > 0) {
-        totalQuizScore += score.percentage;
-        quizCount++;
-      }
-    }
-
-    const quizPoints = quizCount > 0 ? Math.round((totalQuizScore / quizCount) * 1) : 0;
+    // 1. Quiz Points: Average dari semua modul quiz scores (0-100 range)
+    const quizPoints = await calculateQuizPoints(userId);
 
     // 2. Consistency Points: 5 poin per hari menulis jurnal (max 35/minggu)
-    const database = getCosmosClient().database('mpt-db');
-    const tradesContainer = database.container('trades');
-    
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const consistencyPoints = await calculateConsistencyPoints(userId);
 
-    const { resources: trades } = await tradesContainer.items
-      .query({
-        query: `SELECT DISTINCT DATE(c.createdAt) as tradeDate FROM c WHERE c.userId = @userId AND c.createdAt > @date`,
-        parameters: [
-          { name: '@userId', value: userId },
-          { name: '@date', value: sevenDaysAgo.toISOString() }
-        ]
-      })
-      .fetchAll();
+    // 3. Community Points: 2 poin per meaningful comment (max 20/minggu)
+    const communityPoints = await calculateCommunityPoints(userId);
 
-    const consistencyPoints = Math.min(trades.length * 5, 35); // Max 35/minggu
+    // 4. Calculate Total Points using weighted formula
+    // Total = (Quiz × 0.40) + (Consistency × 0.35) + (Community × 0.25)
+    const totalPoints = Math.round(
+      (quizPoints * 0.40) + (consistencyPoints * 0.35) + (communityPoints * 0.25)
+    );
 
-    // 3. Community Points: Akan di-integrate dengan forum/discussion feature
-    // For now, default 0 (dapat di-expand kemudian)
-    const communityPoints = 0;
-
-    const totalPoints = quizPoints + consistencyPoints + communityPoints;
-    const winRate = quizPoints; // Simplified: using quiz score as win rate
+    // 5. Calculate Win Rate from trades
+    const winRate = await calculateWinRate(userId);
 
     return {
       quizPoints,
@@ -735,7 +722,173 @@ export async function calculateUserLeaderboardScore(userId: string): Promise<{
 }
 
 /**
- * Get badge based on total points
+ * Calculate Quiz Points: Average of all module quiz scores
+ * Range: 0-100 points
+ */
+async function calculateQuizPoints(userId: string): Promise<number> {
+  try {
+    const allModules = await getAllModules();
+    if (!allModules || allModules.length === 0) {
+      return 0;
+    }
+
+    let totalQuizScore = 0;
+    let completedModules = 0;
+
+    for (const module of allModules) {
+      const score = await getUserQuizScore(userId, module.id);
+      if (score && score.percentage > 0) {
+        totalQuizScore += score.percentage;
+        completedModules++;
+      }
+    }
+
+    // Return average score (0-100 range)
+    const avgScore = completedModules > 0 
+      ? Math.round((totalQuizScore / completedModules) * 100) / 100 
+      : 0;
+
+    // Normalize to 0-100 range
+    return Math.min(100, Math.max(0, avgScore));
+  } catch (error) {
+    console.error(`Error calculating quiz points for user ${userId}:`, error);
+    return 0;
+  }
+}
+
+/**
+ * Calculate Consistency Points: Days with journal entries in last 7 days
+ * Formula: 5 points per day × min(days, 7) = max 35 points/week
+ * Range: 0-35 points
+ */
+async function calculateConsistencyPoints(userId: string): Promise<number> {
+  try {
+    const database = getCosmosClient().database('mpt-db');
+    const tradesContainer = database.container('trades');
+    
+    // Get last 7 days
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // Query distinct dates with journal entries
+    const { resources: journalEntries } = await tradesContainer.items
+      .query({
+        query: `
+          SELECT DISTINCT 
+            DATE(c.createdAt) as journalDate 
+          FROM c 
+          WHERE c.userId = @userId 
+            AND c.createdAt > @date
+            AND c.notes != null
+            AND LENGTH(c.notes) > 0
+        `,
+        parameters: [
+          { name: '@userId', value: userId },
+          { name: '@date', value: sevenDaysAgo.toISOString() }
+        ]
+      })
+      .fetchAll();
+
+    // Count unique days (each day = 5 points, max 7 days = 35 points)
+    const uniqueDays = journalEntries.length || 0;
+    const consistencyPoints = Math.min(uniqueDays * 5, 35);
+
+    return Math.max(0, consistencyPoints);
+  } catch (error) {
+    console.error(`Error calculating consistency points for user ${userId}:`, error);
+    return 0;
+  }
+}
+
+/**
+ * Calculate Community Points: Meaningful comments/discussions
+ * Formula: 2 points per comment × min(comments, 10) = max 20 points/week
+ * Range: 0-20 points
+ * 
+ * Note: Requires community_comments table/container
+ * Current implementation returns 0 (placeholder)
+ */
+async function calculateCommunityPoints(userId: string): Promise<number> {
+  try {
+    // TODO: Implement when forum/community feature is ready
+    // For now, return 0 to represent no community points
+    
+    // Placeholder implementation:
+    // const database = getCosmosClient().database('mpt-db');
+    // const commentsContainer = database.container('community_comments');
+    // 
+    // const sevenDaysAgo = new Date();
+    // sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    // 
+    // const { resources: comments } = await commentsContainer.items
+    //   .query({
+    //     query: `
+    //       SELECT * FROM c 
+    //       WHERE c.userId = @userId 
+    //         AND c.createdAt > @date
+    //         AND LENGTH(c.text) >= 10
+    //     `,
+    //     parameters: [
+    //       { name: '@userId', value: userId },
+    //       { name: '@date', value: sevenDaysAgo.toISOString() }
+    //     ]
+    //   })
+    //   .fetchAll();
+    // 
+    // const meaningfulComments = comments.length || 0;
+    // const communityPoints = Math.min(meaningfulComments * 2, 20);
+    
+    return 0; // Placeholder
+  } catch (error) {
+    console.error(`Error calculating community points for user ${userId}:`, error);
+    return 0;
+  }
+}
+
+/**
+ * Calculate Win Rate: Percentage of winning trades
+ * Range: 0-100 (percentage)
+ */
+async function calculateWinRate(userId: string): Promise<number> {
+  try {
+    const database = getCosmosClient().database('mpt-db');
+    const tradesContainer = database.container('trades');
+
+    const { resources: trades } = await tradesContainer.items
+      .query({
+        query: `
+          SELECT c.result 
+          FROM c 
+          WHERE c.userId = @userId 
+            AND c.status = 'CLOSED'
+            AND c.result != null
+        `,
+        parameters: [{ name: '@userId', value: userId }]
+      })
+      .fetchAll();
+
+    if (!trades || trades.length === 0) {
+      return 0; // No closed trades yet
+    }
+
+    const winCount = trades.filter(t => t.result === 'WIN').length;
+    const winRate = Math.round((winCount / trades.length) * 100);
+
+    return Math.max(0, Math.min(100, winRate));
+  } catch (error) {
+    console.error(`Error calculating win rate for user ${userId}:`, error);
+    return 0;
+  }
+}
+
+/**
+ * Get badge based on total points (cumulative lifetime points)
+ * 
+ * Tier Thresholds:
+ * - Recruit: 0-500 points
+ * - Elite Warrior: 501-1500 points
+ * - Commander: 1501-3000 points
+ * - Legendary Mentor: 3001+ points
  */
 function getBadgeFromPoints(points: number): 'Recruit' | 'Elite Warrior' | 'Commander' | 'Legendary Mentor' {
   if (points >= 3001) return 'Legendary Mentor';
@@ -974,5 +1127,188 @@ export async function getLeaderboardHistory(week: number, year: number = new Dat
   } catch (error: any) {
     if (error.code === 404) return null;
     throw error;
+  }
+}
+
+/**
+ * Calculate Radar Chart Data for user profile visualization
+ * 
+ * Dimensions (normalized 0-100):
+ * 1. Technical Analysis = (Quiz Score × 0.8) + (Win Rate × 0.2)
+ * 2. Risk Management = (Consistency Score × 0.9) + (Win Rate × 0.1)
+ * 3. Psychology = (Consistency × 0.5) + Base 50 + Random factor (TODO: parse from journal)
+ * 4. Discipline = Consistency Score directly (normalized 0-100)
+ * 5. Knowledge = Quiz Score directly (0-100)
+ */
+export async function calculateRadarChartData(userId: string): Promise<{
+  technicalAnalysis: number;
+  riskManagement: number;
+  psychology: number;
+  discipline: number;
+  knowledge: number;
+}> {
+  try {
+    const scores = await calculateUserLeaderboardScore(userId);
+    
+    // Normalize scores to 0-100 range for radar chart
+    const normalizedConsistency = Math.min(100, (scores.consistencyPoints / 35) * 100);
+    const normalizedQuiz = scores.quizPoints; // Already 0-100
+    const normalizedWinRate = scores.winRate; // Already 0-100
+
+    return {
+      // Technical Analysis: Balanced between knowledge and trading success
+      technicalAnalysis: Math.round((normalizedQuiz * 0.8) + (normalizedWinRate * 0.2)),
+
+      // Risk Management: Based on consistency + win rate discipline
+      riskManagement: Math.round((normalizedConsistency * 0.9) + (normalizedWinRate * 0.1)),
+
+      // Psychology: Consistency + base + potential boost from journal analysis
+      // TODO: Parse emotion/sentiment from trading journal entries for better accuracy
+      psychology: Math.round((normalizedConsistency * 0.5) + 40),
+
+      // Discipline: Direct measure of consistency in journaling
+      discipline: Math.round(normalizedConsistency),
+
+      // Knowledge: Direct measure of quiz performance
+      knowledge: Math.round(normalizedQuiz)
+    };
+  } catch (error) {
+    console.error(`Error calculating radar chart data for user ${userId}:`, error);
+    return {
+      technicalAnalysis: 0,
+      riskManagement: 0,
+      psychology: 0,
+      discipline: 0,
+      knowledge: 0
+    };
+  }
+}
+
+/**
+ * Get or generate Mentor Notes for a user
+ * 
+ * Sources (in priority order):
+ * 1. Manual notes from admin/mentor in dashboard
+ * 2. Auto-generated assessment based on radar scores
+ * 3. Default encouraging message
+ */
+export async function getMentorNotes(userId: string): Promise<string | null> {
+  try {
+    const database = getCosmosClient().database('mpt-db');
+    const usersContainer = database.container('users');
+
+    // Try to get user document with manual mentor notes
+    try {
+      const { resource: user } = await usersContainer.item(userId, userId).read<any>();
+      if (user && user.mentorNotes) {
+        return user.mentorNotes;
+      }
+    } catch (error) {
+      // User not found, continue
+    }
+
+    // Generate automatic assessment based on performance
+    const radarData = await calculateRadarChartData(userId);
+    const scores = await calculateUserLeaderboardScore(userId);
+    const badge = getBadgeFromPoints(scores.totalPoints);
+
+    // Identify strengths and areas to improve
+    const scores_array = [
+      { name: 'Technical Analysis', value: radarData.technicalAnalysis },
+      { name: 'Risk Management', value: radarData.riskManagement },
+      { name: 'Psychology', value: radarData.psychology },
+      { name: 'Discipline', value: radarData.discipline },
+      { name: 'Knowledge', value: radarData.knowledge }
+    ];
+
+    const strengths = scores_array
+      .filter(s => s.value >= 75)
+      .map(s => s.name);
+
+    const improvements = scores_array
+      .filter(s => s.value < 60)
+      .map(s => s.name);
+
+    // Generate message based on badge and performance
+    let message = '';
+
+    switch (badge) {
+      case 'Legendary Mentor':
+        message = `🌟 Selamat ${badge}! Anda adalah teladan MPT Philosophy. Pertahankan konsistensi dan terus mentoring komunitas.`;
+        break;
+      case 'Commander':
+        message = `🎖️ Excellent progress, ${badge}! Fokus pada peningkatan kualitas jurnal dan analisis teknikal untuk meraih level selanjutnya.`;
+        break;
+      case 'Elite Warrior':
+        message = `⚔️ Well done, ${badge}! Anda sudah menunjukkan kedisiplinan yang solid. Terus tingkatkan knowledge dengan menyelesaikan modul-modul sisa.`;
+        break;
+      default:
+        message = `🥲 Selamat datang ${badge}! Mulai dari sini dengan konsisten menulis jurnal trading. Disiplin adalah fondasi kesuksesan trader.`;
+    }
+
+    // Add specific recommendations
+    if (strengths.length > 0) {
+      message += `\n\n💪 Kekuatan Anda: ${strengths.join(', ')}`;
+    }
+
+    if (improvements.length > 0) {
+      message += `\n\n🎯 Area untuk ditingkatkan: ${improvements.join(', ')}`;
+    }
+
+    message += `\n\n📚 Saran: Fokus pada modul ${improvements[0] || 'lanjutan'} dan pertahankan momentum journaling Anda!`;
+
+    return message;
+  } catch (error) {
+    console.error(`Error getting mentor notes for user ${userId}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Get weekly history for user (last 4-12 weeks)
+ */
+export async function getUserWeeklyHistory(userId: string, weeksBack: number = 4): Promise<Array<{
+  week: number;
+  year: number;
+  rank: number;
+  totalPoints: number;
+  badge: string;
+}> | null> {
+  try {
+    const historyContainer = getLeaderboardHistoryContainer();
+    const history = [];
+
+    const now = new Date();
+    for (let i = 0; i < weeksBack; i++) {
+      const checkDate = new Date(now);
+      checkDate.setDate(checkDate.getDate() - (i * 7));
+      
+      const week = Math.ceil(checkDate.getDate() / 7);
+      const year = checkDate.getFullYear();
+      const weekId = `${year}-w${week}`;
+
+      try {
+        const { resource: snapshot } = await historyContainer.item(weekId, weekId).read<any>();
+        if (snapshot && snapshot.rankings) {
+          const userRanking = snapshot.rankings.find((r: any) => r.userId === userId);
+          if (userRanking) {
+            history.push({
+              week,
+              year,
+              rank: userRanking.rank,
+              totalPoints: userRanking.totalPoints,
+              badge: userRanking.badge
+            });
+          }
+        }
+      } catch (error) {
+        // Week history not found, continue
+      }
+    }
+
+    return history.length > 0 ? history : null;
+  } catch (error) {
+    console.error(`Error getting weekly history for user ${userId}:`, error);
+    return null;
   }
 }
