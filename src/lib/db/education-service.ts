@@ -770,12 +770,11 @@ async function calculateConsistencyPoints(userId: string): Promise<number> {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    // Query distinct dates with journal entries
+    // Query journal entries (Cosmos DB doesn't support DATE() function, so we'll filter in JS)
     const { resources: journalEntries } = await tradesContainer.items
       .query({
         query: `
-          SELECT DISTINCT 
-            DATE(c.createdAt) as journalDate 
+          SELECT c.createdAt, c.notes 
           FROM c 
           WHERE c.userId = @userId 
             AND c.createdAt > @date
@@ -789,8 +788,16 @@ async function calculateConsistencyPoints(userId: string): Promise<number> {
       })
       .fetchAll();
 
-    // Count unique days (each day = 5 points, max 7 days = 35 points)
-    const uniqueDays = journalEntries.length || 0;
+    // Count unique days by extracting date portion
+    const uniqueDates = new Set<string>();
+    journalEntries.forEach((entry: any) => {
+      // Extract date portion (YYYY-MM-DD) from ISO string
+      const dateString = entry.createdAt.split('T')[0];
+      uniqueDates.add(dateString);
+    });
+
+    // Each day = 5 points, max 7 days = 35 points
+    const uniqueDays = uniqueDates.size || 0;
     const consistencyPoints = Math.min(uniqueDays * 5, 35);
 
     return Math.max(0, consistencyPoints);
@@ -912,7 +919,7 @@ export async function updateLeaderboardRanking(): Promise<void> {
       await database.containers.createIfNotExists({
         id: 'user-leaderboard',
         partitionKey: '/userId',
-        throughput: 100
+        throughput: 400  // Minimum 400 RU/s for Cosmos DB
       });
       console.log('✅ user-leaderboard container ready');
     } catch (error: any) {
