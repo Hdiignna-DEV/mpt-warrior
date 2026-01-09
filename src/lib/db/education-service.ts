@@ -939,6 +939,28 @@ export async function updateLeaderboardRanking(): Promise<void> {
       })
       .fetchAll();
 
+    // Get all leaderboard entries to identify and remove inactive users
+    const { resources: allLeaderboardEntries } = await leaderboardContainer.items
+      .query({
+        query: `SELECT c.id, c.userId FROM c`
+      })
+      .fetchAll();
+
+    // Get active user IDs
+    const activeUserIds = new Set(users.map((u: any) => u.id));
+
+    // Delete leaderboard entries for inactive users
+    for (const entry of allLeaderboardEntries) {
+      if (!activeUserIds.has(entry.userId)) {
+        try {
+          await leaderboardContainer.item(entry.id, entry.userId).delete();
+          console.log(`   🗑️  Removed inactive user from leaderboard: ${entry.userId}`);
+        } catch (error) {
+          console.warn(`   ⚠️  Could not remove ${entry.userId}:`, error);
+        }
+      }
+    }
+
     // Calculate scores for each user
     const leaderboardEntries: LeaderboardEntry[] = [];
 
@@ -975,12 +997,31 @@ export async function updateLeaderboardRanking(): Promise<void> {
       });
     }
 
-    // Sort by total points (descending)
-    leaderboardEntries.sort((a, b) => b.totalPoints - a.totalPoints);
+    // Sort by total points (descending), then by quiz points (tie-breaker), then by consistency, then by userId (stable)
+    leaderboardEntries.sort((a, b) => {
+      if (b.totalPoints !== a.totalPoints) {
+        return b.totalPoints - a.totalPoints; // Higher points first
+      }
+      if (b.quizPoints !== a.quizPoints) {
+        return b.quizPoints - a.quizPoints; // Higher quiz points as tie-breaker
+      }
+      if (b.consistencyPoints !== a.consistencyPoints) {
+        return b.consistencyPoints - a.consistencyPoints; // Higher consistency as 2nd tie-breaker
+      }
+      return a.userId.localeCompare(b.userId); // Alphabetical by userId for stability
+    });
 
-    // Assign ranks and determine trend
+    // Assign ranks and determine trend (handle ties by using actual rank skipping)
+    let currentRank = 1;
     leaderboardEntries.forEach((entry, index) => {
-      entry.rank = index + 1;
+      // If same points as previous entry, use same rank, otherwise use index + 1
+      if (index > 0 && leaderboardEntries[index - 1].totalPoints === entry.totalPoints) {
+        entry.rank = leaderboardEntries[index - 1].rank;
+      } else {
+        entry.rank = index + 1;
+      }
+      currentRank = entry.rank;
+
       if (entry.previousRank === null) {
         entry.rankTrend = 'STABLE';
       } else if (entry.rank < entry.previousRank) {
