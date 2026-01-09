@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     console.log('User:', decoded.email, 'Role:', decoded.role);
 
     const client = getCosmosClient();
-    const educationDb = client.database('mpt-warrior');
+    const mptDb = client.database('mpt-db');
 
     const results = {
       userLeaderboard: { status: 'pending', message: '' },
@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
 
     // Create user-leaderboard container
     try {
-      console.log('📦 Creating user-leaderboard container...');
-      await educationDb.containers.createIfNotExists({
+      console.log('📦 Creating user-leaderboard container in mpt-db...');
+      await mptDb.containers.createIfNotExists({
         id: 'user-leaderboard',
         partitionKey: '/userId',
         throughput: 100
@@ -64,8 +64,8 @@ export async function POST(request: NextRequest) {
 
     // Create leaderboard-history container
     try {
-      console.log('📦 Creating leaderboard-history container...');
-      await educationDb.containers.createIfNotExists({
+      console.log('📦 Creating leaderboard-history container in mpt-db...');
+      await mptDb.containers.createIfNotExists({
         id: 'leaderboard-history',
         partitionKey: '/week',
         throughput: 100
