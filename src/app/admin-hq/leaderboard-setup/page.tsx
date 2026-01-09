@@ -19,21 +19,14 @@ export default function LeaderboardSetupPage() {
   const [steps, setSteps] = useState<SetupStep[]>([
     {
       id: 'containers',
-      title: '1️⃣ Create Leaderboard Containers',
-      description: 'Setup user-leaderboard and leaderboard-history containers in Cosmos DB',
+      title: '🚀 Initialize Leaderboard System',
+      description: 'Create containers, calculate user scores, and populate leaderboard rankings (one-click setup)',
       action: 'setupContainers',
       status: 'pending'
     },
     {
       id: 'rankings',
-      title: '2️⃣ Initialize Rankings',
-      description: 'Calculate scores for all users and populate leaderboard',
-      action: 'initializeRankings',
-      status: 'pending'
-    },
-    {
-      id: 'scheduler',
-      title: '3️⃣ Start Auto-Scheduler',
+      title: '2️⃣ Start Auto-Scheduler (Optional)',
       description: 'Enable hourly automatic leaderboard updates',
       action: 'startScheduler',
       status: 'pending'
@@ -50,8 +43,6 @@ export default function LeaderboardSetupPage() {
 
       if (action === 'setupContainers') {
         url = '/api/admin/setup-leaderboard';
-      } else if (action === 'initializeRankings') {
-        url = '/api/admin/initialize-leaderboard';
       } else if (action === 'startScheduler') {
         url = '/api/admin/schedule-leaderboard';
         body = { action: 'start', intervalMinutes: 60 };
