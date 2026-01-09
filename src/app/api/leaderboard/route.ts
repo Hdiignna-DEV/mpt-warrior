@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     // Cache miss - fetch from database and filter
     console.log('🔄 Fetching leaderboard from database');
     const allLeaderboard = await getLeaderboardTop(1000, 0);
-    const database = getCosmosClient().database('mpt-db');
+    const database = getCosmosClient().database('mpt-warrior');
     const usersContainer = database.container('users');
     
     const filteredLeaderboard = [];
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is super admin in database
-    const database = getCosmosClient().database('mpt-db');
+    const database = getCosmosClient().database('mpt-warrior');
     const usersContainer = database.container('users');
     
     try {
