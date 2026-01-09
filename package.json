@@ -16,6 +16,7 @@
     "db:phase2": "tsx scripts/init-phase2-containers.ts",
     "db:init-profile": "tsx scripts/init-profile-system.ts",
     "db:optimize": "tsx scripts/optimize-cosmos-free-tier.ts",
+    "leaderboard:populate": "tsx scripts/populate-leaderboard.ts",
     "azure:deploy": "npm run build && echo 'Push to GitHub to trigger Azure deployment'",
     "azure:monitor": "powershell -ExecutionPolicy Bypass -File scripts/setup-azure-monitoring.ps1",
     "azure:cleanup": "echo 'Cleaning up old Vercel configs...' && rm -f vercel.json",
