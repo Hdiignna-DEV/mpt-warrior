@@ -51,7 +51,7 @@ export default function LeaderboardSetupPage() {
       if (action === 'setupContainers') {
         url = '/api/admin/setup-leaderboard';
       } else if (action === 'initializeRankings') {
-        url = '/api/leaderboard';
+        url = '/api/admin/initialize-leaderboard';
       } else if (action === 'startScheduler') {
         url = '/api/admin/schedule-leaderboard';
         body = { action: 'start', intervalMinutes: 60 };
