@@ -6,7 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET || '';
 export interface JWTPayload {
   userId: string;
   email: string;
-  role: 'ADMIN' | 'WARRIOR';
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'WARRIOR';
   status: string;
 }
 
