@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Trophy, ArrowRight } from 'lucide-react';
+import { Trophy, ArrowRight, Star, Zap, Shield, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { RankBadgeCompact } from './RankBadge';
+import { getBadgeByPoints, getRankDisplay, isInTopTen, formatPoints } from '@/utils/badge-system';
 import Image from 'next/image';
 
 interface TopUser {
@@ -15,12 +16,14 @@ interface TopUser {
   totalPoints: number;
   badge: string;
   rank: number;
+  avatar?: string;
 }
 
 interface WidgetData {
   top3: TopUser[];
   userRank: number | null;
   userPoints: number | null;
+  userBadge?: string;
 }
 
 export function WarriorRankingWidget() {
@@ -44,6 +47,7 @@ export function WarriorRankingWidget() {
           // Find user's rank if WARRIOR
           let userRank = null;
           let userPoints = null;
+          let userBadge = undefined;
           if (user && user.role === 'WARRIOR') {
             const allLeaderboard = await fetch(`/api/leaderboard?limit=100`, {
               headers: { 'Authorization': `Bearer ${token}` }
@@ -53,13 +57,15 @@ export function WarriorRankingWidget() {
             if (userEntry) {
               userRank = userEntry.rank;
               userPoints = userEntry.totalPoints;
+              userBadge = userEntry.badge;
             }
           }
 
           setData({
             top3,
             userRank,
-            userPoints
+            userPoints,
+            userBadge,
           });
         }
       } catch (error) {
@@ -124,10 +130,20 @@ export function WarriorRankingWidget() {
       {/* User Position */}
       {data.userRank && (
         <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4 mb-6">
-          <p className="text-xs text-gray-400 mb-1">YOUR POSITION</p>
+          <p className="text-xs text-gray-400 mb-2">YOUR POSITION</p>
           <div className="flex items-center justify-between">
-            <p className="text-2xl font-bold text-orange-400">#{data.userRank}</p>
-            <p className="text-sm text-orange-400">{data.userPoints} pts</p>
+            <div>
+              <p className="text-2xl font-bold text-orange-400">#{data.userRank}</p>
+              {isInTopTen(data.userRank) && (
+                <span className="inline-block text-xs mt-1 px-2 py-0.5 bg-yellow-500/30 text-yellow-300 rounded-full border border-yellow-500/50">
+                  🔥 Top 10!
+                </span>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-semibold text-orange-300">{formatPoints(data.userPoints || 0)}</p>
+              <p className="text-xs text-gray-400">pts</p>
+            </div>
           </div>
         </div>
       )}

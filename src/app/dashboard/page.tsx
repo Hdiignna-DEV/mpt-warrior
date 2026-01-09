@@ -22,6 +22,10 @@ import { formatCurrency, type Currency } from '@/utils/helpers';
 import { getExchangeRate, initializeExchangeRate } from '@/utils/exchange-rate';
 // FASE 2.6.4: Import discipline metrics components
 import { EmotionDistribution, DisciplineTrend, EmotionPerformance } from '@/components/Dashboard/DisciplineMetrics';
+// Warrior Ranking Widget
+import { WarriorRankingWidget } from '@/components/leaderboard/WarriorRankingWidget';
+import { LeaderboardArkaTrigger } from '@/components/LeaderboardArkaTrigger';
+import { useLeaderboardRankTrigger } from '@/hooks/useLeaderboardRankTrigger';
 
 interface Trade {
   id: string;
@@ -37,6 +41,7 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const { loading: authLoading } = useAuth();
   const { currency, setCurrency } = useCurrency();
+  const { trigger: rankTrigger } = useLeaderboardRankTrigger();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [customBalance, setCustomBalance] = useState<number>(10000000); // Default 10 juta IDR
@@ -500,6 +505,15 @@ export default function Dashboard() {
           />
         </motion.div>
 
+        {/* Warrior Ranking Widget - Mini Leaderboard Preview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.5 }}
+        >
+          <WarriorRankingWidget />
+        </motion.div>
+
         {/* Quick Actions - NEW GRID DESIGN */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -771,6 +785,16 @@ export default function Dashboard() {
               </div>
             </div>
           </motion.div>
+        )}
+
+        {/* Arka Leaderboard Trigger Notification */}
+        {rankTrigger && (
+          <LeaderboardArkaTrigger
+            message={rankTrigger.message}
+            pose={rankTrigger.arkaPose}
+            isVisible={rankTrigger.showArka}
+            onClose={() => {}}
+          />
         )}
       </div>
     </div>
