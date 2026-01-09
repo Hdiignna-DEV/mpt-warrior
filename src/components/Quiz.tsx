@@ -61,6 +61,7 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
   const [submitting, setSubmitting] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showResults, setShowResults] = useState(false);
+  const [showDetailedReview, setShowDetailedReview] = useState(false);
   
   // Quiz Focus Mode (Lockdown)
   const [isQuizLocked, setIsQuizLocked] = useState(false);
@@ -117,6 +118,13 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
   useEffect(() => {
     fetchQuiz();
     fetchScore();
+
+    // Auto-refresh score every 10 seconds if quiz is completed
+    const scoreRefreshInterval = setInterval(() => {
+      fetchScore();
+    }, 10000); // Check for updates every 10 seconds
+
+    return () => clearInterval(scoreRefreshInterval);
   }, [moduleId]);
 
   const fetchQuiz = async () => {
@@ -150,12 +158,17 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
         
         // Build answers map from user's previous answers
         const answersMap: Record<string, string> = {};
+        const submittedList: UserAnswer[] = [];
+        
         data.answers.forEach((item: any) => {
           if (item.answer) {
             answersMap[item.question.id] = item.answer.answer;
+            submittedList.push(item.answer);
           }
         });
+        
         setAnswers(answersMap);
+        setSubmittedAnswers(submittedList);
 
         // If quiz already completed, show results
         if (data.score.percentage > 0) {
@@ -291,6 +304,88 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
   }
 
   if (showResults && score) {
+    // Show detailed review of answers with feedback
+    if (showDetailedReview) {
+      return (
+        <div className="space-y-4">
+          <Card className="bg-white/5 backdrop-blur-sm border-white/10 p-6">
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold text-white mb-4">📋 Detailed Review</h3>
+              
+              {submittedAnswers.length === 0 ? (
+                <p className="text-gray-400 text-center py-8">No answers submitted yet.</p>
+              ) : (
+                <div className="space-y-4">
+                  {submittedAnswers.map((answer, index) => {
+                    const question = questions.find(q => q.id === answer.questionId);
+                    const isGraded = answer.score !== null;
+                    
+                    return (
+                      <div key={answer.id} className="bg-white/5 border border-white/10 rounded-lg p-4">
+                        <div className="mb-3">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <h4 className="font-semibold text-white">
+                              {index + 1}. {question?.question || 'Question'}
+                            </h4>
+                            {isGraded && (
+                              <Badge className={answer.score! > 0 ? 'bg-green-600' : 'bg-red-600'}>
+                                {answer.score} pts
+                              </Badge>
+                            )}
+                          </div>
+                          
+                          {question?.type === 'essay' && (
+                            <p className="text-sm text-gray-400">
+                              <span className="font-semibold text-gray-300">Max: {question.points} points</span>
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Your Answer */}
+                        <div className="mb-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded">
+                          <p className="text-sm text-gray-400 mb-1">Your answer:</p>
+                          <p className="text-white whitespace-pre-wrap break-words">{answer.answer}</p>
+                        </div>
+
+                        {/* Graded Feedback */}
+                        {isGraded ? (
+                          <div className="space-y-2">
+                            {answer.feedback && (
+                              <div className="p-3 bg-green-500/10 border border-green-500/30 rounded">
+                                <p className="text-sm text-green-400 font-semibold mb-1">📝 Feedback from {answer.gradedBy}:</p>
+                                <p className="text-white whitespace-pre-wrap break-words">{answer.feedback}</p>
+                              </div>
+                            )}
+                            {answer.gradedAt && (
+                              <p className="text-xs text-gray-500">
+                                Graded on: {new Date(answer.gradedAt).toLocaleDateString()} at {new Date(answer.gradedAt).toLocaleTimeString()}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded">
+                            <p className="text-sm text-yellow-400">⏳ Pending grading by instructor</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <Button
+              onClick={() => setShowDetailedReview(false)}
+              className="w-full bg-purple-600 hover:bg-purple-700"
+            >
+              ← Back to Results
+            </Button>
+          </Card>
+        </div>
+      );
+    }
+
+    // Show results summary
     return (
       <Card className="bg-white/5 backdrop-blur-sm border-white/10 p-6">
         <div className="text-center mb-6">
@@ -335,10 +430,10 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
         )}
 
         <Button
-          onClick={() => setShowResults(false)}
+          onClick={() => setShowDetailedReview(true)}
           className="w-full bg-purple-600 hover:bg-purple-700"
         >
-          Review Answers
+          📋 Review Detailed Answers & Feedback
         </Button>
       </Card>
     );
