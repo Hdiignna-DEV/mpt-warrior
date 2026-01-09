@@ -1,17 +1,21 @@
 /**
  * API Route: /api/leaderboard
- * GET - Get leaderboard top users with caching (filters out admin/super admin)
+ * GET - Get leaderboard top users with Redis caching (filters out admin/super admin)
+ * POST - Recalculate leaderboard rankings (Super Admin only)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getLeaderboardTop, updateLeaderboardRanking } from '@/lib/db/education-service';
 import { getCosmosClient } from '@/lib/db/cosmos-client';
+import { getCachedValue, setCachedValue, deleteCachedValue } from '@/lib/cache/redis-cache';
 
-// Simple in-memory cache (in production, use Redis)
-let leaderboardCache: any = null;
+const LEADERBOARD_CACHE_KEY = 'leaderboard:top100:v1';
+const CACHE_TTL = 3600; // 1 hour in seconds (Redis native)
+
+// Fallback in-memory cache if Redis unavailable
+let leaderboardCacheFallback: any = null;
 let leaderboardCacheTime = 0;
-const CACHE_TTL = 3600000; // 1 hour in milliseconds
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,24 +34,37 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '100', 10);
     const offset = parseInt(searchParams.get('offset') || '0', 10);
 
-    // Check cache
-    const now = Date.now();
-    if (leaderboardCache && (now - leaderboardCacheTime) < CACHE_TTL) {
-      console.log('📦 Returning leaderboard from cache');
+    // Try Redis cache first
+    console.log('🔍 Checking Redis cache...');
+    const cachedData = await getCachedValue<any[]>(LEADERBOARD_CACHE_KEY);
+    
+    if (cachedData && cachedData.length > 0) {
+      console.log('✅ Redis cache HIT');
       return NextResponse.json({
         success: true,
-        leaderboard: leaderboardCache.slice(offset, offset + limit),
-        total: leaderboardCache.length,
+        leaderboard: cachedData.slice(offset, offset + limit),
+        total: cachedData.length,
         cached: true,
-        cacheAge: now - leaderboardCacheTime
+        cacheSource: 'redis'
+      });
+    }
+
+    // Check fallback in-memory cache
+    const now = Date.now();
+    if (leaderboardCacheFallback && (now - leaderboardCacheTime) < (CACHE_TTL * 1000)) {
+      console.log('📦 Using fallback in-memory cache');
+      return NextResponse.json({
+        success: true,
+        leaderboard: leaderboardCacheFallback.slice(offset, offset + limit),
+        total: leaderboardCacheFallback.length,
+        cached: true,
+        cacheSource: 'memory'
       });
     }
 
     // Cache miss - fetch from database and filter
     console.log('🔄 Fetching leaderboard from database');
     const allLeaderboard = await getLeaderboardTop(1000, 0);
-    
-    // Filter out admin users - get user roles from database
     const database = getCosmosClient().database('mpt-db');
     const usersContainer = database.container('users');
     
@@ -64,15 +81,19 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    // Update cache
-    leaderboardCache = filteredLeaderboard;
+    // Save to Redis cache
+    await setCachedValue(LEADERBOARD_CACHE_KEY, filteredLeaderboard, CACHE_TTL);
+    
+    // Also update fallback in-memory cache
+    leaderboardCacheFallback = filteredLeaderboard;
     leaderboardCacheTime = now;
 
     return NextResponse.json({
       success: true,
       leaderboard: filteredLeaderboard.slice(offset, offset + limit),
       total: filteredLeaderboard.length,
-      cached: false
+      cached: false,
+      cacheSource: 'database'
     });
 
   } catch (error: any) {
@@ -85,25 +106,51 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST - Trigger manual leaderboard recalculation (Admin only)
+ * POST - Trigger manual leaderboard recalculation (Super Admin only)
  */
 export async function POST(request: NextRequest) {
   try {
     const decoded = await verifyToken(request);
-    if (!decoded || decoded.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized - Admin only' }, { status: 403 });
+    if (!decoded) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check if user is super admin in database
+    const database = getCosmosClient().database('mpt-db');
+    const usersContainer = database.container('users');
+    
+    try {
+      const { resource: userDoc } = await usersContainer
+        .item(decoded.userId, decoded.userId)
+        .read<any>();
+      
+      if (!userDoc || userDoc.role !== 'SUPER_ADMIN') {
+        return NextResponse.json(
+          { error: 'Unauthorized - Super Admin only' },
+          { status: 403 }
+        );
+      }
+    } catch (error) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Trigger update
+    console.log('🔄 Recalculating leaderboard rankings...');
     await updateLeaderboardRanking();
 
-    // Clear cache
-    leaderboardCache = null;
+    // Clear Redis cache
+    await deleteCachedValue(LEADERBOARD_CACHE_KEY);
+    
+    // Clear fallback cache
+    leaderboardCacheFallback = null;
     leaderboardCacheTime = 0;
+
+    console.log('✅ Leaderboard recalculated and cache cleared');
 
     return NextResponse.json({
       success: true,
-      message: 'Leaderboard recalculated successfully'
+      message: 'Leaderboard recalculated successfully',
+      cacheCleared: true
     });
 
   } catch (error: any) {
