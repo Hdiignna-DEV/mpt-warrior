@@ -344,7 +344,11 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
                         {/* Your Answer */}
                         <div className="mb-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded">
                           <p className="text-sm text-gray-400 mb-1">Your answer:</p>
-                          <p className="text-white whitespace-pre-wrap break-words">{answer.answer}</p>
+                          <p className="text-white whitespace-pre-wrap break-words">
+                            {question?.type === 'multiple-choice' || question?.type === 'true-false'
+                              ? question?.options?.[parseInt(answer.answer)] || answer.answer
+                              : answer.answer}
+                          </p>
                         </div>
 
                         {/* Graded Feedback */}
