@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { ArrowUp, ArrowDown, Zap, Trophy, Medal, Crown, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import { ArkaMascotFeedback } from '@/components/ArkaMascotFeedback';
 import Image from 'next/image';
 
 interface LeaderboardEntry {
@@ -41,6 +42,7 @@ export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRank, setUserRank] = useState<number | null>(null);
+  const [userEntry, setUserEntry] = useState<LeaderboardEntry | null>(null);
   const [viewMode, setViewMode] = useState<'top100' | 'all'>('top100');
 
   // Founder profile
@@ -78,9 +80,10 @@ export default function LeaderboardPage() {
         
         // Find user's rank
         if (user) {
-          const userEntry = data.leaderboard.find((entry: LeaderboardEntry) => entry.userId === user.id);
-          if (userEntry) {
-            setUserRank(userEntry.rank);
+          const foundUserEntry = data.leaderboard.find((entry: LeaderboardEntry) => entry.userId === user.id);
+          if (foundUserEntry) {
+            setUserRank(foundUserEntry.rank);
+            setUserEntry(foundUserEntry);
           }
         }
       }
@@ -342,6 +345,17 @@ export default function LeaderboardPage() {
           <p>📊 Leaderboard updated hourly | Scores based on Quiz, Consistency & Community</p>
         </div>
       </div>
+
+      {/* Arka Mascot Feedback - Show to logged-in user with rank trend */}
+      {user && userEntry && (
+        <ArkaMascotFeedback
+          userName={user.name}
+          rankTrend={userEntry.rankTrend}
+          currentRank={userEntry.rank}
+          previousRank={userEntry.previousRank}
+          totalPoints={userEntry.totalPoints}
+        />
+      )}
     </div>
   );
 }
