@@ -101,15 +101,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user is super admin
-    const database = getCosmosClient().database('mpt-db');
-    const usersContainer = database.container('users');
-    
-    const { resource: userDoc } = await usersContainer
-      .item(decoded.userId, decoded.userId)
-      .read<any>();
-    
-    if (!userDoc || userDoc.role !== 'SUPER_ADMIN') {
+    // Check if user is super admin (from JWT token)
+    if (decoded.role !== 'SUPER_ADMIN') {
       return NextResponse.json(
         { error: 'Unauthorized - Super Admin only' },
         { status: 403 }
@@ -137,15 +130,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user is super admin
-    const database = getCosmosClient().database('mpt-db');
-    const usersContainer = database.container('users');
-    
-    const { resource: userDoc } = await usersContainer
-      .item(decoded.userId, decoded.userId)
-      .read<any>();
-    
-    if (!userDoc || userDoc.role !== 'SUPER_ADMIN') {
+    // Check if user is super admin (from JWT token)
+    if (decoded.role !== 'SUPER_ADMIN') {
       return NextResponse.json(
         { error: 'Unauthorized - Super Admin only' },
         { status: 403 }
