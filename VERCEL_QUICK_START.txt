@@ -1,0 +1,79 @@
+# 🚀 VERCEL FIX - QUICK CARD
+
+## Problem
+Your Vercel build is failing because environment variables aren't set.
+
+## Root Cause
+- ✅ Variables exist in `.env.local` (your computer)
+- ❌ Variables NOT in Vercel Settings (cloud)
+- Vercel can't see them during build
+
+## Solution (5 steps, 15 minutes)
+
+### 1. Open Vercel Dashboard
+https://vercel.com/dashboard
+
+### 2. Select Project
+Click: **mpt-warrior**
+
+### 3. Go to Settings
+Click: **Settings** (top menu)
+
+### 4. Go to Environment Variables
+Click: **Environment Variables** (left sidebar)
+
+### 5. Add 12 Variables
+
+**For each variable:**
+1. Click **"Add New"**
+2. Copy from your `.env.local`:
+   - Name: (variable name)
+   - Value: (its value)
+3. Check all 3 environments:
+   - ✅ Production
+   - ✅ Preview
+   - ✅ Development
+4. Click **Save**
+
+**The 12 variables are:**
+```
+NEXT_PUBLIC_GEMINI_API_KEY
+GEMINI_API_KEY
+GROQ_API_KEY
+NEXT_PUBLIC_GROQ_API_KEY
+AZURE_COSMOS_CONNECTION_STRING
+AZURE_COSMOS_ENDPOINT
+AZURE_COSMOS_KEY
+AZURE_COSMOS_DATABASE
+JWT_SECRET
+NEXT_PUBLIC_ADMIN_EMAIL
+CRON_SECRET
+NEXT_PUBLIC_APP_URL
+```
+
+**Find them in:**
+`c:\Users\deden\mpt-warrior\.env.local`
+
+### 6. Rebuild
+1. Go to: **Deployments**
+2. Find: Failed deployment
+3. Click: **Redeploy**
+4. Wait: 2-3 minutes
+5. Should see: ✅ **Ready**
+
+---
+
+## ✅ Done!
+Your site is now live at:
+https://mpt-community.vercel.app
+
+---
+
+## Files Created for Reference
+- `VERCEL_FIX_NOW.md` - Detailed step-by-step guide
+- `VERCEL_COMPLETE_SETUP.md` - Full troubleshooting guide
+- `vercel-setup.ps1` - PowerShell helper script
+
+## Support
+If still stuck, check exact error message from:
+Vercel → Deployments → Failed deployment → Build Logs
