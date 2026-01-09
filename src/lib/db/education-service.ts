@@ -1,3 +1,4 @@
+import { onQuizCompleted } from '@/lib/integrations/leaderboard-hooks';
 /**
  * Education Service - MPT Academy
  * Handles educational modules and user progress
@@ -433,6 +434,12 @@ export async function submitQuizAnswer(
   };
 
   await container.items.upsert(userAnswer);
+
+  // Sync quiz points to ranking system
+  if (score !== null) {
+    onQuizCompleted(userId, moduleId, score, userAnswer.id)
+      .catch(err => console.error('Leaderboard sync error:', err));
+  }
   return userAnswer;
 }
 

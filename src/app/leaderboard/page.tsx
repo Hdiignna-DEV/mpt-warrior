@@ -8,7 +8,11 @@ import { ArrowUp, ArrowDown, Zap, Trophy, Medal, Crown, Sparkles } from 'lucide-
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { ArkaMascotFeedback } from '@/components/ArkaMascotFeedback';
+import { LeaderboardSearch } from '@/components/leaderboard/LeaderboardSearch';
+import { RankBadgeCompact } from '@/components/leaderboard/RankBadge';
 import Image from 'next/image';
+
+type Period = 'all' | 'weekly' | 'monthly';
 
 interface LeaderboardEntry {
   userId: string;
@@ -41,10 +45,13 @@ export default function LeaderboardPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [filteredLeaderboard, setFilteredLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRank, setUserRank] = useState<number | null>(null);
   const [userEntry, setUserEntry] = useState<LeaderboardEntry | null>(null);
   const [viewMode, setViewMode] = useState<'top100' | 'all'>('top100');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [period, setPeriod] = useState<Period>('all');
 
   // Founder profile
   const founderProfile: FounderProfile = {
@@ -67,6 +74,11 @@ export default function LeaderboardPage() {
       fetchLeaderboard();
     }
   }, [authLoading]);
+
+  useEffect(() => {
+    // Update filtered leaderboard when main leaderboard changes
+    applyFilters(leaderboard, searchQuery, period);
+  }, [leaderboard]);
 
   const fetchLeaderboard = async () => {
     try {
@@ -102,6 +114,7 @@ export default function LeaderboardPage() {
         }
         
         setLeaderboard(data.leaderboard);
+        applyFilters(data.leaderboard, searchQuery, period);
         
         // Find user's rank
         if (user) {
@@ -119,6 +132,34 @@ export default function LeaderboardPage() {
     }
   };
 
+  const applyFilters = (entries: LeaderboardEntry[], query: string, filterPeriod: Period) => {
+    let filtered = [...entries];
+    
+    // Search filter
+    if (query.trim()) {
+      const lowerQuery = query.toLowerCase();
+      filtered = filtered.filter(entry =>
+        entry.userName.toLowerCase().includes(lowerQuery) ||
+        entry.whatsapp?.includes(query)
+      );
+    }
+    
+    // Period filter (would need API support for weekly/monthly data)
+    // For now, show all - period filter would require leaderboard-history container queries
+    
+    setFilteredLeaderboard(filtered);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    applyFilters(leaderboard, query, period);
+  };
+
+  const handleFilterChange = (newPeriod: Period) => {
+    setPeriod(newPeriod);
+    applyFilters(leaderboard, searchQuery, newPeriod);
+  };
+
   const getBadgeColor = (badge: string) => {
     switch (badge) {
       case 'Legendary Mentor':
@@ -130,6 +171,7 @@ export default function LeaderboardPage() {
       default:
         return 'bg-green-500/20 text-green-400 border-green-500/30';
     }
+
   };
 
   const getRankIcon = (rank: number) => {
@@ -168,6 +210,15 @@ export default function LeaderboardPage() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">⚔️ WARRIOR LEADERBOARD</h1>
           <p className="text-gray-400">Kompetisi Kualitas Trading - Mindset, Plan, Execution</p>
+        </div>
+
+        {/* Search & Filter */}
+        <div className="mb-8">
+          <LeaderboardSearch 
+            onSearch={handleSearch}
+            onFilterChange={handleFilterChange}
+            defaultPeriod={period}
+          />
         </div>
 
         {/* Founder Profile Section */}
@@ -283,7 +334,7 @@ export default function LeaderboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {leaderboard.map((entry, index) => (
+                {filteredLeaderboard.map((entry, index) => (
                   <tr
                     key={entry.userId}
                     className={`border-b border-white/5 transition-colors ${
@@ -299,22 +350,27 @@ export default function LeaderboardPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div>
-                        <p className="text-white font-semibold">{entry.userName}</p>
-                        <p className="text-gray-500 text-sm">
-                          {entry.whatsapp ? (
-                            <a 
-                              href={`https://wa.me/${entry.whatsapp.replace(/\D/g, '')}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-green-400 hover:text-green-300"
-                            >
-                              💬 {entry.whatsapp}
-                            </a>
-                          ) : (
+                      <div className="flex items-center gap-2">
+                        <div>
+                          <p className="text-white font-semibold flex items-center gap-2">
+                            {entry.userName}
+                            <RankBadgeCompact badge={entry.badge as any} />
+                          </p>
+                          <p className="text-gray-500 text-sm">
+                            {entry.whatsapp ? (
+                              <a 
+                                href={`https://wa.me/${entry.whatsapp.replace(/\D/g, '')}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-green-400 hover:text-green-300"
+                              >
+                                💬 {entry.whatsapp}
+                              </a>
+                            ) : (
                             <span className="text-gray-600">No WhatsApp</span>
                           )}
-                        </p>
+                          </p>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -346,7 +402,7 @@ export default function LeaderboardPage() {
 
           {/* Mobile View */}
           <div className="md:hidden space-y-3 p-4">
-            {leaderboard.map((entry) => (
+            {filteredLeaderboard.map((entry) => (
               <Card
                 key={entry.userId}
                 className={`p-4 ${
@@ -367,7 +423,10 @@ export default function LeaderboardPage() {
                     </span>
                   </div>
                 </div>
-                <p className="text-white font-semibold">{entry.userName}</p>
+                <p className="text-white font-semibold flex items-center gap-2">
+                  {entry.userName}
+                  <RankBadgeCompact badge={entry.badge as any} />
+                </p>
                 <p className="text-gray-500 text-xs mb-2">
                   {entry.whatsapp ? (
                     <a 

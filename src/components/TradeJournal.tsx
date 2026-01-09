@@ -1,7 +1,9 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { BookOpen, Plus, Trash2, Download, Share2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { onJournalEntrySaved } from '@/lib/integrations/leaderboard-hooks';
 import { ResultNotificationModal, CommanderArkaFullDisplay } from './ChatUIEnhancers';
 
 interface Trade {

@@ -17,11 +17,18 @@
     "db:init-profile": "tsx scripts/init-profile-system.ts",
     "db:optimize": "tsx scripts/optimize-cosmos-free-tier.ts",
     "leaderboard:populate": "tsx scripts/populate-leaderboard.ts",
+    "migrate-leaderboard": "tsx scripts/migrate-leaderboard-schema.ts",
     "azure:deploy": "npm run build && echo 'Push to GitHub to trigger Azure deployment'",
     "azure:monitor": "powershell -ExecutionPolicy Bypass -File scripts/setup-azure-monitoring.ps1",
     "azure:cleanup": "echo 'Cleaning up old Vercel configs...' && rm -f vercel.json",
     "mobile:build": "npm run build",
-    "mobile:check": "echo 'Checking PWA readiness...' && npm run build"
+    "mobile:check": "echo 'Checking PWA readiness...' && npm run build",
+    "phase1:auto": "bash scripts/phase-1-auto.sh",
+    "phase1:setup": "tsx scripts/phase-1-automation.ts",
+    "phase1:migrate": "npm run migrate-leaderboard",
+    "phase1:verify": "npm run db:check && echo 'Phase 1 verification complete'",
+    "phase1:control": "tsx scripts/phase-1-control.ts",
+    "phase1:start": "tsx scripts/phase-1-control.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",

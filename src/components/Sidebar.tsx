@@ -36,6 +36,7 @@ const menuSections = [
     items: [
       { href: '/academy', label: 'Warrior Academy', fallback: 'Warrior Academy', icon: Sparkles, description: 'Training Path' },
       { href: '/achievements', label: 'nav.achievements', fallback: 'Achievements', icon: Trophy, description: 'Progress' },
+      { href: '/leaderboard', label: 'Warrior Ranking', fallback: 'Warrior Ranking', icon: Trophy, description: 'Rankings' },
       { href: '/about', label: 'About Founder', fallback: 'About Founder', icon: Info, description: 'Instructor' },
     ]
   },
