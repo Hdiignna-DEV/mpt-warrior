@@ -3,12 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Trophy, ArrowRight, Star, Zap, Shield, ChevronRight } from 'lucide-react';
+import { Trophy, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import { RankBadgeCompact } from './RankBadge';
-import { getBadgeByPoints, getRankDisplay, isInTopTen, formatPoints } from '@/utils/badge-system';
-import Image from 'next/image';
 
 interface TopUser {
   userId: string;
@@ -148,7 +145,6 @@ export function WarriorRankingWidget() {
               <p className="text-sm font-semibold text-white truncate">{user.userName}</p>
               <p className="text-xs text-gray-400">{user.totalPoints} pts</p>
             </div>
-            <RankBadgeCompact badge={user.badge as any} />
           </div>
         ))}
       </div>
@@ -160,14 +156,9 @@ export function WarriorRankingWidget() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-2xl font-bold text-orange-400">#{data.userRank}</p>
-              {isInTopTen(data.userRank) && (
-                <span className="inline-block text-xs mt-1 px-2 py-0.5 bg-yellow-500/30 text-yellow-300 rounded-full border border-yellow-500/50">
-                  🔥 Top 10!
-                </span>
-              )}
             </div>
             <div className="text-right">
-              <p className="text-sm font-semibold text-orange-300">{formatPoints(data.userPoints || 0)}</p>
+              <p className="text-sm font-semibold text-orange-300">{data.userPoints?.toLocaleString()}</p>
               <p className="text-xs text-gray-400">pts</p>
             </div>
           </div>
