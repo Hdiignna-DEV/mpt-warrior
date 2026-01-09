@@ -905,6 +905,22 @@ export async function updateLeaderboardRanking(): Promise<void> {
   try {
     const database = getCosmosClient().database('mpt-db');
     const usersContainer = database.container('users');
+    
+    // Ensure leaderboard containers exist before using them
+    console.log('📦 Ensuring leaderboard containers exist...');
+    try {
+      await database.containers.createIfNotExists({
+        id: 'user-leaderboard',
+        partitionKey: '/userId',
+        throughput: 100
+      });
+      console.log('✅ user-leaderboard container ready');
+    } catch (error: any) {
+      if (error.code !== 409) {
+        console.warn('⚠️ Could not create user-leaderboard container:', error.message);
+      }
+    }
+
     const leaderboardContainer = getLeaderboardContainer();
 
     // Get all active users
