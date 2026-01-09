@@ -9,19 +9,41 @@ import { getCosmosClient } from '@/lib/db/cosmos-client';
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify admin access
+    // Verify super admin access
     const decoded = await verifyToken(request);
-    if (!decoded || decoded.role !== 'ADMIN') {
+    if (!decoded) {
       return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
-        { status: 403 }
+        { error: 'Unauthorized - Token required' },
+        { status: 401 }
+      );
+    }
+
+    // Check user role in database
+    const client = getCosmosClient();
+    const userAuthDb = client.database('mpt-db');
+    const usersContainer = userAuthDb.container('users');
+    
+    try {
+      const { resource: userDoc } = await usersContainer
+        .item(decoded.userId, decoded.userId)
+        .read<any>();
+      
+      if (!userDoc || userDoc.role !== 'SUPER_ADMIN') {
+        return NextResponse.json(
+          { error: 'Unauthorized - Super Admin access required' },
+          { status: 403 }
+        );
+      }
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
       );
     }
 
     console.log('🚀 Starting leaderboard container setup...');
 
-    const client = getCosmosClient();
-    const database = client.database('mpt-warrior');
+    const educationDb = client.database('mpt-warrior');
 
     const results = {
       userLeaderboard: { status: 'pending', message: '' },
@@ -31,7 +53,7 @@ export async function POST(request: NextRequest) {
     // Create user-leaderboard container
     try {
       console.log('📦 Creating user-leaderboard container...');
-      await database.containers.createIfNotExists({
+      await educationDb.containers.createIfNotExists({
         id: 'user-leaderboard',
         partitionKey: '/userId',
         throughput: 100
@@ -56,7 +78,7 @@ export async function POST(request: NextRequest) {
     // Create leaderboard-history container
     try {
       console.log('📦 Creating leaderboard-history container...');
-      await database.containers.createIfNotExists({
+      await educationDb.containers.createIfNotExists({
         id: 'leaderboard-history',
         partitionKey: '/week',
         throughput: 100
