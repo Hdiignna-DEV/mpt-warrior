@@ -152,12 +152,23 @@ export default function AIMentor() {
             date: new Date(thread.updatedAt).toLocaleString('id-ID'),
           }));
           setChatHistory(formattedHistory);
+        } else {
+          // If API fails, try localStorage
+          const saved = localStorage.getItem('mpt_ai_chat_history');
+          if (saved) {
+            setChatHistory(JSON.parse(saved));
+          }
         }
       } catch (error) {
         console.error('Error loading chat history:', error);
+        // Fallback to localStorage
         const saved = localStorage.getItem('mpt_ai_chat_history');
         if (saved) {
-          setChatHistory(JSON.parse(saved));
+          try {
+            setChatHistory(JSON.parse(saved));
+          } catch (e) {
+            console.error('Failed to parse localStorage history:', e);
+          }
         }
       } finally {
         setIsLoadingHistory(false);
@@ -220,6 +231,18 @@ export default function AIMentor() {
   useEffect(() => { 
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); 
   }, [messages]);
+
+  // Sync messages with chat history whenever messages change
+  useEffect(() => {
+    if (currentChatId && messages.length > 0) {
+      const updatedHistory = chatHistory.map(chat => 
+        chat.id === currentChatId 
+          ? { ...chat, messages, date: new Date().toLocaleString('id-ID') }
+          : chat
+      );
+      saveChatHistory(updatedHistory);
+    }
+  }, [messages, currentChatId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
