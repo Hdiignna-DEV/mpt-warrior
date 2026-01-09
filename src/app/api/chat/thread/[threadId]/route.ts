@@ -9,8 +9,9 @@ import { deleteChatThread } from '@/lib/db/chat-service';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { threadId: string } }
+  { params }: { params: Promise<{ threadId: string }> }
 ) {
+  const { threadId } = await params;
   try {
     // Verify authentication
     const user = await verifyToken(request);
@@ -22,7 +23,6 @@ export async function DELETE(
     }
 
     const userId = user.userId;
-    const { threadId } = params;
 
     if (!threadId) {
       return NextResponse.json(

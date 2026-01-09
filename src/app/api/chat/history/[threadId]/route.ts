@@ -9,8 +9,9 @@ import { getChatThread, getChatMessages } from '@/lib/db/chat-service';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { threadId: string } }
+  { params }: { params: Promise<{ threadId: string }> }
 ) {
+  const { threadId } = await params;
   try {
     // Verify authentication
     const user = await verifyToken(request);
@@ -22,7 +23,6 @@ export async function GET(
     }
 
     const userId = user.userId;
-    const { threadId } = params;
 
     // Verify thread ownership
     const thread = await getChatThread(threadId);
