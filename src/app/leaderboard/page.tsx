@@ -76,6 +76,30 @@ export default function LeaderboardPage() {
 
       if (response.ok) {
         const data = await response.json();
+        
+        // If leaderboard is empty, auto-populate from user data
+        if (!data.leaderboard || data.leaderboard.length === 0) {
+          console.log('📊 Leaderboard empty, auto-populating from user data...');
+          try {
+            const populateResponse = await fetch('/api/leaderboard/auto-populate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+            });
+            
+            if (populateResponse.ok) {
+              const populateData = await populateResponse.json();
+              console.log(`✅ Auto-populated: ${populateData.entriesCreated} entries created`);
+              // Retry fetch after population
+              setTimeout(() => {
+                window.location.reload();
+              }, 1000);
+              return;
+            }
+          } catch (populateError) {
+            console.warn('Could not auto-populate:', populateError);
+          }
+        }
+        
         setLeaderboard(data.leaderboard);
         
         // Find user's rank
