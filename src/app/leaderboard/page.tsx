@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { ArkaMascotFeedback } from '@/components/ArkaMascotFeedback';
 import { LeaderboardSearch } from '@/components/leaderboard/LeaderboardSearch';
 import { RankBadgeCompact } from '@/components/leaderboard/RankBadge';
+import { Top10Celebration } from '@/components/leaderboard/Top10Celebration';
 import Image from 'next/image';
 
 type Period = 'all' | 'weekly' | 'monthly';
@@ -17,8 +18,8 @@ type Period = 'all' | 'weekly' | 'monthly';
 interface LeaderboardEntry {
   userId: string;
   userName: string;
-  email?: string; // Optional, kept for backward compatibility
-  whatsapp?: string; // WhatsApp contact
+  email?: string;
+  whatsapp?: string;
   totalPoints: number;
   quizPoints: number;
   consistencyPoints: number;
@@ -52,6 +53,7 @@ export default function LeaderboardPage() {
   const [viewMode, setViewMode] = useState<'top100' | 'all'>('top100');
   const [searchQuery, setSearchQuery] = useState('');
   const [period, setPeriod] = useState<Period>('all');
+  const [showTop10Celebration, setShowTop10Celebration] = useState(false);
 
   // Founder profile
   const founderProfile: FounderProfile = {
@@ -122,6 +124,23 @@ export default function LeaderboardPage() {
           if (foundUserEntry) {
             setUserRank(foundUserEntry.rank);
             setUserEntry(foundUserEntry);
+            
+            // Check if user just entered Top 10
+            if (foundUserEntry.rank <= 10) {
+              const previousWasInTop10 = foundUserEntry.previousRank !== null && foundUserEntry.previousRank <= 10;
+              const justEnteredTop10 = foundUserEntry.previousRank !== null && foundUserEntry.previousRank > 10;
+              
+              // Show celebration if user is new to Top 10 or improved rank within Top 10
+              if (justEnteredTop10 || (foundUserEntry.rankTrend === 'UP' && foundUserEntry.rank <= 10)) {
+                // Check localStorage to avoid showing multiple times
+                const lastCelebrationTime = localStorage.getItem(`top10-celebration-${user.id}`);
+                const now = Date.now();
+                if (!lastCelebrationTime || now - parseInt(lastCelebrationTime) > 3600000) { // 1 hour
+                  setTimeout(() => setShowTop10Celebration(true), 500);
+                  localStorage.setItem(`top10-celebration-${user.id}`, now.toString());
+                }
+              }
+            }
           }
         }
       }
@@ -260,58 +279,77 @@ export default function LeaderboardPage() {
 
         {/* User Position Card */}
         {user && userRank && (
-          <Card className="bg-gradient-to-r from-orange-500/20 to-amber-500/20 border-orange-500/50 mb-8 p-6 glow-orange">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm mb-1">YOUR POSITION</p>
-                <h2 className="text-3xl font-bold text-orange-400">Rank #{userRank}</h2>
+          <div className="mb-8 relative">
+            {/* Glow effect background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-600/30 via-amber-600/20 to-transparent rounded-2xl blur-2xl opacity-60" />
+            
+            <Card className="relative bg-gradient-to-r from-orange-500/25 to-amber-500/15 border-2 border-orange-500/60 p-8 shadow-xl shadow-orange-500/20 hover:shadow-orange-500/40 transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-orange-300 text-sm font-bold mb-2 uppercase tracking-wider">YOUR POSITION</p>
+                  <h2 className="text-4xl font-black text-orange-400">Rank #{userRank}</h2>
+                </div>
+                <div className="text-right">
+                  <p className="text-orange-300 text-sm font-bold mb-2 uppercase tracking-wider">TOTAL POINTS</p>
+                  <p className="text-4xl font-black text-orange-400">
+                    {leaderboard.find(e => e.userId === user.id)?.totalPoints || 0} pts
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-gray-400 text-sm mb-1">TOTAL POINTS</p>
-                <p className="text-3xl font-bold text-orange-400">
-                  {leaderboard.find(e => e.userId === user.id)?.totalPoints || 0} pts
-                </p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         )}
 
         {/* Top 3 Podium */}
         {top3.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4 text-center">🏆 TOP 3</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <h2 className="text-2xl font-bold text-white mb-6 text-center">🏆 TOP 3 WARRIORS</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+              {/* Podium Background Effect */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-amber-500/5 rounded-2xl" />
+              </div>
+
               {/* 2nd Place */}
               {top3[1] && (
-                <Card className="bg-white/5 backdrop-blur-sm border-white/10 p-6 text-center">
-                  <div className="text-4xl mb-2">🥈</div>
-                  <p className="text-gray-400 text-sm mb-1">2nd Place</p>
-                  <h3 className="text-xl font-bold text-white mb-2">{top3[1].userName}</h3>
-                  <p className="text-blue-400 font-bold mb-2">{top3[1].totalPoints} pts</p>
-                  <Badge className={getBadgeColor(top3[1].badge)}>{top3[1].badge}</Badge>
-                </Card>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-500/20 to-gray-600/10 rounded-xl blur-xl" />
+                  <Card className="relative bg-gradient-to-br from-gray-600/30 via-slate-700/20 to-gray-700/20 border-2 border-gray-500/40 p-6 text-center hover:shadow-lg hover:shadow-gray-500/20 transition-all duration-300">
+                    <div className="text-5xl mb-4">🥈</div>
+                    <p className="text-gray-400 text-xs font-bold mb-1 uppercase tracking-widest">2nd Place</p>
+                    <h3 className="text-xl font-bold text-white mb-3">{top3[1].userName}</h3>
+                    <p className="text-gray-300 font-bold mb-4 text-lg">{top3[1].totalPoints} pts</p>
+                    <Badge className={getBadgeColor(top3[1].badge)}>{top3[1].badge}</Badge>
+                  </Card>
+                </div>
               )}
 
-              {/* 1st Place */}
+              {/* 1st Place - Champion */}
               {top3[0] && (
-                <Card className="bg-gradient-to-br from-yellow-500/30 to-amber-500/20 border-yellow-500/50 p-6 text-center md:scale-110 md:z-10">
-                  <div className="text-5xl mb-2">👑</div>
-                  <p className="text-gray-300 text-sm mb-1 font-bold">1st PLACE</p>
-                  <h3 className="text-2xl font-bold text-yellow-300 mb-2">{top3[0].userName}</h3>
-                  <p className="text-yellow-400 font-bold mb-2 text-lg">{top3[0].totalPoints} pts</p>
-                  <Badge className={getBadgeColor(top3[0].badge)}>{top3[0].badge}</Badge>
-                </Card>
+                <div className="relative md:scale-110 md:z-10">
+                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/40 via-amber-500/20 to-orange-500/20 rounded-xl blur-2xl" />
+                  <Card className="relative bg-gradient-to-br from-yellow-500/35 via-amber-500/25 to-orange-500/15 border-3 border-yellow-500/60 p-8 text-center shadow-2xl shadow-yellow-500/30 hover:shadow-yellow-500/50 transition-all duration-300">
+                    <div className="text-6xl mb-4 drop-shadow-lg">👑</div>
+                    <p className="text-yellow-300 text-xs font-black mb-2 uppercase tracking-widest">Champion</p>
+                    <h3 className="text-2xl font-black text-yellow-300 mb-4">{top3[0].userName}</h3>
+                    <p className="text-yellow-400 font-black mb-4 text-2xl">{top3[0].totalPoints} pts</p>
+                    <Badge className={getBadgeColor(top3[0].badge)}>{top3[0].badge}</Badge>
+                  </Card>
+                </div>
               )}
 
               {/* 3rd Place */}
               {top3[2] && (
-                <Card className="bg-white/5 backdrop-blur-sm border-white/10 p-6 text-center">
-                  <div className="text-4xl mb-2">🥉</div>
-                  <p className="text-gray-400 text-sm mb-1">3rd Place</p>
-                  <h3 className="text-xl font-bold text-white mb-2">{top3[2].userName}</h3>
-                  <p className="text-amber-400 font-bold mb-2">{top3[2].totalPoints} pts</p>
-                  <Badge className={getBadgeColor(top3[2].badge)}>{top3[2].badge}</Badge>
-                </Card>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-600/20 to-amber-700/10 rounded-xl blur-xl" />
+                  <Card className="relative bg-gradient-to-br from-orange-600/30 via-amber-700/20 to-orange-700/20 border-2 border-orange-600/40 p-6 text-center hover:shadow-lg hover:shadow-orange-600/20 transition-all duration-300">
+                    <div className="text-5xl mb-4">🥉</div>
+                    <p className="text-orange-400 text-xs font-bold mb-1 uppercase tracking-widest">3rd Place</p>
+                    <h3 className="text-xl font-bold text-white mb-3">{top3[2].userName}</h3>
+                    <p className="text-orange-300 font-bold mb-4 text-lg">{top3[2].totalPoints} pts</p>
+                    <Badge className={getBadgeColor(top3[2].badge)}>{top3[2].badge}</Badge>
+                  </Card>
+                </div>
               )}
             </div>
           </div>
@@ -337,23 +375,26 @@ export default function LeaderboardPage() {
                 {filteredLeaderboard.map((entry, index) => (
                   <tr
                     key={entry.userId}
-                    className={`border-b border-white/5 transition-colors ${
+                    className={`border-b border-white/5 transition-all duration-300 ${
                       user?.id === entry.userId
-                        ? 'bg-orange-500/20 hover:bg-orange-500/30'
+                        ? 'bg-gradient-to-r from-orange-600/40 via-orange-500/30 to-transparent border-l-4 border-l-orange-500 hover:from-orange-600/50 hover:via-orange-500/40 shadow-lg shadow-orange-500/30'
                         : 'hover:bg-white/5'
                     }`}
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl">{getRankIcon(entry.rank)}</span>
-                        <span className="font-bold text-white">#{entry.rank}</span>
+                        <span className={`font-bold ${user?.id === entry.userId ? 'text-orange-400 text-lg' : 'text-white'}`}>
+                          #{entry.rank}
+                        </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <div>
-                          <p className="text-white font-semibold flex items-center gap-2">
+                          <p className={`font-semibold flex items-center gap-2 ${user?.id === entry.userId ? 'text-orange-300 text-base' : 'text-white'}`}>
                             {entry.userName}
+                            {user?.id === entry.userId && <span className="text-xs px-2 py-1 bg-orange-500/40 text-orange-200 rounded-full border border-orange-500/60">You</span>}
                             <RankBadgeCompact badge={entry.badge as any} />
                           </p>
                           <p className="text-gray-500 text-sm">
@@ -376,8 +417,8 @@ export default function LeaderboardPage() {
                     <td className="px-6 py-4">
                       <Badge className={getBadgeColor(entry.badge)}>{entry.badge}</Badge>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="text-white font-bold text-lg">{entry.totalPoints}</span>
+                    <td className={`px-6 py-4 text-right ${user?.id === entry.userId ? 'font-black text-orange-300' : 'font-bold text-white'}`}>
+                      <span className="text-lg">{entry.totalPoints}</span>
                       <p className="text-gray-500 text-xs">points</p>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -405,29 +446,32 @@ export default function LeaderboardPage() {
             {filteredLeaderboard.map((entry) => (
               <Card
                 key={entry.userId}
-                className={`p-4 ${
+                className={`p-4 transition-all duration-300 ${
                   user?.id === entry.userId
-                    ? 'bg-orange-500/20 border-orange-500/50'
+                    ? 'bg-gradient-to-r from-orange-600/40 to-orange-500/20 border-2 border-orange-500/60 shadow-lg shadow-orange-500/30'
                     : 'bg-white/5 border-white/10'
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <span className="text-2xl">{getRankIcon(entry.rank)}</span>
-                    <span className="font-bold text-white">#{entry.rank}</span>
+                    <span className={`font-bold ${user?.id === entry.userId ? 'text-orange-400 text-lg' : 'text-white'}`}>
+                      #{entry.rank}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     {getTrendIcon(entry.rankTrend)}
-                    <span className={entry.winRate >= 70 ? 'text-green-400' : 'text-amber-400'}>
+                    <span className={entry.winRate >= 70 ? 'text-green-400 font-semibold' : 'text-amber-400 font-semibold'}>
                       {entry.winRate.toFixed(1)}%
                     </span>
                   </div>
                 </div>
-                <p className="text-white font-semibold flex items-center gap-2">
+                <p className={`font-semibold flex items-center gap-2 mb-2 ${user?.id === entry.userId ? 'text-orange-300' : 'text-white'}`}>
                   {entry.userName}
+                  {user?.id === entry.userId && <span className="text-xs px-2 py-1 bg-orange-500/40 text-orange-200 rounded-full border border-orange-500/60">You</span>}
                   <RankBadgeCompact badge={entry.badge as any} />
                 </p>
-                <p className="text-gray-500 text-xs mb-2">
+                <p className="text-gray-500 text-xs mb-3">
                   {entry.whatsapp ? (
                     <a 
                       href={`https://wa.me/${entry.whatsapp.replace(/\D/g, '')}`}
@@ -443,7 +487,9 @@ export default function LeaderboardPage() {
                 </p>
                 <div className="flex justify-between items-center">
                   <Badge className={getBadgeColor(entry.badge)}>{entry.badge}</Badge>
-                  <span className="text-cyan-400 font-bold">{entry.totalPoints} pts</span>
+                  <span className={`font-bold text-lg ${user?.id === entry.userId ? 'text-orange-300' : 'text-cyan-400'}`}>
+                    {entry.totalPoints} pts
+                  </span>
                 </div>
               </Card>
             ))}
@@ -464,6 +510,18 @@ export default function LeaderboardPage() {
           currentRank={userEntry.rank}
           previousRank={userEntry.previousRank}
           totalPoints={userEntry.totalPoints}
+        />
+      )}
+
+      {/* Top 10 Celebration - Show when user enters Top 10 */}
+      {user && userEntry && (
+        <Top10Celebration
+          show={showTop10Celebration}
+          userName={user.name}
+          rank={userEntry.rank}
+          points={userEntry.totalPoints}
+          previousRank={userEntry.previousRank}
+          onClose={() => setShowTop10Celebration(false)}
         />
       )}
     </div>
