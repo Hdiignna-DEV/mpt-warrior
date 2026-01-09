@@ -1011,16 +1011,9 @@ export async function updateLeaderboardRanking(): Promise<void> {
       return a.userId.localeCompare(b.userId); // Alphabetical by userId for stability
     });
 
-    // Assign ranks and determine trend (handle ties by using actual rank skipping)
-    let currentRank = 1;
+    // Assign sequential ranks (1, 2, 3...) and determine trend
     leaderboardEntries.forEach((entry, index) => {
-      // If same points as previous entry, use same rank, otherwise use index + 1
-      if (index > 0 && leaderboardEntries[index - 1].totalPoints === entry.totalPoints) {
-        entry.rank = leaderboardEntries[index - 1].rank;
-      } else {
-        entry.rank = index + 1;
-      }
-      currentRank = entry.rank;
+      entry.rank = index + 1; // Sequential ranking: #1, #2, #3, etc.
 
       if (entry.previousRank === null) {
         entry.rankTrend = 'STABLE';
