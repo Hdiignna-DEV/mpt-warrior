@@ -584,23 +584,27 @@ export async function canAccessModule(userId: string, moduleId: string, level: L
   const userProgress = await getUserProgress(userId);
   
   for (const prereqId of module.prerequisites) {
-    const prereqModule = await getAllModules().then(modules => 
-      modules.find(m => m.id === prereqId)
-    );
+    // Use getModuleById to ensure we get complete module with lessons
+    const prereqModule = await getModuleById(prereqId, level);
     
     if (!prereqModule) continue;
     
     // Check if all lessons are completed
     const prereqProgress = userProgress.filter(p => p.moduleId === prereqId && p.completed);
-    const totalLessons = prereqModule.lessons.length;
+    const totalLessons = prereqModule.lessons?.length || 0;
     
-    if (prereqProgress.length < totalLessons) {
+    if (totalLessons === 0) {
+      // If module has no lessons, skip to quiz check
+      console.warn(`Module ${prereqId} has no lessons`);
+    } else if (prereqProgress.length < totalLessons) {
+      console.log(`User ${userId} missing lessons for module ${prereqId}: ${prereqProgress.length}/${totalLessons}`);
       return false; // Prerequisite lessons not fully completed
     }
     
     // Check if quiz is passed (>= 70%)
     const quizScore = await getUserQuizScore(userId, prereqId);
     if (!quizScore.isPassed) {
+      console.log(`User ${userId} quiz not passed for module ${prereqId}: ${quizScore.percentage}%`);
       return false; // Quiz not passed
     }
   }
