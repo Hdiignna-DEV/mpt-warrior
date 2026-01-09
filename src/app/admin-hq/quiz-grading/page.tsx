@@ -34,6 +34,14 @@ interface UngradedEssay {
   questionPoints: number;
 }
 
+interface UserEssayGroup {
+  userName: string;
+  userId: string;
+  essays: UngradedEssay[];
+  totalEssays: number;
+  totalPoints: number;
+}
+
 interface GradingFormData {
   score: number | '';
   feedback: string;
@@ -42,11 +50,13 @@ interface GradingFormData {
 export default function QuizGradingPage() {
   const router = useRouter();
   const [essays, setEssays] = useState<UngradedEssay[]>([]);
+  const [groupedEssays, setGroupedEssays] = useState<UserEssayGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [gradingEssayId, setGradingEssayId] = useState<string | null>(null);
   const [gradingData, setGradingData] = useState<Record<string, GradingFormData>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [expandedUser, setExpandedUser] = useState<string | null>(null);
 
   useEffect(() => {
     const userData = localStorage.getItem('mpt_user');
@@ -89,6 +99,10 @@ export default function QuizGradingPage() {
       const data = await response.json();
       setEssays(data.essays || []);
       
+      // Group essays by userName
+      const groups = groupEssaysByUser(data.essays || []);
+      setGroupedEssays(groups);
+      
       // Initialize grading data
       const initialGradingData: Record<string, GradingFormData> = {};
       data.essays.forEach((essay: UngradedEssay) => {
@@ -104,6 +118,32 @@ export default function QuizGradingPage() {
       setError(err.message);
       setLoading(false);
     }
+  };
+
+  // Group essays by userName
+  const groupEssaysByUser = (essays: UngradedEssay[]): UserEssayGroup[] => {
+    const grouped = new Map<string, UngradedEssay[]>();
+    
+    essays.forEach(essay => {
+      const key = essay.userId; // Group by userId to get unique users
+      if (!grouped.has(key)) {
+        grouped.set(key, []);
+      }
+      grouped.get(key)!.push(essay);
+    });
+
+    // Convert to array and sort by user name
+    return Array.from(grouped.entries())
+      .map(([userId, userEssays]) => ({
+        userName: userEssays[0].userName, // All essays in group have same userName
+        userId: userId,
+        essays: userEssays.sort((a, b) => 
+          new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+        ), // Sort by submission date (newest first)
+        totalEssays: userEssays.length,
+        totalPoints: userEssays.reduce((sum, e) => sum + (e.questionPoints || 0), 0),
+      }))
+      .sort((a, b) => a.userName.localeCompare(b.userName)); // Sort groups alphabetically by name
   };
 
   const handleGradeSubmit = async (essay: UngradedEssay) => {
@@ -143,7 +183,13 @@ export default function QuizGradingPage() {
       }
 
       // Remove graded essay from list
-      setEssays(prev => prev.filter(e => e.id !== essay.id));
+      const updatedEssays = essays.filter(e => e.id !== essay.id);
+      setEssays(updatedEssays);
+      
+      // Regroup remaining essays
+      const groups = groupEssaysByUser(updatedEssays);
+      setGroupedEssays(groups);
+      
       setGradingEssayId(null);
       
       alert('Essay graded successfully!');
@@ -243,19 +289,19 @@ export default function QuizGradingPage() {
               <Clock className="w-8 h-8 text-amber-400" />
               <div>
                 <p className="text-2xl font-bold text-white">{essays.length}</p>
-                <p className="text-sm text-gray-400">Pending Review</p>
+                <p className="text-sm text-gray-400">Pending Essays</p>
               </div>
             </div>
           </Card>
           
           <Card className="bg-white/5 border-white/10 p-4">
             <div className="flex items-center gap-3">
-              <BookOpen className="w-8 h-8 text-blue-400" />
+              <User className="w-8 h-8 text-blue-400" />
               <div>
                 <p className="text-2xl font-bold text-white">
-                  {new Set(essays.filter(e => e.moduleId).map(e => e.moduleId)).size}
+                  {groupedEssays.length}
                 </p>
-                <p className="text-sm text-gray-400">Modules</p>
+                <p className="text-sm text-gray-400">Students with Pending</p>
               </div>
             </div>
           </Card>
@@ -267,7 +313,7 @@ export default function QuizGradingPage() {
                 <p className="text-2xl font-bold text-white">
                   {essays.reduce((sum, e) => sum + (e.questionPoints || 0), 0)}
                 </p>
-                <p className="text-sm text-gray-400">Total Points to Grade</p>
+                <p className="text-sm text-gray-400">Total Points</p>
               </div>
             </div>
           </Card>
@@ -281,8 +327,8 @@ export default function QuizGradingPage() {
           </div>
         )}
 
-        {/* Essays List */}
-        {essays.length === 0 ? (
+        {/* Essays List - Grouped by User */}
+        {groupedEssays.length === 0 ? (
           <Card className="bg-white/5 border-white/10 p-12 text-center">
             <CheckCircle2 className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-white mb-2">All Caught Up!</h3>
@@ -290,117 +336,160 @@ export default function QuizGradingPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {essays.map((essay) => (
-              <Card
-                key={essay.id}
-                className="bg-white/5 backdrop-blur-sm border-white/10 p-6"
+            {/* Summary by User Groups */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {groupedEssays.map((group) => (
+                <Card 
+                  key={group.userId}
+                  className="bg-white/5 border-white/10 p-4 cursor-pointer hover:bg-white/10 transition-all"
+                  onClick={() => setExpandedUser(expandedUser === group.userId ? null : group.userId)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-white">{group.userName}</h3>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {group.totalEssays} essay{group.totalEssays !== 1 ? 's' : ''} pending
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-amber-400">
+                        {group.totalPoints}
+                      </div>
+                      <p className="text-xs text-gray-400">points</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            {/* Detailed Essays by User */}
+            {groupedEssays.map((group) => (
+              <div 
+                key={group.userId}
+                className={`overflow-hidden transition-all ${
+                  expandedUser === group.userId ? 'block' : 'hidden'
+                }`}
               >
-                {/* Essay Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge className={`${getModuleBadgeColor(essay.moduleId)} border`}>
-                        {essay.moduleId ? essay.moduleId.toUpperCase() : 'UNKNOWN'}
-                      </Badge>
-                      <Badge className="bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                        {essay.questionPoints || 0} points
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
-                      <User className="w-4 h-4" />
-                      <span>{essay.userName || 'Unknown'} ({essay.userId || 'N/A'})</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-gray-400 text-sm">
-                      <Clock className="w-4 h-4" />
-                      <span>Submitted: {essay.submittedAt ? formatDate(essay.submittedAt) : 'N/A'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Question */}
-                <div className="mb-4">
-                  <h4 className="text-sm font-semibold text-gray-400 mb-2">Question:</h4>
-                  <p className="text-white leading-relaxed">{essay.questionText || 'No question text'}</p>
-                </div>
-
-                {/* Student Answer */}
                 <div className="mb-6">
-                  <h4 className="text-sm font-semibold text-gray-400 mb-2">Student Answer:</h4>
-                  <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
-                    <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
-                      {essay.userAnswer || 'No answer provided'}
-                    </p>
+                  <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                    <User className="w-6 h-6 text-amber-400" />
+                    {group.userName}
+                    <Badge className="bg-amber-500/20 text-amber-400 border border-amber-500/30 ml-2">
+                      {group.totalEssays} pending
+                    </Badge>
+                  </h2>
+
+                  <div className="space-y-4">
+                    {group.essays.map((essay) => (
+                      <Card
+                        key={essay.id}
+                        className="bg-white/5 backdrop-blur-sm border-white/10 p-6"
+                      >
+                        {/* Essay Header */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Badge className={`${getModuleBadgeColor(essay.moduleId)} border`}>
+                                {essay.moduleId ? essay.moduleId.toUpperCase() : 'UNKNOWN'}
+                              </Badge>
+                              <Badge className="bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                                {essay.questionPoints || 0} points
+                              </Badge>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 text-gray-400 text-sm">
+                              <Clock className="w-4 h-4" />
+                              <span>Submitted: {essay.submittedAt ? formatDate(essay.submittedAt) : 'N/A'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Question */}
+                        <div className="mb-4">
+                          <h4 className="text-sm font-semibold text-gray-400 mb-2">Question:</h4>
+                          <p className="text-white leading-relaxed">{essay.questionText || 'No question text'}</p>
+                        </div>
+
+                        {/* Student Answer */}
+                        <div className="mb-6">
+                          <h4 className="text-sm font-semibold text-gray-400 mb-2">Student Answer:</h4>
+                          <div className="bg-slate-800/50 border border-slate-700 rounded-lg p-4">
+                            <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                              {essay.userAnswer || 'No answer provided'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Grading Form */}
+                        {gradingEssayId === essay.id ? (
+                          <div className="space-y-4 bg-slate-800/30 border border-slate-700 rounded-lg p-4">
+                            {/* Score Input */}
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-400 mb-2">
+                                Score (0 - {essay.questionPoints} points):
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                max={essay.questionPoints}
+                                value={gradingData[essay.id]?.score ?? ''}
+                                onChange={(e) => {
+                                  const value = e.target.value === '' ? '' : parseInt(e.target.value);
+                                  updateGradingData(essay.id, 'score', value);
+                                }}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500"
+                                placeholder="Enter score"
+                              />
+                            </div>
+
+                            {/* Feedback Input */}
+                            <div>
+                              <label className="block text-sm font-semibold text-gray-400 mb-2">
+                                Feedback (optional):
+                              </label>
+                              <textarea
+                                rows={4}
+                                value={gradingData[essay.id]?.feedback || ''}
+                                onChange={(e) => updateGradingData(essay.id, 'feedback', e.target.value)}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500 resize-none"
+                                placeholder="Provide constructive feedback to the student..."
+                              />
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3">
+                              <button
+                                onClick={() => handleGradeSubmit(essay)}
+                                disabled={submitting}
+                                className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                              >
+                                <Send className="w-4 h-4" />
+                                {submitting ? 'Submitting...' : 'Submit Grade'}
+                              </button>
+                              
+                              <button
+                                onClick={() => setGradingEssayId(null)}
+                                disabled={submitting}
+                                className="px-6 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 disabled:opacity-50 transition-all"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setGradingEssayId(essay.id)}
+                            className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all"
+                          >
+                            <FileText className="w-4 h-4" />
+                            Grade This Essay
+                          </button>
+                        )}
+                      </Card>
+                    ))}
                   </div>
                 </div>
-
-                {/* Grading Form */}
-                {gradingEssayId === essay.id ? (
-                  <div className="space-y-4 bg-slate-800/30 border border-slate-700 rounded-lg p-4">
-                    {/* Score Input */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-400 mb-2">
-                        Score (0 - {essay.questionPoints} points):
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max={essay.questionPoints}
-                        value={gradingData[essay.id]?.score ?? ''}
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? '' : parseInt(e.target.value);
-                          updateGradingData(essay.id, 'score', value);
-                        }}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500"
-                        placeholder="Enter score"
-                      />
-                    </div>
-
-                    {/* Feedback Input */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-400 mb-2">
-                        Feedback (optional):
-                      </label>
-                      <textarea
-                        rows={4}
-                        value={gradingData[essay.id]?.feedback || ''}
-                        onChange={(e) => updateGradingData(essay.id, 'feedback', e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-amber-500 resize-none"
-                        placeholder="Provide constructive feedback to the student..."
-                      />
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => handleGradeSubmit(essay)}
-                        disabled={submitting}
-                        className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                      >
-                        <Send className="w-4 h-4" />
-                        {submitting ? 'Submitting...' : 'Submit Grade'}
-                      </button>
-                      
-                      <button
-                        onClick={() => setGradingEssayId(null)}
-                        disabled={submitting}
-                        className="px-6 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 disabled:opacity-50 transition-all"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setGradingEssayId(essay.id)}
-                    className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all"
-                  >
-                    <FileText className="w-4 h-4" />
-                    Grade This Essay
-                  </button>
-                )}
-              </Card>
+              </div>
             ))}
           </div>
         )}

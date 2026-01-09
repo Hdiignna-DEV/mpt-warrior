@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateSuperAdmin } from '@/lib/middleware/auth';
 import { getUngradedEssays } from '@/lib/db/education-service';
+import { getUserById } from '@/lib/db/user-service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,18 +19,25 @@ export async function GET(request: NextRequest) {
     // Get all ungraded essays
     const ungradedEssays = await getUngradedEssays();
 
-    // Transform data for frontend
-    const transformedEssays = ungradedEssays.map(({ question, answer }) => ({
-      id: `${answer.userId}-${answer.questionId}`, // Unique ID per user-question combination
-      userId: answer.userId,
-      userName: answer.userId, // Will be replaced with actual name in future
-      questionId: answer.questionId,
-      moduleId: answer.moduleId,
-      questionText: question.question,
-      questionPoints: question.points,
-      userAnswer: answer.answer,
-      submittedAt: answer.submittedAt,
-    }));
+    // Transform data for frontend with user info
+    const transformedEssays = await Promise.all(
+      ungradedEssays.map(async ({ question, answer }) => {
+        // Fetch user info to get full name
+        const user = await getUserById(answer.userId);
+        
+        return {
+          id: `${answer.userId}-${answer.questionId}`, // Unique ID per user-question combination
+          userId: answer.userId,
+          userName: user?.name || answer.userId, // Use actual name or fallback to userId
+          questionId: answer.questionId,
+          moduleId: answer.moduleId,
+          questionText: question.question,
+          questionPoints: question.points,
+          userAnswer: answer.answer,
+          submittedAt: answer.submittedAt,
+        };
+      })
+    );
 
     return NextResponse.json({
       success: true,
