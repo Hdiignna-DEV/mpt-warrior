@@ -1,14 +1,25 @@
 /**
  * POST /api/chat/thread
  * Create or update a chat thread
+ * 
+ * PUT /api/chat/thread
+ * Create or update a chat thread (alias for POST)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { createChatThread, updateChatThread } from '@/lib/db/chat-service';
+import { initializeContainers } from '@/lib/db/cosmos-client';
 
-export async function POST(request: NextRequest) {
+async function handleThreadRequest(request: NextRequest) {
   try {
+    // Ensure containers exist
+    try {
+      await initializeContainers();
+    } catch (initError) {
+      console.error('[/api/chat/thread] Container initialization warning:', initError);
+    }
+
     // Verify authentication
     const user = await verifyToken(request);
     if (!user) {
@@ -59,4 +70,12 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+export async function POST(request: NextRequest) {
+  return handleThreadRequest(request);
+}
+
+export async function PUT(request: NextRequest) {
+  return handleThreadRequest(request);
 }
