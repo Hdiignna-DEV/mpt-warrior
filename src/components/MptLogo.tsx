@@ -45,8 +45,8 @@ export default function MptLogo({ className = "", size = 96 }: { className?: str
   // Try GitHub raw URL for PNG
   return (
     <img 
-      src="https://raw.githubusercontent.com/Hdiignna-DEV/mpt-warrior/main/public/mpt-logo.png" 
-      alt="MPT Logo" 
+      src="/images/mpt-logo.png" 
+      alt="MPT Mindset Plan Trader Logo" 
       width={size}
       height={size}
       className={className}
