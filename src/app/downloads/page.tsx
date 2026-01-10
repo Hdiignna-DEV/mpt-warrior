@@ -43,46 +43,53 @@ export default function DownloadsPage() {
               <ol className="space-y-3 text-slate-300">
                 <li className="flex gap-3">
                   <span className="text-blue-400 font-bold">1.</span>
-                  <span>Klik tombol <span className="text-blue-400 font-bold">"Download APK"</span> di bawah</span>
+                  <span>Klik salah satu tombol di bawah sesuai metode pilihan Anda</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-blue-400 font-bold">2.</span>
-                  <span>File akan tersimpan di folder <span className="text-slate-200 font-mono">Downloads</span></span>
+                  <span>Jika pilih <span className="text-blue-400 font-bold">"Download APK"</span> → File tersimpan di Downloads</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-blue-400 font-bold">3.</span>
-                  <span>Buka file manager dan cari file <span className="text-slate-200 font-mono">mpt-warrior.apk</span></span>
+                  <span>Jika pilih <span className="text-blue-400 font-bold">"Build from Source"</span> → Follow instruksi di halaman GitHub</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-blue-400 font-bold">4.</span>
-                  <span>Tap file untuk mulai install (jika error soal "Unknown sources", aktifkan di Settings → Security)</span>
+                  <span>Jika pilih <span className="text-blue-400 font-bold">"Test with Expo"</span> → Scan QR code langsung di phone</span>
                 </li>
                 <li className="flex gap-3">
                   <span className="text-blue-400 font-bold">5.</span>
-                  <span>Setelah selesai, buka app dan login dengan akun MPT Anda</span>
+                  <span>Buka app dan login dengan akun MPT Anda</span>
                 </li>
               </ol>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
-              <a href="https://github.com/Hdiignna-DEV/mpt-warrior/releases" target="_blank" rel="noopener noreferrer" className="flex-1">
-                <Button className="bg-blue-500 text-white hover:bg-blue-400 font-bold w-full py-4">
-                  <Download className="mr-2" size={18} />
-                  Download APK (GitHub Releases)
-                </Button>
+            <div className="grid sm:grid-cols-3 gap-3 mb-6">
+              <a href="/downloads/mpt-warrior.apk" download className="col-span-1">
+                <button className="bg-green-500 text-white hover:bg-green-400 font-bold w-full py-3 rounded-lg transition">
+                  <Download className="inline mr-2" size={18} />
+                  Download APK
+                </button>
               </a>
-              <a href="https://github.com/Hdiignna-DEV/mpt-warrior" target="_blank" rel="noopener noreferrer" className="flex-1">
-                <Button variant="outline" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 font-bold w-full py-4">
-                  Clone Repository
-                </Button>
+              <a href="https://github.com/Hdiignna-DEV/mpt-warrior#-quick-start-build" target="_blank" rel="noopener noreferrer" className="col-span-1">
+                <button className="border border-blue-500 text-blue-400 hover:bg-blue-500/10 font-bold w-full py-3 rounded-lg transition">
+                  📦 Build from Source
+                </button>
+              </a>
+              <a href="https://expo.dev" target="_blank" rel="noopener noreferrer" className="col-span-1">
+                <button className="border border-purple-500 text-purple-400 hover:bg-purple-500/10 font-bold w-full py-3 rounded-lg transition">
+                  📱 Test with Expo
+                </button>
               </a>
             </div>
 
-            <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 flex gap-3">
-              <AlertCircle size={20} className="text-amber-400 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-amber-200">
-                <p className="font-semibold mb-1">Requirements:</p>
-                <p>Android 10 atau lebih tinggi • Minimum 100MB storage • Internet connection</p>
+            <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30 flex gap-3 mb-6">
+              <CheckCircle size={20} className="text-blue-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-blue-200">
+                <p className="font-semibold mb-1">3 Cara Download:</p>
+                <p>🟢 <span className="font-bold">Green Button</span> - Direct download APK</p>
+                <p>🔵 <span className="font-bold">Blue Button</span> - Build from source code (GitHub)</p>
+                <p>🟣 <span className="font-bold">Purple Button</span> - Test instantly with Expo (no install needed)</p>
               </div>
             </div>
           </section>
