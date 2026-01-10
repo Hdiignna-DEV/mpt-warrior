@@ -63,6 +63,10 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
   const [showResults, setShowResults] = useState(false);
   const [showDetailedReview, setShowDetailedReview] = useState(false);
   
+  // Error handling
+  const [error, setError] = useState<string | null>(null);
+  const [showErrorRetry, setShowErrorRetry] = useState(false);
+  
   // Quiz Focus Mode (Lockdown)
   const [isQuizLocked, setIsQuizLocked] = useState(false);
   const [attemptedNavigation, setAttemptedNavigation] = useState(false);
@@ -173,10 +177,12 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
 
   const fetchQuiz = async () => {
     try {
+      setError(null);
       const token = localStorage.getItem('mpt_token');
       if (!token) {
-        console.error('No token found');
+        setError('You are not authenticated. Please login again.');
         setLoading(false);
+        setShowErrorRetry(true);
         return;
       }
 
@@ -186,7 +192,9 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('Failed to fetch quiz:', res.status, errorData);
+        const errorMsg = errorData.error || errorData.message || `Failed to load quiz (${res.status})`;
+        setError(`Failed to load quiz: ${errorMsg}`);
+        setShowErrorRetry(true);
         setLoading(false);
         return;
       }
@@ -194,10 +202,16 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
       const data = await res.json();
       if (data.questions && Array.isArray(data.questions)) {
         setQuestions(data.questions);
+        setError(null);
+        setShowErrorRetry(false);
       } else {
-        console.error('Invalid quiz data format:', data);
+        setError('Invalid quiz data format received from server');
+        setShowErrorRetry(true);
       }
     } catch (error) {
+      const msg = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setError(`Error loading quiz: ${msg}`);
+      setShowErrorRetry(true);
       console.error('Error fetching quiz:', error);
     } finally {
       setLoading(false);
@@ -208,7 +222,6 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
     try {
       const token = localStorage.getItem('mpt_token');
       if (!token) {
-        console.error('No token found');
         return;
       }
 
@@ -305,35 +318,50 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
 
   const handleSubmitAll = async () => {
     setSubmitting(true);
+    setError(null);
     try {
       const token = localStorage.getItem('mpt_token');
       if (!token) {
-        console.error('No token found');
+        setError('You are not authenticated. Please login again.');
+        setShowErrorRetry(true);
         setSubmitting(false);
         return;
       }
       
       // Submit all answers
+      let failedCount = 0;
       for (const question of questions) {
         if (answers[question.id]) {
-          const res = await fetch('/api/academy/quiz/submit', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              moduleId,
-              questionId: question.id,
-              answer: answers[question.id],
-            }),
-          });
+          try {
+            const res = await fetch('/api/academy/quiz/submit', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                moduleId,
+                questionId: question.id,
+                answer: answers[question.id],
+              }),
+            });
 
-          if (!res.ok) {
-            const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
-            console.error(`Failed to submit question ${question.id}:`, res.status, errorData);
+            if (!res.ok) {
+              failedCount++;
+              const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
+              console.error(`Failed to submit question ${question.id}:`, res.status, errorData);
+            }
+          } catch (err) {
+            failedCount++;
+            console.error(`Failed to submit question ${question.id}:`, err);
           }
         }
+      }
+
+      if (failedCount > 0) {
+        setError(`Failed to submit ${failedCount} answer(s). Please try again.`);
+        setShowErrorRetry(true);
+        return;
       }
 
       // Refresh score
@@ -348,6 +376,9 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
       
       if (onComplete) onComplete();
     } catch (error) {
+      const msg = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setError(`Error submitting quiz: ${msg}`);
+      setShowErrorRetry(true);
       console.error('Error submitting all answers:', error);
     } finally {
       setSubmitting(false);
@@ -383,6 +414,38 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
 
   if (!isClient) {
     return null;
+  }
+
+  // Show error screen with retry option
+  if (error && showErrorRetry && !showResults) {
+    return (
+      <Card className="bg-white/5 backdrop-blur-sm border-white/10 p-6">
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h3 className="text-2xl font-bold text-red-400 mb-2">Quiz Error</h3>
+          <p className="text-gray-300 mb-6">{error}</p>
+          <div className="space-y-3">
+            <Button
+              onClick={() => {
+                setError(null);
+                setShowErrorRetry(false);
+                fetchQuiz();
+                fetchScore();
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              🔄 Retry Loading
+            </Button>
+            <Button
+              onClick={() => window.location.href = '/academy'}
+              className="w-full bg-gray-600 hover:bg-gray-700"
+            >
+              ← Go Back
+            </Button>
+          </div>
+        </div>
+      </Card>
+    );
   }
 
   if (loading) {
@@ -551,6 +614,28 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
 
   return (
     <div className={`space-y-4 ${isQuizLocked ? 'opacity-95' : ''}`}>
+      {/* Error Message */}
+      {error && !showErrorRetry && (
+        <div className="bg-red-500/20 border-2 border-red-500/50 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-400 mt-1 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="font-bold text-red-300">Quiz Error</p>
+              <p className="text-red-200 text-sm mt-1">{error}</p>
+              <button
+                onClick={() => {
+                  setError(null);
+                  fetchQuiz();
+                }}
+                className="mt-2 text-xs text-red-300 underline hover:text-red-200"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Lock Warning */}
       {attemptedNavigation && isQuizLocked && (
         <div className="bg-red-500/20 border-2 border-red-500/50 rounded-lg p-4 animate-pulse">
