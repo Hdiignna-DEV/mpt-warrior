@@ -11,6 +11,7 @@ import { ArkaMascotFeedback } from '@/components/ArkaMascotFeedback';
 import { LeaderboardSearch } from '@/components/leaderboard/LeaderboardSearch';
 import { RankBadgeCompact } from '@/components/leaderboard/RankBadge';
 import { Top10Celebration } from '@/components/leaderboard/Top10Celebration';
+import FounderShowcase from '@/components/leaderboard/FounderShowcase';
 import Image from 'next/image';
 
 type Period = 'all' | 'weekly' | 'monthly';
@@ -245,42 +246,15 @@ export default function LeaderboardPage() {
           />
         </div>
 
-        {/* Founder Profile Section */}
-        <Card className="bg-gradient-to-r from-purple-600/30 via-blue-600/30 to-cyan-600/30 border-purple-500/50 mb-8 p-8">
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            {/* Founder Info */}
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-4">
-                <Crown className="w-8 h-8 text-yellow-400" />
-                <h2 className="text-3xl font-bold text-yellow-300">{founderProfile.name}</h2>
-              </div>
-              <p className="text-2xl text-purple-300 font-semibold mb-3">{founderProfile.title}</p>
-              <p className="text-gray-300 leading-relaxed mb-4">{founderProfile.description}</p>
-              
-              {/* Expertise */}
-              <div className="mb-4">
-                <p className="text-gray-400 text-sm font-semibold mb-2">Areas of Expertise:</p>
-                <div className="flex flex-wrap gap-2">
-                  {founderProfile.expertise.map((skill, idx) => (
-                    <Badge key={idx} className="bg-purple-500/30 text-purple-200 border-purple-500/50">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
-              {founderProfile.stats.map((stat, idx) => (
-                <div key={idx} className="bg-white/5 border border-white/10 rounded-lg p-4 text-center">
-                  <p className="text-gray-400 text-sm mb-1">{stat.label}</p>
-                  <p className="text-2xl font-bold text-cyan-400">{stat.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
+        {/* Founder Showcase Section */}
+        <FounderShowcase
+          name={founderProfile.name}
+          title={founderProfile.title}
+          description={founderProfile.description}
+          expertise={founderProfile.expertise}
+          stats={founderProfile.stats}
+          showRank={true}
+        />
 
         {/* User Position Card */}
         {user && userRank && (

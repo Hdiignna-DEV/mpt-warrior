@@ -12,8 +12,9 @@ export interface DecodedToken {
   userId: string;
   email: string;
   name: string;
-  role: 'SUPER_ADMIN' | 'ADMIN' | 'WARRIOR';
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'WARRIOR' | 'FOUNDER';
   status: 'active' | 'pending' | 'suspended' | 'rejected';
+  isFounder?: boolean;
 }
 
 /**

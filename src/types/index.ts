@@ -4,7 +4,7 @@
 // USER MANAGEMENT & AUTHENTICATION
 // ============================================
 
-export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'WARRIOR' | 'PENDING';
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'WARRIOR' | 'FOUNDER' | 'PENDING';
 export type UserStatus = 'active' | 'pending' | 'suspended' | 'rejected';
 
 export interface User {
@@ -13,6 +13,9 @@ export interface User {
   name: string;
   password: string; // Hashed password (bcrypt)
   avatar?: string;
+  
+  // Founder/Admin Status
+  isFounder?: boolean; // True if this is the founder/head educator
   
   // Warrior Identity
   warriorId: string; // Format: MPT-YYYY-XXXXX (e.g., MPT-2026-00001)
