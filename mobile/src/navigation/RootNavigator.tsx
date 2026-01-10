@@ -30,6 +30,7 @@ const TabIcons: Record<string, string> = {
 function DashboardStack() {
   return (
     <Stack.Navigator
+      id="dashboard"
       screenOptions={{
         headerStyle: {
           backgroundColor: '#1e293b',
@@ -53,6 +54,7 @@ function DashboardStack() {
 function JournalStack() {
   return (
     <Stack.Navigator
+      id="journal"
       screenOptions={{
         headerStyle: {
           backgroundColor: '#1e293b',
@@ -100,6 +102,7 @@ function JournalStack() {
 function ChatStack() {
   return (
     <Stack.Navigator
+      id="chat"
       screenOptions={{
         headerStyle: {
           backgroundColor: '#1e293b',
@@ -123,6 +126,7 @@ function ChatStack() {
 function AchievementsStack() {
   return (
     <Stack.Navigator
+      id="achievements"
       screenOptions={{
         headerStyle: {
           backgroundColor: '#1e293b',
@@ -146,6 +150,7 @@ function AchievementsStack() {
 function ProfileStack() {
   return (
     <Stack.Navigator
+      id="profilestack"
       screenOptions={{
         headerStyle: {
           backgroundColor: '#1e293b',
@@ -169,6 +174,7 @@ function ProfileStack() {
 function MainTabs() {
   return (
     <Tab.Navigator
+      id="maintabs"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused }) => {
           const icon = TabIcons[route.name];
@@ -256,7 +262,7 @@ export function RootNavigator() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator id="root" screenOptions={{ headerShown: false }}>
         {!isLoggedIn ? (
           <Stack.Screen name="Auth" component={LoginScreen} />
         ) : (

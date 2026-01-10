@@ -1,5 +1,0 @@
-# MPT Logo
-The Mindset Plan Trader logo has been placed here.
-File: /public/images/mpt-logo.png
-
-This is the official MPT branding used across the application.
