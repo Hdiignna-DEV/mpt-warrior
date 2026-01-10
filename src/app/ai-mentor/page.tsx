@@ -528,7 +528,17 @@ export default function AIMentor() {
       }
     })();
     
-    return baseContext + modeContext + tradeContext;
+    // 🧠 CONTEXT INJECTION: Include last 10 messages for AI memory
+    let conversationContext = '';
+    if (messages.length > 1) {
+      const lastMessages = messages.slice(-10);
+      conversationContext = '\n\n📜 CONVERSATION HISTORY (Last 10 messages for context):\n';
+      conversationContext += lastMessages
+        .map((msg, idx) => `${idx + 1}. ${msg.role === 'user' ? '🗣️ User' : '🤖 AI'}: ${msg.content.substring(0, 100)}${msg.content.length > 100 ? '...' : ''}`)
+        .join('\n');
+    }
+    
+    return baseContext + modeContext + tradeContext + conversationContext;
   };
 
   const checkMTAViolations = (): string | null => {
@@ -726,18 +736,60 @@ export default function AIMentor() {
             </button>
             <button
               onClick={() => {
-                if (confirm('🗑️ Clear all local chat history? (localStorage)\n\nNote: Cosmos DB data will NOT be deleted')) {
-                  localStorage.removeItem('mpt_ai_chat_history');
-                  localStorage.removeItem('mpt_last_thread_id');
-                  setChatHistory([]);
-                  startNewChat();
-                  alert('✅ Local history cleared! Reload to see Cosmos DB chats again.');
-                }
+                const options = ['🗑️ Clear Local Only (localStorage)', '🌐 Clear Cosmos DB Only', '💥 Clear Both', '❌ Cancel'];
+                const selected = prompt(
+                  '📋 Choose what to clear:\n\n' +
+                  '1️⃣  Clear Local Only (localStorage)\n' +
+                  '2️⃣  Clear Cosmos DB Only\n' +
+                  '3️⃣  Clear Both\n' +
+                  '4️⃣  Cancel\n\n' +
+                  'Enter number (1-4):',
+                  '1'
+                );
+                
+                if (!selected || selected === '4') return;
+                
+                (async () => {
+                  try {
+                    // Clear Local
+                    if (selected === '1' || selected === '3') {
+                      localStorage.removeItem('mpt_ai_chat_history');
+                      localStorage.removeItem('mpt_last_thread_id');
+                      setChatHistory([]);
+                      console.log('✓ Local cache cleared');
+                    }
+                    
+                    // Clear Cosmos DB
+                    if (selected === '2' || selected === '3') {
+                      const token = localStorage.getItem('mpt_token');
+                      
+                      // Delete all chats from history
+                      for (const chat of chatHistory) {
+                        try {
+                          await fetch(`/api/chat/thread/${chat.id}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token}` },
+                          });
+                          console.log(`✓ Deleted thread: ${chat.id}`);
+                        } catch (err) {
+                          console.error(`Error deleting thread ${chat.id}:`, err);
+                        }
+                      }
+                      console.log('✓ Cosmos DB chats cleared');
+                    }
+                    
+                    startNewChat();
+                    alert('✅ Chat history cleared!\n\n📊 Siap untuk fresh start, Bro! 🚀');
+                  } catch (error) {
+                    console.error('Error clearing history:', error);
+                    alert('⚠️ Error clearing history. Check console for details.');
+                  }
+                })();
               }}
               className="w-full py-1.5 px-2 text-xs font-mono uppercase tracking-wider bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded text-red-400 transition-all"
-              title="Clear localStorage only (Cosmos DB data remains)"
+              title="Clear chat history (local and/or Cosmos DB)"
             >
-              🗑️ CLEAR LOCAL
+              🗑️ CLEAR HISTORY
             </button>
           </div>
         </div>
