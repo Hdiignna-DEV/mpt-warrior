@@ -717,12 +717,27 @@ export default function AIMentor() {
               ))
             )}
           </div>
-          <div className="border-t border-cyan-500/20 p-2">
+          <div className="border-t border-cyan-500/20 p-2 space-y-2">
             <button
               onClick={startNewChat}
               className="w-full py-1.5 px-2 text-xs font-mono uppercase tracking-wider bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded text-cyan-400 transition-all"
             >
               + NEW CHAT
+            </button>
+            <button
+              onClick={() => {
+                if (confirm('🗑️ Clear all local chat history? (localStorage)\n\nNote: Cosmos DB data will NOT be deleted')) {
+                  localStorage.removeItem('mpt_ai_chat_history');
+                  localStorage.removeItem('mpt_last_thread_id');
+                  setChatHistory([]);
+                  startNewChat();
+                  alert('✅ Local history cleared! Reload to see Cosmos DB chats again.');
+                }
+              }}
+              className="w-full py-1.5 px-2 text-xs font-mono uppercase tracking-wider bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded text-red-400 transition-all"
+              title="Clear localStorage only (Cosmos DB data remains)"
+            >
+              🗑️ CLEAR LOCAL
             </button>
           </div>
         </div>
