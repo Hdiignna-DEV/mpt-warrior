@@ -35,7 +35,7 @@ export const authService = {
     try {
       const response = await apiClient.get('/auth/check-status');
       return response.data;
-    } catch (error) {
+    } catch {
       return null;
     }
   },
