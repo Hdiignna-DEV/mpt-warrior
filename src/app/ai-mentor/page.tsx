@@ -145,12 +145,42 @@ export default function AIMentor() {
 
         if (response.ok) {
           const data = await response.json();
-          const formattedHistory = data.threads.map((thread: any) => ({
-            id: thread.id,
-            title: thread.title,
-            messages: [],
-            date: new Date(thread.updatedAt).toLocaleString('id-ID'),
+          
+          // Load each thread with its messages
+          const formattedHistory = await Promise.all(data.threads.map(async (thread: any) => {
+            try {
+              // Fetch messages for this thread
+              const messagesResponse = await fetch(`/api/chat/thread/${thread.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+              });
+              
+              let threadMessages = [];
+              if (messagesResponse.ok) {
+                const threadData = await messagesResponse.json();
+                threadMessages = threadData.messages || [];
+              }
+              
+              return {
+                id: thread.id,
+                title: thread.title,
+                messages: threadMessages.map((msg: any) => ({
+                  role: msg.role,
+                  content: msg.content,
+                  model: msg.model || '⚡ Warrior Buddy'
+                })),
+                date: new Date(thread.updatedAt).toLocaleString('id-ID'),
+              };
+            } catch (error) {
+              console.error('Error loading messages for thread', thread.id, ':', error);
+              return {
+                id: thread.id,
+                title: thread.title,
+                messages: [],
+                date: new Date(thread.updatedAt).toLocaleString('id-ID'),
+              };
+            }
           }));
+          
           setChatHistory(formattedHistory);
         } else {
           // If API fails, try localStorage
