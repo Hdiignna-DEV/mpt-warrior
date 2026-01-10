@@ -68,10 +68,54 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
   const [attemptedNavigation, setAttemptedNavigation] = useState(false);
   const quizLockStartRef = useRef<number | null>(null);
   const [isClient, setIsClient] = useState(false);
+  
+  // Auto-save draft answers to localStorage
+  const DRAFT_KEY = `quiz_draft_${moduleId}`;
+  const DRAFT_EXPIRY_KEY = `quiz_draft_expiry_${moduleId}`;
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Load draft answers from localStorage on mount
+  const loadDraftAnswers = () => {
+    if (!isClient) return {};
+    try {
+      const draft = localStorage.getItem(DRAFT_KEY);
+      const expiry = localStorage.getItem(DRAFT_EXPIRY_KEY);
+      
+      // Draft expires after 7 days
+      if (draft && expiry) {
+        const expiryTime = parseInt(expiry, 10);
+        if (Date.now() < expiryTime) {
+          return JSON.parse(draft);
+        } else {
+          localStorage.removeItem(DRAFT_KEY);
+          localStorage.removeItem(DRAFT_EXPIRY_KEY);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load draft answers:', e);
+    }
+    return {};
+  };
+
+  // Save draft answers to localStorage whenever answers change
+  useEffect(() => {
+    if (!isClient) return;
+    
+    // Only save if there are unsaved answers
+    const hasUnsavedAnswers = Object.keys(answers).length > 0;
+    if (hasUnsavedAnswers) {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(answers));
+        // Set expiry to 7 days from now
+        localStorage.setItem(DRAFT_EXPIRY_KEY, (Date.now() + 7 * 24 * 60 * 60 * 1000).toString());
+      } catch (e) {
+        console.error('Failed to save draft answers:', e);
+      }
+    }
+  }, [answers, isClient, DRAFT_KEY, DRAFT_EXPIRY_KEY]);
 
   // Restore quiz lock state on mount
   useEffect(() => {
@@ -182,7 +226,7 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
       if (data.score) {
         setScore(data.score);
         
-        // Build answers map from user's previous answers
+        // Build answers map from user's previous answers (submitted to DB)
         const answersMap: Record<string, string> = {};
         const submittedList: UserAnswer[] = [];
         
@@ -195,7 +239,11 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
           });
         }
         
-        setAnswers(answersMap);
+        // Merge with draft answers from localStorage (unsaved work)
+        const draftAnswers = loadDraftAnswers();
+        const mergedAnswers = { ...answersMap, ...draftAnswers };
+        
+        setAnswers(mergedAnswers);
         setSubmittedAnswers(submittedList);
 
         // If quiz already completed, show results
@@ -245,6 +293,7 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
       const data = await res.json();
       if (data.success) {
         // Refresh score after submission
+        // This will merge DB answers with remaining draft answers
         await fetchScore();
       }
     } catch (error) {
@@ -291,8 +340,10 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
       await fetchScore();
       setShowResults(true);
       
-      // Clear quiz lock
+      // Clear quiz lock and draft answers
       localStorage.removeItem(QUIZ_LOCK_KEY);
+      localStorage.removeItem(DRAFT_KEY);
+      localStorage.removeItem(DRAFT_EXPIRY_KEY);
       setIsQuizLocked(false);
       
       if (onComplete) onComplete();
