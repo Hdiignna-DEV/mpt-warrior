@@ -41,12 +41,12 @@ export default function JournalScreen({ navigation }: any) {
 
     const wins = trades.filter((t) => t.hasil === 'WIN').length;
     const losses = trades.filter((t) => t.hasil === 'LOSS').length;
-    const totalPips = trades.reduce((sum, t) => sum + t.pip, 0);
+    const totalPips = trades.reduce((sum, t) => sum + (t.pip || 0), 0);
 
     return {
       wins,
       losses,
-      winRate: ((wins / trades.length) * 100).toFixed(1),
+      winRate: trades.length > 0 ? ((wins / trades.length) * 100).toFixed(1) : '0',
       totalPips,
     };
   };
