@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "assets:convert": "node scripts/convert-assets-to-webp.js",
     "db:init": "tsx scripts/init-cosmos.ts",
     "db:check": "tsx scripts/check-cosmos-health.ts",
     "db:generate-codes": "tsx scripts/generate-codes.ts",
