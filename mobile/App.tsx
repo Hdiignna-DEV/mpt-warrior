@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { notificationService } from './src/services/notifications';
+import { updateService } from './src/services/updates';
 
 export default function App() {
   useEffect(() => {
@@ -13,7 +14,13 @@ export default function App() {
       }
     };
 
+    // Check for app updates
+    const setupUpdates = async () => {
+      await updateService.initializeUpdateChecks();
+    };
+
     setupNotifications();
+    setupUpdates();
 
     // Setup notification listeners
     const unsubscribe = notificationService.setupNotificationListeners();

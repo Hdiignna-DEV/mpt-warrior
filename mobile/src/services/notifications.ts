@@ -87,6 +87,15 @@ export const notificationService = {
     const responseListener = Notifications.addNotificationResponseReceivedListener(
       (response) => {
         console.log('Notification response:', response.notification.request.content);
+        
+        const data = response.notification.request.content.data;
+        
+        // Handle app-update notifications
+        if (data?.type === 'app-update') {
+          console.log('App update notification clicked');
+          // Will be handled by updateService
+        }
+        
         // You can handle navigation or other actions here
       }
     );
