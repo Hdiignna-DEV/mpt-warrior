@@ -156,7 +156,7 @@ export async function saveChatMessage(
   });
   
   // Update thread message count (non-blocking)
-  updateChatThread(threadId, userId, { messageCount: (await getChatMessages(threadId)).length })
+  updateChatThread(threadId, userId, { messageCount: (await getChatMessages(threadId, userId)).length })
     .catch(err => console.error('[saveChatMessage] Error updating thread message count:', err));
 
   return resource as ChatMessage;
@@ -164,17 +164,34 @@ export async function saveChatMessage(
 
 /**
  * Get all messages in a thread (ordered by creation time)
+ * Note: Query includes both userId and threadId for efficient partition key usage
  */
 export async function getChatMessages(
   threadId: string,
+  userId?: string,
   limit?: number
 ): Promise<ChatMessage[]> {
   const container = getChatMessagesContainer();
   
-  const query = {
-    query: "SELECT * FROM c WHERE c.threadId = @threadId ORDER BY c.createdAt ASC",
-    parameters: [{ name: "@threadId", value: threadId }],
-  };
+  // If userId provided, use it in partition key query for efficiency
+  // Otherwise do cross-partition query
+  let query;
+  
+  if (userId) {
+    query = {
+      query: "SELECT * FROM c WHERE c.threadId = @threadId AND c.userId = @userId ORDER BY c.createdAt ASC",
+      parameters: [
+        { name: "@threadId", value: threadId },
+        { name: "@userId", value: userId },
+      ],
+    };
+  } else {
+    // Fallback: cross-partition query (less efficient but works)
+    query = {
+      query: "SELECT * FROM c WHERE c.threadId = @threadId ORDER BY c.createdAt ASC",
+      parameters: [{ name: "@threadId", value: threadId }],
+    };
+  }
 
   const { resources } = await container.items.query<ChatMessage>(query).fetchAll();
   
@@ -192,14 +209,16 @@ export async function getChatMessages(
  */
 export async function getRecentChatMessages(
   threadId: string,
+  userId: string,
   limit: number = 50
 ): Promise<ChatMessage[]> {
   const container = getChatMessagesContainer();
   
   const query = {
-    query: "SELECT TOP @limit * FROM c WHERE c.threadId = @threadId ORDER BY c.createdAt DESC",
+    query: "SELECT TOP @limit * FROM c WHERE c.threadId = @threadId AND c.userId = @userId ORDER BY c.createdAt DESC",
     parameters: [
       { name: "@threadId", value: threadId },
+      { name: "@userId", value: userId },
       { name: "@limit", value: limit },
     ],
   };
@@ -227,9 +246,9 @@ export async function deleteChatThread(
   }
 
   // Delete all messages in thread
-  const messages = await getChatMessages(threadId);
+  const messages = await getChatMessages(threadId, userId);
   for (const message of messages) {
-    await messagesContainer.item(message.id, threadId).delete();
+    await messagesContainer.item(message.id, userId).delete();
   }
 
   // Delete thread
@@ -252,10 +271,10 @@ export async function deleteChatMessage(
     throw new Error('Unauthorized - cannot delete from this thread');
   }
 
-  await container.item(messageId, threadId).delete();
+  await container.item(messageId, userId).delete();
   
   // Update message count
-  const messages = await getChatMessages(threadId);
+  const messages = await getChatMessages(threadId, userId);
   updateChatThread(threadId, userId, { messageCount: messages.length })
     .catch(err => console.error('Error updating message count:', err));
 }
@@ -265,14 +284,16 @@ export async function deleteChatMessage(
  */
 export async function searchChatMessages(
   threadId: string,
+  userId: string,
   keyword: string
 ): Promise<ChatMessage[]> {
   const container = getChatMessagesContainer();
   
   const query = {
-    query: "SELECT * FROM c WHERE c.threadId = @threadId AND CONTAINS(LOWER(c.content), LOWER(@keyword)) ORDER BY c.createdAt DESC",
+    query: "SELECT * FROM c WHERE c.threadId = @threadId AND c.userId = @userId AND CONTAINS(LOWER(c.content), LOWER(@keyword)) ORDER BY c.createdAt DESC",
     parameters: [
       { name: "@threadId", value: threadId },
+      { name: "@userId", value: userId },
       { name: "@keyword", value: keyword },
     ],
   };
@@ -292,9 +313,10 @@ export async function searchChatMessages(
  */
 export async function getConversationContext(
   threadId: string,
+  userId: string,
   contextWindow: number = 20
 ): Promise<Array<{ role: 'user' | 'assistant'; content: string }>> {
-  const messages = await getRecentChatMessages(threadId, contextWindow);
+  const messages = await getRecentChatMessages(threadId, userId, contextWindow);
   
   return messages.map(msg => ({
     role: msg.role,

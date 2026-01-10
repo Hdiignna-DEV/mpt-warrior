@@ -51,7 +51,7 @@ export async function GET(
     }
 
     // Get all messages in thread
-    const messages = await getChatMessages(threadId);
+    const messages = await getChatMessages(threadId, userId);
 
     return NextResponse.json({
       success: true,

@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     // Enrich threads with last message preview
     const threadPreviews = await Promise.all(
       threads.map(async (thread) => {
-        const messages = await getChatMessages(thread.id);
+        const messages = await getChatMessages(thread.id, userId);
         const lastMessage = messages[messages.length - 1];
 
         return {
