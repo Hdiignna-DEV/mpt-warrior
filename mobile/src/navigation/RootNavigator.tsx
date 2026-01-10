@@ -14,6 +14,7 @@ import AchievementsScreen from '../screens/AchievementsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import AddTradeScreen from '../screens/trades/AddTradeScreen';
 import EditTradeScreen from '../screens/trades/EditTradeScreen';
+import TradeDetailScreen from '../screens/trades/TradeDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -81,6 +82,14 @@ function JournalStack() {
         component={EditTradeScreen}
         options={{
           title: 'Edit Trade',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="TradeDetail"
+        component={TradeDetailScreen}
+        options={{
+          title: 'Trade Details',
           headerShown: true,
         }}
       />

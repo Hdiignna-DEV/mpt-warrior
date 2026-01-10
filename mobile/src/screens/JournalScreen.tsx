@@ -99,9 +99,9 @@ export default function JournalScreen({ navigation }: any) {
           <TouchableOpacity
             style={styles.tradeCard}
             onPress={() =>
-              navigation.navigate('EditTrade', {
+              navigation.navigate('TradeDetail', {
                 tradeId: item.id,
-                refreshCallback: fetchTrades,
+                trade: item,
               })
             }
           >
