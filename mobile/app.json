@@ -3,6 +3,8 @@
     "name": "MPT Warrior",
     "slug": "mpt-warrior",
     "version": "1.0.0",
+    "appId": "com.dedendev.mptwarrior",
+    "runtimeVersion": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "mptwarrior",
@@ -18,7 +20,9 @@
       "enabled": true,
       "checkAutomatically": "ON_LOAD"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dedendev.mptwarrior",
@@ -56,8 +60,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "mpt-warrior-mobile"
+        "projectId": "01cbff08-a5b5-4e32-b7d6-11eebe07c986"
       }
-    }
+    },
+    "owner": "mpt_community"
   }
 }
