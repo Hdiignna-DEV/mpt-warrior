@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { X, MessageCircle } from 'lucide-react';
 import { CommanderArkaPose } from './ChatUIEnhancers';
@@ -36,8 +36,10 @@ export function FloatingAIMentorBubble({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize position to bottom-right corner (with safe margin)
   useEffect(() => {
@@ -48,6 +50,31 @@ export function FloatingAIMentorBubble({
         y: window.innerHeight - 96 - margin
       });
     }
+  }, []);
+
+  // Handle scroll event - reduce opacity while reading
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(true);
+
+      // Clear existing timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // Reset opacity after scroll ends (1s of no scrolling)
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolling(false);
+      }, 1000);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Handle mouse drag - only when minimized and not expanded
@@ -116,12 +143,15 @@ export function FloatingAIMentorBubble({
   if (!isVisible || !isMobile) return null;
 
   // Dynamic opacity system:
+  // - Scrolling (10%): User viewing/reading content - very subtle
   // - Idle (25%): Visible but subtle, doesn't block interactions
   // - Hover (60%): On mouse/touch hover
   // - Active (100%): When expanded or forcefully active
   const getOpacity = () => {
     if (isExpanded) return 'opacity-100';
-    if (isActive || isHovering) return 'opacity-100';
+    if (isActive) return 'opacity-100';
+    if (isScrolling) return 'opacity-10'; // Very subtle while reading
+    if (isHovering) return 'opacity-60'; // More visible on hover
     return 'opacity-25'; // Idle state - subtle but visible
   };
 

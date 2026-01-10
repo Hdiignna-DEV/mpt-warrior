@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { CommanderArkaPose } from './ChatUIEnhancers';
 
@@ -31,16 +31,45 @@ export function AIMentorSidebar({
 }: AIMentorSidebarProps) {
   const [currentOpacity, setCurrentOpacity] = useState(opacity);
   const [isHovering, setIsHovering] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Update opacity based on active state and hovering
-  // Idle: 25%, Active/Hover: 100%
+  // Update opacity based on active state, hovering, and scrolling
+  // Priority: isActive > isHovering > isScrolling > idle
   useEffect(() => {
     if (isActive || isHovering) {
       setCurrentOpacity(100);
+    } else if (isScrolling) {
+      setCurrentOpacity(30); // Reduce opacity while user is reading/scrolling
     } else {
       setCurrentOpacity(opacity);
     }
-  }, [isActive, isHovering, opacity]);
+  }, [isActive, isHovering, isScrolling, opacity]);
+
+  // Handle scroll event
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(true);
+
+      // Clear existing timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // Reset scroll state after 1s of no scrolling
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolling(false);
+      }, 1000);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <aside
@@ -127,6 +156,7 @@ export function AIMentorSidebar({
  * - Full-body mascot display (onboarding pose)
  * - Better for welcoming/onboarding scenarios
  */
+  // Do same for AIMentorSidebarLeft
 export function AIMentorSidebarLeft({
   pose = 'onboarding',
   isActive = false,
@@ -135,14 +165,41 @@ export function AIMentorSidebarLeft({
 }: AIMentorSidebarProps) {
   const [currentOpacity, setCurrentOpacity] = useState(opacity);
   const [isHovering, setIsHovering] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isActive || isHovering) {
       setCurrentOpacity(100);
+    } else if (isScrolling) {
+      setCurrentOpacity(30);
     } else {
       setCurrentOpacity(opacity);
     }
-  }, [isActive, isHovering, opacity]);
+  }, [isActive, isHovering, isScrolling, opacity]);
+
+  // Handle scroll event
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(true);
+
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolling(false);
+      }, 1000);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <aside
