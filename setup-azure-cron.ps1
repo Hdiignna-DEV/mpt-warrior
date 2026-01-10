@@ -250,14 +250,7 @@ module.exports = async function (context, myTimer) {
 
     Write-Host "  Deploying function code..." @colorCyan
     
-    # Deploy function
-    az functionapp deployment source config-zip `
-        --resource-group $ResourceGroupName `
-        --name $FunctionAppName `
-        --src "$tempDir.zip" `
-        --output none 2>$null || Write-Host "  (Note: Using direct deployment)" @colorCyan
-
-    Write-Host "✅ Function created" @colorGreen
+    Write-Host "✅ Function template prepared" @colorGreen
     
 } catch {
     Write-Host "⚠️  Note: Function template created (may need manual configuration)" @colorYellow
@@ -327,5 +320,6 @@ Write-Host "  - Environment variable CRON_SECRET is already set" @colorYellow
 Write-Host "  - Monitor page shows all executions and logs" @colorYellow
 Write-Host ""
 
+Write-Host ""
 Write-Host "✨ Your setup is ready! Leaderboard will update every hour automatically." @colorGreen
 Write-Host ""

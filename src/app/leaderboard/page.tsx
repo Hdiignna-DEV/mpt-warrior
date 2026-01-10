@@ -166,6 +166,9 @@ export default function LeaderboardPage() {
     // Period filter (would need API support for weekly/monthly data)
     // For now, show all - period filter would require leaderboard-history container queries
     
+    // IMPORTANT: Always sort by rank to maintain consistency with podium display
+    filtered.sort((a, b) => a.rank - b.rank);
+    
     setFilteredLeaderboard(filtered);
   };
 
@@ -219,8 +222,10 @@ export default function LeaderboardPage() {
     );
   }
 
-  // Top 3 Podium
-  const top3 = leaderboard.slice(0, 3);
+  // Top 3 Podium - explicitly sort by rank to ensure consistency
+  const top3 = [...leaderboard]
+    .sort((a, b) => a.rank - b.rank)
+    .slice(0, 3);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
