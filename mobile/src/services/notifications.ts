@@ -93,8 +93,12 @@ export const notificationService = {
 
     // Return cleanup function
     return () => {
-      Notifications.removeNotificationSubscription(notificationListener);
-      Notifications.removeNotificationSubscription(responseListener);
+      if (notificationListener) {
+        notificationListener.remove();
+      }
+      if (responseListener) {
+        responseListener.remove();
+      }
     };
   },
 
