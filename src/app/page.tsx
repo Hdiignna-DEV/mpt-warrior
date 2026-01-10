@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Shield, Zap, Target, Brain, Lock, TrendingUp, Users, CheckCircle, Rocket } from 'lucide-react';
+import { Shield, Zap, Target, Brain, Lock, TrendingUp, Users, CheckCircle, Rocket, Download, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import MptLogo from '@/components/MptLogo';
 
@@ -69,8 +69,85 @@ export default function LandingPage() {
                 Member Login
               </Button>
             </Link>
+            <a href="/downloads/mpt-warrior.apk" download className="w-full sm:w-auto">
+              <Button variant="outline" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10 text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 w-full sm:w-auto">
+                <Download className="mr-2" size={18} />
+                Download App
+              </Button>
+            </a>
           </div>
         </motion.div>
+      </section>
+
+      {/* MOBILE APP SECTION */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20 bg-gradient-to-r from-blue-500/5 to-blue-600/5 rounded-3xl border border-blue-500/20">
+        <div className="flex flex-col lg:flex-row items-center gap-8 sm:gap-12">
+          <div className="flex-1">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-blue-500/30 bg-blue-500/5 mb-4 sm:mb-6">
+                <Smartphone size={14} className="text-blue-400" />
+                <span className="text-xs sm:text-sm font-mono text-blue-400">MOBILE APP</span>
+              </div>
+              
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4 sm:mb-6">
+                Trading on the Go
+              </h2>
+              <p className="text-base sm:text-lg text-slate-300 mb-6 sm:mb-8">
+                Download the MPT Warrior mobile app untuk akses penuh ke trading journal, AI Mentor, dan semua fitur premium kapan saja, di mana saja.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <a href="/downloads" className="w-full sm:w-auto">
+                  <Button className="bg-blue-500 text-white hover:bg-blue-400 font-bold text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-6 w-full sm:w-auto">
+                    <Download className="mr-2" size={18} />
+                    Download APK (Android)
+                  </Button>
+                </a>
+              </div>
+
+              <div className="mt-8 space-y-3">
+                <div className="flex items-start gap-3">
+                  <CheckCircle size={20} className="text-green-400 mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="text-white font-semibold">Offline Mode</p>
+                    <p className="text-sm text-slate-400">Berfungsi tanpa internet dengan automatic sync</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle size={20} className="text-green-400 mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="text-white font-semibold">Push Notifications</p>
+                    <p className="text-sm text-slate-400">Get instant alerts untuk trading events</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle size={20} className="text-green-400 mt-1 flex-shrink-0" />
+                  <div>
+                    <p className="text-white font-semibold">Always Encrypted</p>
+                    <p className="text-sm text-slate-400">Data Anda aman dengan end-to-end encryption</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+          
+          <div className="flex-1">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="aspect-square bg-gradient-to-br from-blue-500/10 to-blue-600/10 rounded-3xl border border-blue-500/30 flex items-center justify-center">
+                <Smartphone size={150} className="text-blue-400 opacity-80" />
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </section>
 
       {/* FEATURES SECTION */}
