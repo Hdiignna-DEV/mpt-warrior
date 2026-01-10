@@ -38,8 +38,8 @@ export async function createChatThread(
     userId,
     title,
     messageCount: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   const { resource } = await container.items.create(thread);
@@ -110,7 +110,7 @@ export async function updateChatThread(
     ...updates,
     id: thread.id,
     userId: thread.userId,
-    updatedAt: new Date(),
+    updatedAt: new Date().toISOString(),
   };
 
   const { resource } = await container.item(threadId, userId).replace(updated);
@@ -137,7 +137,7 @@ export async function saveChatMessage(
     role,
     content,
     model,
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
   };
 
   const { resource } = await container.items.create(message);
