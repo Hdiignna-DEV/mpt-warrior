@@ -12,6 +12,8 @@ import ChatScreen from '../screens/ChatScreen';
 import JournalScreen from '../screens/JournalScreen';
 import AchievementsScreen from '../screens/AchievementsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import AddTradeScreen from '../screens/trades/AddTradeScreen';
+import EditTradeScreen from '../screens/trades/EditTradeScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -65,6 +67,22 @@ function JournalStack() {
         name="JournalHome"
         component={JournalScreen}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AddTrade"
+        component={AddTradeScreen}
+        options={{
+          title: 'Add Trade',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="EditTrade"
+        component={EditTradeScreen}
+        options={{
+          title: 'Edit Trade',
+          headerShown: true,
+        }}
       />
     </Stack.Navigator>
   );

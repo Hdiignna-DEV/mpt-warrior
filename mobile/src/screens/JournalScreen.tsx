@@ -10,13 +10,16 @@ import {
 } from 'react-native';
 import { tradesService, Trade } from '../services/trades';
 
-export default function JournalScreen() {
+export default function JournalScreen({ navigation }: any) {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchTrades();
-  }, []);
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchTrades();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const fetchTrades = async () => {
     setLoading(true);
@@ -81,14 +84,27 @@ export default function JournalScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() =>
+          navigation.navigate('AddTrade', { refreshCallback: fetchTrades })
+        }
+      >
         <Text style={styles.addButtonText}>+ Add Trade</Text>
       </TouchableOpacity>
 
       <FlatList
         data={trades}
         renderItem={({ item }) => (
-          <View style={styles.tradeCard}>
+          <TouchableOpacity
+            style={styles.tradeCard}
+            onPress={() =>
+              navigation.navigate('EditTrade', {
+                tradeId: item.id,
+                refreshCallback: fetchTrades,
+              })
+            }
+          >
             <View style={styles.tradeHeader}>
               <Text style={styles.tradePair}>{item.pair}</Text>
               <Text
@@ -109,10 +125,18 @@ export default function JournalScreen() {
                 Date: {new Date(item.tanggal).toLocaleDateString()}
               </Text>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id}
         scrollEnabled={true}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No trades yet</Text>
+            <Text style={styles.emptyStateSubtext}>
+              Add your first trade to get started
+            </Text>
+          </View>
+        }
       />
     </View>
   );
@@ -191,6 +215,21 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   tradeResult: {
+  emptyState: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#cbd5e1',
+    marginBottom: 8,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: '#64748b',
+  },
     fontSize: 14,
     fontWeight: '700',
     paddingHorizontal: 8,

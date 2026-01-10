@@ -18,10 +18,16 @@ export default function DashboardScreen({ navigation }: any) {
       </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('Journal', { screen: 'AddTrade' })}
+        >
           <Text style={styles.actionText}>Add Trade</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('Journal')}
+        >
           <Text style={styles.actionText}>View Journal</Text>
         </TouchableOpacity>
       </View>
