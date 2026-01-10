@@ -28,34 +28,16 @@ export async function onQuizCompleted(
     // Formula: (score / 100) * 40
     const quizPoints = Math.round((score / 100) * 40);
 
-    // Call sync-points endpoint
-    const response = await fetch('/api/leaderboard/sync-points', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` }),
-      },
-      body: JSON.stringify({
-        userId,
-        pointType: 'quiz',
-        points: quizPoints,
-        sourceId: quizId,
-        metadata: {
-          moduleId,
-          score,
-        },
-      }),
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      console.log(`✅ Quiz points synced: ${quizPoints} points`);
-      return result;
-    } else {
-      console.error('❌ Failed to sync quiz points:', response.statusText);
-    }
+    // For now, just log the points - actual point syncing happens in calculateUserLeaderboardScore
+    // This prevents issues with relative fetch paths on the server
+    console.log(`✅ Quiz answer submitted: ${quizPoints} potential points (will be calculated on leaderboard update)`);
+    
+    // Clear any cached leaderboard data so next fetch gets fresh data
+    await deleteCachedValue('leaderboard:top100:v1').catch(() => {});
+    
+    return { success: true, message: 'Quiz data recorded' };
   } catch (error) {
-    console.error('❌ Error syncing quiz points:', error);
+    console.error('❌ Error in quiz completion hook:', error);
     // Don't throw - this is non-blocking
   }
 }

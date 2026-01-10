@@ -22,14 +22,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const { moduleId, questionId, answer } = await request.json();
+    const body = await request.json();
+    const { moduleId, questionId, answer } = body;
 
     if (!moduleId || !questionId || answer === undefined) {
+      console.warn('Quiz submit: Missing fields', { moduleId, questionId, hasAnswer: answer !== undefined });
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields: moduleId, questionId, answer' },
         { status: 400 }
       );
     }
+
+    console.log(`📝 Quiz submit: User ${decoded.userId}, Module ${moduleId}, Question ${questionId}`);
 
     // Submit answer (auto-grades MC/TF, queues essay for manual grading)
     const userAnswer = await submitQuizAnswer(
@@ -39,18 +43,24 @@ export async function POST(request: NextRequest) {
       answer
     );
 
+    console.log(`✅ Quiz answer submitted successfully for question ${questionId}`);
+
     return NextResponse.json({
       success: true,
       answer: userAnswer,
       message: userAnswer.score !== null 
-        ? 'Answer submitted and graded' 
+        ? `Answer submitted and graded: ${userAnswer.score} points`
         : 'Answer submitted, pending manual grading',
     });
 
   } catch (error: any) {
-    console.error('Error submitting answer:', error);
+    console.error('❌ Error submitting answer:', error.message, error.stack);
     return NextResponse.json(
-      { error: 'Failed to submit answer', details: error.message },
+      { 
+        error: 'Failed to submit answer', 
+        details: error.message,
+        type: error.constructor.name 
+      },
       { status: 500 }
     );
   }

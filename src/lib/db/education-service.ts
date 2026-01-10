@@ -408,15 +408,33 @@ export async function submitQuizAnswer(
   const container = getQuizAnswersContainer();
   const questionsContainer = getQuizQuestionsContainer();
   
-  // Get question details
-  const { resource: question } = await questionsContainer.item(questionId, moduleId).read<QuizQuestion>();
-  if (!question) throw new Error('Question not found');
+  // Get question details with error handling
+  let question: QuizQuestion | null = null;
+  try {
+    const { resource } = await questionsContainer.item(questionId, moduleId).read<QuizQuestion>();
+    question = resource || null;
+  } catch (error: any) {
+    if (error.code !== 404) {
+      console.error(`Error reading question ${questionId}:`, error);
+    }
+    throw new Error(`Question not found: ${questionId}`);
+  }
+  
+  if (!question) {
+    throw new Error(`Question not found: ${questionId}`);
+  }
   
   // Auto-grade for multiple-choice and true-false
   let score: number | null = null;
   if (question.type !== 'essay' && question.correctAnswer !== null && question.correctAnswer !== undefined) {
-    const userAnswerIndex = parseInt(answer);
-    score = userAnswerIndex === question.correctAnswer ? question.points : 0;
+    try {
+      const userAnswerIndex = parseInt(answer);
+      if (!isNaN(userAnswerIndex)) {
+        score = userAnswerIndex === question.correctAnswer ? question.points : 0;
+      }
+    } catch (e) {
+      console.warn(`Could not parse answer for question ${questionId}:`, answer);
+    }
   }
   
   const answerId = `${userId}-${questionId}`;
@@ -433,13 +451,19 @@ export async function submitQuizAnswer(
     submittedAt: new Date().toISOString(),
   };
 
-  await container.items.upsert(userAnswer);
+  try {
+    await container.items.upsert(userAnswer);
+  } catch (error) {
+    console.error(`Error upserting answer for user ${userId}, question ${questionId}:`, error);
+    throw new Error(`Failed to save quiz answer: ${error}`);
+  }
 
-  // Sync quiz points to ranking system
+  // Sync quiz points to ranking system (non-blocking)
   if (score !== null) {
     onQuizCompleted(userId, moduleId, score, userAnswer.id)
-      .catch(err => console.error('Leaderboard sync error:', err));
+      .catch(err => console.error('Quiz hook error (non-blocking):', err));
   }
+  
   return userAnswer;
 }
 
