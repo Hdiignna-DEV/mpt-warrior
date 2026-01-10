@@ -41,9 +41,25 @@ export default function FounderShowcase({
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row gap-8 items-start mt-4">
-          {/* Left Side - Info */}
-          <div className="flex-1">
+        <div className="flex flex-col md:flex-row gap-8 items-start md:items-center mt-4">
+          {/* Left Side - Photo */}
+          <div className="flex justify-center md:flex-shrink-0 order-2 md:order-1">
+            <div className="w-48 h-48 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden shadow-2xl shadow-amber-500/30 border-4 border-amber-400/50">
+              <img 
+                src="/images/founder-photo.jpg" 
+                alt={name} 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback to emoji if image not found
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.innerHTML = '<span class="text-8xl">👨‍🏫</span>';
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Center/Right Side - Info */}
+          <div className="flex-1 order-1 md:order-2">
             {/* Name with Crown and Verified Badge */}
             <div className="flex items-center gap-3 mb-4 flex-wrap">
               <Crown className="w-8 h-8 text-amber-400 drop-shadow-lg animate-pulse" />

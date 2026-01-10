@@ -56,17 +56,17 @@ export default function LeaderboardPage() {
   const [period, setPeriod] = useState<Period>('all');
   const [showTop10Celebration, setShowTop10Celebration] = useState(false);
 
-  // Founder profile
+  // Founder profile - Data from about page
   const founderProfile: FounderProfile = {
-    name: 'Deden (Founder & Head Educator)',
-    title: '🎓 Mentor Legendaris',
-    description: 'Founder & Head Educator MPT Warrior Academy - Mentor berpengalaman dalam mengajarkan Mindset, Plan, dan Risk Management untuk trader profesional.',
-    expertise: ['Trading Psychology', 'Risk Management', 'Technical Analysis', 'Discipline Training', 'Trading Mindset'],
+    name: 'Deden Hadiguna',
+    title: '👨‍🏫 Founder & Head Educator',
+    description: 'Transforming Traders into Disciplined Plan Warriors. Founder of MPT Academy (Mindset Plan Trader) - mengajarkan trader lain untuk bertahan dan berkembang di market melalui mindset yang solid, plan yang jelas, dan risk management yang ketat.',
+    expertise: ['Mindset Development', 'Risk Management', 'Price Action Trading', 'Technical Analysis', 'Trading Psychology', 'XAUUSD Specialization'],
     stats: [
-      { label: 'Students Mentored', value: '1000+' },
-      { label: 'Trading Experience', value: '15+ Years' },
-      { label: 'Win Rate', value: '78%' },
-      { label: 'Community Rating', value: '4.9/5' }
+      { label: 'Traders Educated', value: '470+' },
+      { label: 'Trading Experience', value: '2+ Years Professional' },
+      { label: 'Focus Instruments', value: 'XAUUSD, Major Forex' },
+      { label: 'Core Values', value: 'Discipline • Precision • Humility' }
     ]
   };
 
