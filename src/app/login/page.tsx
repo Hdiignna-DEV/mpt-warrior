@@ -47,8 +47,12 @@ export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: st
       const data = await response.json();
 
       if (!response.ok) {
-        // Handle pending status
+        // Handle pending status - Save user data and redirect
         if (data.status === 'pending') {
+          // Save pending user data to localStorage (no token!)
+          localStorage.setItem('mpt_user', JSON.stringify(data.user));
+          localStorage.removeItem('mpt_token'); // Make sure no token is set
+          
           setShowSalute(true);
           setTimeout(() => {
             router.push('/pending-approval');

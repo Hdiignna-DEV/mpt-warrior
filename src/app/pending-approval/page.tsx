@@ -57,8 +57,13 @@ export default function PendingApprovalPage() {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
 
-      // If user is already approved, redirect to login
+      // Only redirect if status is ALREADY active (approved while on this page)
+      // Don't redirect pending users back to login
       if (parsedUser.status === 'active') {
+        // User was approved, redirect to login to get new token
+        router.push('/login');
+      } else if (parsedUser.status === 'rejected') {
+        // User was rejected
         router.push('/login');
       }
     } else {
