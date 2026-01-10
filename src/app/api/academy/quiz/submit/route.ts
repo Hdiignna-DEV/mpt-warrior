@@ -6,9 +6,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { submitQuizAnswer } from '@/lib/db/education-service';
+import { initializeContainers } from '@/lib/db/cosmos-client';
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure containers exist
+    try {
+      await initializeContainers();
+    } catch (initError) {
+      console.error('[POST /api/academy/quiz/submit] Container initialization warning:', initError);
+    }
+
     // Verify authentication
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {

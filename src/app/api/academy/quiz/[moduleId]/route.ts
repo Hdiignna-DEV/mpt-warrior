@@ -6,12 +6,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getQuizQuestions } from '@/lib/db/education-service';
+import { initializeContainers } from '@/lib/db/cosmos-client';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ moduleId: string }> }
 ) {
   try {
+    // Ensure containers exist
+    try {
+      await initializeContainers();
+    } catch (initError) {
+      console.error('[GET /api/academy/quiz] Container initialization warning:', initError);
+    }
+
     // Verify authentication
     const authHeader = request.headers.get('authorization');
     if (!authHeader) {

@@ -268,6 +268,18 @@ export async function initializeContainers() {
     });
     console.log('✓ chat-messages container ready');
 
+    await db.containers.createIfNotExists({
+      id: "quiz-questions",
+      partitionKey: { paths: ["/moduleId"] },
+    });
+    console.log('✓ quiz-questions container ready');
+
+    await db.containers.createIfNotExists({
+      id: "quiz-answers",
+      partitionKey: { paths: ["/userId"] },
+    });
+    console.log('✓ quiz-answers container ready');
+
     console.log("✅ Cosmos DB containers initialized successfully");
     containersInitialized = true;
     return true;
