@@ -140,11 +140,24 @@ export async function saveChatMessage(
     createdAt: new Date().toISOString(),
   };
 
+  console.log('[saveChatMessage] Saving message to Cosmos DB:', {
+    messageId: message.id,
+    threadId,
+    userId,
+    role,
+    contentLength: content.length,
+  });
+
   const { resource } = await container.items.create(message);
+  
+  console.log('[saveChatMessage] ✓ Message saved successfully:', {
+    savedId: resource?.id,
+    savedRole: resource?.role,
+  });
   
   // Update thread message count (non-blocking)
   updateChatThread(threadId, userId, { messageCount: (await getChatMessages(threadId)).length })
-    .catch(err => console.error('Error updating thread message count:', err));
+    .catch(err => console.error('[saveChatMessage] Error updating thread message count:', err));
 
   return resource as ChatMessage;
 }
