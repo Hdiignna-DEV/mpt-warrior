@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  // Exclude mobile folder from Next.js build
+  typescript: {
+    tsconfigPath: './tsconfig.json',
+    ignoreBuildErrors: false,
+  },
   // PWA Configuration
   headers: async () => [
     {
