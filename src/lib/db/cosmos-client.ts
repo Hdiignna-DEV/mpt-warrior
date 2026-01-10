@@ -255,7 +255,7 @@ export async function initializeContainers() {
 
     await db.containers.createIfNotExists({
       id: "chat-messages",
-      partitionKey: { paths: ["/threadId"] },
+      partitionKey: { paths: ["/userId"] },
     });
     console.log('✓ chat-messages container ready');
 

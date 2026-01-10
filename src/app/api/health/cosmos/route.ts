@@ -1,14 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkCosmosDBHealth } from "@/lib/db/cosmos-client";
+import { checkCosmosDBHealth, initializeContainers } from "@/lib/db/cosmos-client";
 
 /**
  * GET /api/health/cosmos
  * 
  * Check Cosmos DB health status
+ * Also auto-initializes containers on first call
  * Returns status of database and all containers
  */
 export async function GET(request: NextRequest) {
   try {
+    // Auto-initialize containers if not already done
+    try {
+      console.log('[COSMOS] Initializing containers...');
+      await initializeContainers();
+      console.log('[COSMOS] Containers initialized successfully');
+    } catch (initError) {
+      console.warn('[COSMOS] Container initialization error (may already exist):', initError);
+      // Don't fail - containers might already exist
+    }
+
+    // Check health status
     const health = await checkCosmosDBHealth();
 
     return NextResponse.json({
@@ -30,6 +42,8 @@ export async function GET(request: NextRequest) {
         trades: false,
         invitationCodes: false,
         auditLogs: false,
+        chatThreads: false,
+        chatMessages: false,
       },
       error: error instanceof Error ? error.message : 'Health check failed',
       timestamp: new Date().toISOString(),
