@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "MPT Warrior",
-    "slug": "mpt-warrior-mobile",
+    "slug": "mpt-warrior",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mpt-warrior",
+    "scheme": "mptwarrior",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
@@ -15,7 +15,8 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 30000,
-      "url": "https://u.expo.dev/your-project-id"
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -23,7 +24,8 @@
       "bundleIdentifier": "com.dedendev.mptwarrior",
       "buildNumber": "1",
       "infoPlist": {
-        "NSNotificationPermissionUsageDescription": "We need notification access to send you trading alerts"
+        "NSNotificationPermissionUsageDescription": "We need notification access to send you trading alerts",
+        "UIUserInterfaceStyle": "Dark"
       }
     },
     "android": {
@@ -54,7 +56,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "your-eas-project-id"
+        "projectId": "mpt-warrior-mobile"
       }
     }
   }
