@@ -81,6 +81,12 @@ export async function GET(request: NextRequest) {
       }
     }
     
+    // RE-ASSIGN SEQUENTIAL RANKS after filtering (important!)
+    // This ensures ranks are 1, 2, 3, 4, 5... without gaps
+    filteredLeaderboard.forEach((entry, index) => {
+      entry.rank = index + 1;
+    });
+    
     // Save to Redis cache
     await setCachedValue(LEADERBOARD_CACHE_KEY, filteredLeaderboard, CACHE_TTL);
     

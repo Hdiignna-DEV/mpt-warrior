@@ -963,29 +963,31 @@ export async function updateLeaderboardRanking(): Promise<void> {
 
     const leaderboardContainer = getLeaderboardContainer();
 
-    // Get all active users
+    // Get all WARRIOR users (only rank warriors, not admins/super_admins)
     const { resources: users } = await usersContainer.items
       .query({
-        query: `SELECT c.id, c.email, c.name, c.whatsapp FROM c WHERE c.status = 'active'`
+        query: `SELECT c.id, c.email, c.name, c.whatsapp FROM c WHERE c.status = 'active' AND c.role = 'WARRIOR'`
       })
       .fetchAll();
 
-    // Get all leaderboard entries to identify and remove inactive users
+    console.log(`📊 Ranking ${users.length} WARRIOR users...`);
+
+    // Get all leaderboard entries to identify and remove inactive/non-warrior users
     const { resources: allLeaderboardEntries } = await leaderboardContainer.items
       .query({
         query: `SELECT c.id, c.userId FROM c`
       })
       .fetchAll();
 
-    // Get active user IDs
+    // Get active WARRIOR user IDs
     const activeUserIds = new Set(users.map((u: any) => u.id));
 
-    // Delete leaderboard entries for inactive users
+    // Delete leaderboard entries for inactive or non-WARRIOR users
     for (const entry of allLeaderboardEntries) {
       if (!activeUserIds.has(entry.userId)) {
         try {
           await leaderboardContainer.item(entry.id, entry.userId).delete();
-          console.log(`   🗑️  Removed inactive user from leaderboard: ${entry.userId}`);
+          console.log(`   🗑️  Removed non-WARRIOR or inactive user from leaderboard: ${entry.userId}`);
         } catch (error) {
           console.warn(`   ⚠️  Could not remove ${entry.userId}:`, error);
         }
