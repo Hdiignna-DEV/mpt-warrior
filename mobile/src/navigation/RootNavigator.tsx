@@ -173,7 +173,7 @@ function MainTabs() {
         tabBarIcon: ({ focused }) => {
           const icon = TabIcons[route.name];
           return (
-            <View style={{ fontSize: 20 }}>
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               {icon}
             </View>
           );

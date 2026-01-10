@@ -89,9 +89,9 @@ export default function DownloadsPage() {
                   📦 Build from Source
                 </button>
               </a>
-              <a href="https://expo.dev" target="_blank" rel="noopener noreferrer" className="col-span-1">
+              <a href="https://expo.dev/download" target="_blank" rel="noopener noreferrer" className="col-span-1">
                 <button className="border border-purple-500 text-purple-400 hover:bg-purple-500/10 font-bold w-full py-3 rounded-lg transition">
-                  📱 Test with Expo
+                  📱 Download Expo Go
                 </button>
               </a>
             </div>

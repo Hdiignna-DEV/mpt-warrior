@@ -1,7 +1,6 @@
-import * as Updates from 'expo-updates';
 import { Platform, Alert, Linking } from 'react-native';
 import * as Notifications from 'expo-notifications';
-import { api } from './api';
+import api from './api';
 
 export interface UpdateInfo {
   currentVersion: string;
@@ -130,7 +129,7 @@ export const updateService = {
           sound: 'default',
           badge: 1,
         },
-        trigger: { seconds: 2 },
+        trigger: null,
       });
     } catch (error) {
       console.error('Error sending update notification:', error);
@@ -152,20 +151,12 @@ export const updateService = {
 
   /**
    * Check for Expo OTA updates (if using Expo Updates)
+   * NOTE: Requires expo-updates package to be installed
    */
   async checkExpoUpdates(): Promise<void> {
     try {
-      const update = await Updates.checkForUpdateAsync();
-
-      if (update.isAvailable) {
-        console.log('Expo update available');
-        
-        // Download and reload
-        await Updates.fetchUpdateAsync();
-        await Updates.reloadAsync();
-      } else {
-        console.log('No Expo updates available');
-      }
+      // Expo Updates support can be added later when needed
+      console.log('Expo update checking not available in current setup');
     } catch (error) {
       console.error('Error checking Expo updates:', error);
     }

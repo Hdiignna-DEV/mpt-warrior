@@ -1,7 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
-import { api } from './api';
+import api from './api';
 
 // Configure notification handler
 Notifications.setNotificationHandler({
@@ -9,6 +9,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -42,9 +44,13 @@ export const notificationService = {
 
       // Get the push token
       const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+      if (!projectId) {
+        console.log('Project ID not configured');
+        return null;
+      }
       const token = (
         await Notifications.getExpoPushTokenAsync({
-          projectId: projectId || Constants.expoConfig?.projectId,
+          projectId: projectId,
         })
       ).data;
 
@@ -123,7 +129,7 @@ export const notificationService = {
           sound: 'default',
           badge: 1,
         },
-        trigger: { seconds: 2 },
+        trigger: null,
       });
     } catch (error) {
       console.error('Error sending test notification:', error);

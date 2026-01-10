@@ -41,10 +41,10 @@ const TradeDetailScreen: React.FC = () => {
 
   const handleEdit = () => {
     if (tradeData) {
-      navigation.navigate('EditTrade', { 
+      (navigation.navigate as any)('EditTrade', { 
         tradeId: tradeData.id,
         trade: tradeData 
-      } as any);
+      });
     }
   };
 

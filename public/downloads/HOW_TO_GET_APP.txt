@@ -1,0 +1,27 @@
+📥 DOWNLOAD MENYEBABKAN ISSUE?
+=====================================
+
+Ada 3 OPSI yang bisa dipilih (tanpa harus menunggu GitHub Release):
+
+✅ **OPSI 1: PALING MUDAH - Download via GitHub Release**
+   - Tunggu sampai APK di-upload ke GitHub Releases
+   - Link: https://github.com/Hdiignna-DEV/mpt-warrior/releases
+   - Release v1.0.0 akan berisi mpt-warrior.apk
+
+✅ **OPSI 2: BUILD SENDIRI (Rekomendasi sekarang)**
+   - Klik tombol BIRU "Build from Source"
+   - Follow instruksi di GitHub
+   - Jalankan: bash build-apk.sh
+   - APK auto-generated di folder dist/
+
+✅ **OPSI 3: TEST LANGSUNG (Instant)**
+   - Klik tombol UNGU "Test with Expo"
+   - Download Expo Go dari Play Store
+   - Tidak perlu install aplikasi, langsung bisa test!
+   - Perfect untuk coba fitur sebelum install permanent
+
+=====================================
+
+UNTUK SEKARANG: Gunakan OPSI 2 (Build) atau OPSI 3 (Expo)
+
+Kedua opsi ini siap pakai dan tidak perlu menunggu GitHub Release!

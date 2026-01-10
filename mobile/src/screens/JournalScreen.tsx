@@ -215,7 +215,14 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   tradeResult: {
+    fontSize: 14,
+    fontWeight: '700',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
   emptyState: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 40,
@@ -229,12 +236,6 @@ const styles = StyleSheet.create({
   emptyStateSubtext: {
     fontSize: 14,
     color: '#64748b',
-  },
-    fontSize: 14,
-    fontWeight: '700',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
   },
   resultWin: {
     backgroundColor: '#10b981',
