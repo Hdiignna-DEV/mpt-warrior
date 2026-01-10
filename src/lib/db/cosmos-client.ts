@@ -17,6 +17,9 @@ let chatThreadsContainer: Container | null = null;
 let chatMessagesContainer: Container | null = null;
 let auditLogsContainer: Container | null = null;
 
+// Track if containers have been initialized
+let containersInitialized = false;
+
 /**
  * Initialize Cosmos DB client (singleton pattern)
  */
@@ -53,7 +56,7 @@ export function getCosmosClient(): CosmosClient {
           endpoint: endpoint,
           key: key,
           connectionPolicy: {
-            requestTimeout: 10000,
+            requestTimeout: 30000, // Increased from 10000ms to 30000ms
             enableEndpointDiscovery: false,
           },
         });
@@ -86,7 +89,7 @@ export function getCosmosClient(): CosmosClient {
         endpoint: parsedEndpoint,
         key: parsedKey,
         connectionPolicy: {
-          requestTimeout: 10000,
+          requestTimeout: 30000, // Increased from 10000ms to 30000ms
           enableEndpointDiscovery: false,
         },
       });
@@ -214,9 +217,15 @@ export function getChatMessagesContainer(): Container {
 
 /**
  * Initialize all containers (call this on app startup)
- * This ensures containers exist
+ * This ensures containers exist - idempotent (safe to call multiple times)
+ * After first call, subsequent calls return immediately
  */
 export async function initializeContainers() {
+  // Skip if already initialized
+  if (containersInitialized) {
+    return true;
+  }
+
   try {
     const db = getDatabase();
 
@@ -260,10 +269,14 @@ export async function initializeContainers() {
     console.log('✓ chat-messages container ready');
 
     console.log("✅ Cosmos DB containers initialized successfully");
+    containersInitialized = true;
     return true;
   } catch (error) {
     console.error("❌ Error initializing Cosmos DB containers:", error);
-    throw error;
+    // Don't throw - allow requests to continue even if initialization fails
+    // The containers might already exist
+    containersInitialized = true; // Mark as "attempted" to avoid repeated failures
+    return false;
   }
 }
 
