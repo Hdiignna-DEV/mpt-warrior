@@ -19,6 +19,7 @@ import {
   User,
   UserCircle,
   Info,
+  Download,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -52,6 +53,12 @@ const menuSections = [
     title: '🤖 AI Assistant',
     items: [
       { href: '/ai-mentor', label: 'nav.aiMentor', fallback: 'AI Mentor', icon: Bot, description: 'AI Coach' },
+    ]
+  },
+  {
+    title: '📱 Mobile App',
+    items: [
+      { href: '/downloads', label: 'Download App', fallback: 'Download App', icon: Download, description: 'Get APK' },
     ]
   },
 ];

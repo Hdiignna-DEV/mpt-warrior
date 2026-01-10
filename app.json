@@ -1,3 +1,12 @@
 {
-  "expo": {}
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "01cbff08-a5b5-4e32-b7d6-11eebe07c986"
+      }
+    },
+    "android": {
+      "package": "com.mpt_community.mptwarrior"
+    }
+  }
 }
