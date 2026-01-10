@@ -133,7 +133,7 @@ export default function AIMentor() {
     };
   }, []);
 
-  // Load chat history from Cosmos DB
+  // Load chat history from Cosmos DB and auto-load last chat
   useEffect(() => {
     const loadChatHistory = async () => {
       try {
@@ -182,11 +182,54 @@ export default function AIMentor() {
           }));
           
           setChatHistory(formattedHistory);
+          
+          // Auto-load the most recent chat (first in the list)
+          const savedLastThreadId = localStorage.getItem('mpt_last_thread_id');
+          if (formattedHistory.length > 0) {
+            const lastChat = formattedHistory[0];
+            
+            // If we have a saved thread ID, try to find and load it
+            if (savedLastThreadId) {
+              const targetChat = formattedHistory.find(c => c.id === savedLastThreadId);
+              if (targetChat && targetChat.messages.length > 0) {
+                setMessages(targetChat.messages);
+                setCurrentChatId(targetChat.id);
+                setThreadId(targetChat.id);
+                return;
+              }
+            }
+            
+            // Otherwise, load the most recent chat
+            if (lastChat.messages.length > 0) {
+              setMessages(lastChat.messages);
+              setCurrentChatId(lastChat.id);
+              setThreadId(lastChat.id);
+            }
+          }
         } else {
           // If API fails, try localStorage
           const saved = localStorage.getItem('mpt_ai_chat_history');
           if (saved) {
-            setChatHistory(JSON.parse(saved));
+            try {
+              const history = JSON.parse(saved);
+              setChatHistory(history);
+              
+              // Try to restore last chat from local history
+              const savedLastThreadId = localStorage.getItem('mpt_last_thread_id');
+              if (history.length > 0) {
+                const targetChat = savedLastThreadId 
+                  ? history.find((c: any) => c.id === savedLastThreadId) 
+                  : history[0];
+                
+                if (targetChat && targetChat.messages.length > 0) {
+                  setMessages(targetChat.messages);
+                  setCurrentChatId(targetChat.id);
+                  setThreadId(targetChat.id);
+                }
+              }
+            } catch (e) {
+              console.error('Failed to parse localStorage history:', e);
+            }
           }
         }
       } catch (error) {
@@ -195,7 +238,22 @@ export default function AIMentor() {
         const saved = localStorage.getItem('mpt_ai_chat_history');
         if (saved) {
           try {
-            setChatHistory(JSON.parse(saved));
+            const history = JSON.parse(saved);
+            setChatHistory(history);
+            
+            // Try to restore last chat
+            const savedLastThreadId = localStorage.getItem('mpt_last_thread_id');
+            if (history.length > 0) {
+              const targetChat = savedLastThreadId 
+                ? history.find((c: any) => c.id === savedLastThreadId) 
+                : history[0];
+              
+              if (targetChat && targetChat.messages.length > 0) {
+                setMessages(targetChat.messages);
+                setCurrentChatId(targetChat.id);
+                setThreadId(targetChat.id);
+              }
+            }
           } catch (e) {
             console.error('Failed to parse localStorage history:', e);
           }
@@ -232,6 +290,15 @@ export default function AIMentor() {
     loadLatestTrades();
   }, []);
 
+  // Restore thread ID from localStorage if available (for reconnecting to existing chat)
+  useEffect(() => {
+    const savedThreadId = localStorage.getItem('mpt_last_thread_id');
+    if (savedThreadId && !threadId && messages.length === 1) {
+      // Only restore if we're still on the initial greeting message
+      setThreadId(savedThreadId);
+    }
+  }, []);
+
   const saveChatHistory = (newHistory: typeof chatHistory) => {
     setChatHistory(newHistory);
     localStorage.setItem('mpt_ai_chat_history', JSON.stringify(newHistory));
@@ -262,8 +329,14 @@ export default function AIMentor() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); 
   }, [messages]);
 
-  // Sync messages with chat history whenever messages change
+  // Save current thread ID and sync messages with chat history whenever messages or threadId change
   useEffect(() => {
+    // Save the current thread ID to localStorage for auto-loading on page refresh
+    if (threadId) {
+      localStorage.setItem('mpt_last_thread_id', threadId);
+    }
+    
+    // Sync messages with chat history whenever messages change
     if (currentChatId && messages.length > 0) {
       const updatedHistory = chatHistory.map(chat => 
         chat.id === currentChatId 
@@ -272,7 +345,7 @@ export default function AIMentor() {
       );
       saveChatHistory(updatedHistory);
     }
-  }, [messages, currentChatId]);
+  }, [messages, currentChatId, threadId]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -507,7 +580,9 @@ export default function AIMentor() {
     setSelectedImage(null);
     setImagePreview(null);
     setCurrentChatId(null);
+    setThreadId(null); // Clear thread ID for new chat
     setConversationMode('general');
+    localStorage.removeItem('mpt_last_thread_id'); // Clear saved thread ID
   };
 
   const loadChat = async (chatId: string) => {
@@ -516,6 +591,7 @@ export default function AIMentor() {
       setMessages(localChat.messages);
       setCurrentChatId(chatId);
       setThreadId(chatId);
+      localStorage.setItem('mpt_last_thread_id', chatId); // Save for auto-load
       setShowHistory(false);
       return;
     }
@@ -537,6 +613,7 @@ export default function AIMentor() {
         setMessages(loadedMessages);
         setCurrentChatId(chatId);
         setThreadId(chatId);
+        localStorage.setItem('mpt_last_thread_id', chatId); // Save for auto-load
         setShowHistory(false);
       } else {
         console.error('Failed to load chat from database');
