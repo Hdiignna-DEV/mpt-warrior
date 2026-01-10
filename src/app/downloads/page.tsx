@@ -39,33 +39,46 @@ export default function DownloadsPage() {
             </div>
 
             <div className="bg-slate-900/50 rounded-xl p-6 mb-6">
-              <h3 className="text-white font-bold mb-4">Langkah-langkah Install:</h3>
-              <ol className="space-y-3 text-slate-300">
-                <li className="flex gap-3">
-                  <span className="text-blue-400 font-bold">1.</span>
-                  <span>Klik salah satu tombol di bawah sesuai metode pilihan Anda</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-blue-400 font-bold">2.</span>
-                  <span>Jika pilih <span className="text-blue-400 font-bold">"Download APK"</span> → File tersimpan di Downloads</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-blue-400 font-bold">3.</span>
-                  <span>Jika pilih <span className="text-blue-400 font-bold">"Build from Source"</span> → Follow instruksi di halaman GitHub</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-blue-400 font-bold">4.</span>
-                  <span>Jika pilih <span className="text-blue-400 font-bold">"Test with Expo"</span> → Scan QR code langsung di phone</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-blue-400 font-bold">5.</span>
-                  <span>Buka app dan login dengan akun MPT Anda</span>
-                </li>
-              </ol>
+              <h3 className="text-white font-bold mb-4">📥 3 Cara Dapatkan Aplikasi:</h3>
+              
+              <div className="space-y-4 text-slate-300">
+                <div className="border-l-4 border-green-500 pl-4">
+                  <p className="font-bold text-green-400 mb-2">🟢 Cara 1: Download APK (Paling Mudah)</p>
+                  <ol className="space-y-2 text-sm">
+                    <li>1. Klik tombol <span className="text-green-400 font-bold">"Download APK"</span> (hijau)</li>
+                    <li>2. File akan download langsung</li>
+                    <li>3. Buka file manager → Downloads → tap file APK</li>
+                    <li>4. Tap "Install" dan tunggu selesai</li>
+                    <li>5. Buka app dan login</li>
+                  </ol>
+                </div>
+
+                <div className="border-l-4 border-blue-500 pl-4">
+                  <p className="font-bold text-blue-400 mb-2">🔵 Cara 2: Build Sendiri dari Source (untuk Developer)</p>
+                  <ol className="space-y-2 text-sm">
+                    <li>1. Klik tombol <span className="text-blue-400 font-bold">"Build from Source"</span> (biru)</li>
+                    <li>2. Ikuti instruksi build di GitHub README</li>
+                    <li>3. Jalankan: <code className="bg-slate-800 px-2 py-1 rounded text-xs">bash build-apk.sh</code></li>
+                    <li>4. APK akan tersimpan di folder <code className="bg-slate-800 px-2 py-1 rounded text-xs">dist/</code></li>
+                    <li>5. Transfer ke phone dan install</li>
+                  </ol>
+                </div>
+
+                <div className="border-l-4 border-purple-500 pl-4">
+                  <p className="font-bold text-purple-400 mb-2">🟣 Cara 3: Test dengan Expo (Instant, Tanpa Install)</p>
+                  <ol className="space-y-2 text-sm">
+                    <li>1. Klik tombol <span className="text-purple-400 font-bold">"Test with Expo"</span> (ungu)</li>
+                    <li>2. Download aplikasi "Expo Go" dari Play Store</li>
+                    <li>3. Run di komputer: <code className="bg-slate-800 px-2 py-1 rounded text-xs">npm start</code> (di folder mobile)</li>
+                    <li>4. Scan QR code dengan Expo Go app</li>
+                    <li>5. Aplikasi langsung berjalan di phone!</li>
+                  </ol>
+                </div>
+              </div>
             </div>
 
             <div className="grid sm:grid-cols-3 gap-3 mb-6">
-              <a href="/downloads/mpt-warrior.apk" download className="col-span-1">
+              <a href="https://github.com/Hdiignna-DEV/mpt-warrior/releases/download/v1.0.0/mpt-warrior.apk" target="_blank" rel="noopener noreferrer" className="col-span-1">
                 <button className="bg-green-500 text-white hover:bg-green-400 font-bold w-full py-3 rounded-lg transition">
                   <Download className="inline mr-2" size={18} />
                   Download APK
@@ -83,13 +96,16 @@ export default function DownloadsPage() {
               </a>
             </div>
 
-            <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30 flex gap-3 mb-6">
-              <CheckCircle size={20} className="text-blue-400 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-blue-200">
-                <p className="font-semibold mb-1">3 Cara Download:</p>
-                <p>🟢 <span className="font-bold">Green Button</span> - Direct download APK</p>
-                <p>🔵 <span className="font-bold">Blue Button</span> - Build from source code (GitHub)</p>
-                <p>🟣 <span className="font-bold">Purple Button</span> - Test instantly with Expo (no install needed)</p>
+            <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 flex gap-3 mb-6">
+              <AlertCircle size={20} className="text-amber-400 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-amber-200">
+                <p className="font-semibold mb-2">📌 Opsi Download:</p>
+                <p className="mb-2"><span className="font-bold">Jika APK belum tersedia di GitHub:</span></p>
+                <ol className="space-y-1 text-xs">
+                  <li>1. Klik tombol <span className="text-blue-400 font-bold">"Build from Source"</span> (biru)</li>
+                  <li>2. Follow instruksi di GitHub untuk build APK sendiri</li>
+                  <li>3. Atau klik <span className="text-purple-400 font-bold">"Test with Expo"</span> (ungu) untuk langsung coba</li>
+                </ol>
               </div>
             </div>
           </section>
