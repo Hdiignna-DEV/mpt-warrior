@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getUserChatThreads, getChatMessages } from '@/lib/db/chat-service';
+import { initializeContainers } from '@/lib/db/cosmos-client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,6 +21,14 @@ export async function GET(request: NextRequest) {
     }
 
     const userId = user.userId;
+
+    // Ensure containers exist (idempotent operation)
+    try {
+      await initializeContainers();
+    } catch (initError) {
+      console.error('[GET /api/chat/history] Container initialization warning:', initError);
+      // Don't fail here - containers might already exist
+    }
 
     // Get user's chat threads (ordered by recent)
     const threads = await getUserChatThreads(userId, 20);

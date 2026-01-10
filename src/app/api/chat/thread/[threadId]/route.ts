@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getChatThread, getChatMessages, deleteChatThread } from '@/lib/db/chat-service';
+import { initializeContainers } from '@/lib/db/cosmos-client';
 
 export async function GET(
   request: NextRequest,
@@ -16,6 +17,14 @@ export async function GET(
 ) {
   const { threadId } = await params;
   try {
+    // Ensure containers exist (idempotent operation)
+    try {
+      await initializeContainers();
+    } catch (initError) {
+      console.error('[GET /api/chat/thread] Container initialization warning:', initError);
+      // Don't fail here - containers might already exist
+    }
+
     // Verify authentication
     const user = await verifyToken(request);
     if (!user) {
@@ -74,6 +83,14 @@ export async function DELETE(
 ) {
   const { threadId } = await params;
   try {
+    // Ensure containers exist (idempotent operation)
+    try {
+      await initializeContainers();
+    } catch (initError) {
+      console.error('[DELETE /api/chat/thread] Container initialization warning:', initError);
+      // Don't fail here - containers might already exist
+    }
+
     // Verify authentication
     const user = await verifyToken(request);
     if (!user) {

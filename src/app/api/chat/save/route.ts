@@ -7,11 +7,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getChatThread, saveChatMessage } from '@/lib/db/chat-service';
+import { initializeContainers } from '@/lib/db/cosmos-client';
 
 export async function POST(request: NextRequest) {
   try {
     console.log('[POST /api/chat/save] Request received');
     
+    // Ensure containers exist (idempotent operation)
+    try {
+      await initializeContainers();
+    } catch (initError) {
+      console.error('[POST /api/chat/save] Container initialization warning:', initError);
+      // Don't fail here - containers might already exist
+    }
+
     // Verify authentication
     const user = await verifyToken(request);
     if (!user) {
