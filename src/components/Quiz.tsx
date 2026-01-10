@@ -130,13 +130,28 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
   const fetchQuiz = async () => {
     try {
       const token = localStorage.getItem('mpt_token');
+      if (!token) {
+        console.error('No token found');
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch(`/api/academy/quiz/${moduleId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (res.ok) {
-        const data = await res.json();
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Failed to fetch quiz:', res.status, errorData);
+        setLoading(false);
+        return;
+      }
+
+      const data = await res.json();
+      if (data.questions && Array.isArray(data.questions)) {
         setQuestions(data.questions);
+      } else {
+        console.error('Invalid quiz data format:', data);
       }
     } catch (error) {
       console.error('Error fetching quiz:', error);
@@ -148,24 +163,37 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
   const fetchScore = async () => {
     try {
       const token = localStorage.getItem('mpt_token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+
       const res = await fetch(`/api/academy/quiz/score/${moduleId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (res.ok) {
-        const data = await res.json();
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Failed to fetch quiz score:', res.status, errorData);
+        return;
+      }
+
+      const data = await res.json();
+      if (data.score) {
         setScore(data.score);
         
         // Build answers map from user's previous answers
         const answersMap: Record<string, string> = {};
         const submittedList: UserAnswer[] = [];
         
-        data.answers.forEach((item: any) => {
-          if (item.answer) {
-            answersMap[item.question.id] = item.answer.answer;
-            submittedList.push(item.answer);
-          }
-        });
+        if (Array.isArray(data.answers)) {
+          data.answers.forEach((item: any) => {
+            if (item.answer && item.question) {
+              answersMap[item.question.id] = item.answer.answer;
+              submittedList.push(item.answer);
+            }
+          });
+        }
         
         setAnswers(answersMap);
         setSubmittedAnswers(submittedList);
@@ -190,6 +218,11 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('mpt_token');
+      if (!token) {
+        console.error('No token found');
+        return;
+      }
+
       const res = await fetch('/api/academy/quiz/submit', {
         method: 'POST',
         headers: {
@@ -203,8 +236,14 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
         }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Failed to submit answer:', res.status, errorData);
+        return;
+      }
+
+      const data = await res.json();
+      if (data.success) {
         // Refresh score after submission
         await fetchScore();
       }
@@ -219,11 +258,16 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
     setSubmitting(true);
     try {
       const token = localStorage.getItem('mpt_token');
+      if (!token) {
+        console.error('No token found');
+        setSubmitting(false);
+        return;
+      }
       
       // Submit all answers
       for (const question of questions) {
         if (answers[question.id]) {
-          await fetch('/api/academy/quiz/submit', {
+          const res = await fetch('/api/academy/quiz/submit', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -235,6 +279,11 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
               answer: answers[question.id],
             }),
           });
+
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
+            console.error(`Failed to submit question ${question.id}:`, res.status, errorData);
+          }
         }
       }
 
@@ -248,7 +297,7 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
       
       if (onComplete) onComplete();
     } catch (error) {
-      console.error('Error submitting quiz:', error);
+      console.error('Error submitting all answers:', error);
     } finally {
       setSubmitting(false);
     }
@@ -287,18 +336,22 @@ export default function Quiz({ moduleId, onComplete }: QuizProps) {
 
   if (loading) {
     return (
-      <div className="text-center py-8 text-white">
-        Loading quiz...
-      </div>
+      <Card className="bg-white/5 backdrop-blur-sm border-white/10 p-6">
+        <div className="text-center py-8">
+          <p className="text-white mb-2">Loading quiz...</p>
+          <p className="text-gray-400 text-sm">Please wait while we prepare your quiz</p>
+        </div>
+      </Card>
     );
   }
 
   if (questions.length === 0) {
     return (
       <Card className="bg-white/5 backdrop-blur-sm border-white/10 p-6">
-        <p className="text-gray-400 text-center">
-          No quiz available for this module yet.
-        </p>
+        <div className="text-center py-8">
+          <p className="text-gray-300 mb-2">No quiz available for this module yet.</p>
+          <p className="text-gray-500 text-sm">Please check back later or contact your instructor</p>
+        </div>
       </Card>
     );
   }

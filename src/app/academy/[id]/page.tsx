@@ -99,27 +99,42 @@ export default function ModuleDetailPage({
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (!moduleRes.ok) throw new Error('Failed to fetch module');
+      if (!moduleRes.ok) {
+        const errorData = await moduleRes.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `Failed to fetch module (${moduleRes.status})`);
+      }
       
       const moduleData = await moduleRes.json();
+      if (!moduleData.module) {
+        throw new Error('Invalid module data format');
+      }
+
       setModule(moduleData.module);
-      setCanAccess(moduleData.canAccess);
+      setCanAccess(moduleData.canAccess ?? true);
 
       // Fetch user progress
-      const progressRes = await fetch('/api/academy/progress', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      try {
+        const progressRes = await fetch('/api/academy/progress', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      if (progressRes.ok) {
-        const progressData = await progressRes.json();
-        setProgress(
-          progressData.progress.filter((p: LessonProgress) => p.moduleId === resolvedParams.id)
-        );
+        if (progressRes.ok) {
+          const progressData = await progressRes.json();
+          if (Array.isArray(progressData.progress)) {
+            setProgress(
+              progressData.progress.filter((p: LessonProgress) => p.moduleId === resolvedParams.id)
+            );
+          }
+        }
+      } catch (progressError) {
+        console.error('Failed to fetch progress:', progressError);
+        // Continue without progress data
       }
 
       setLoading(false);
     } catch (err: any) {
-      setError(err.message);
+      console.error('[Module Detail] Error:', err);
+      setError(err.message || 'Failed to load module');
       setLoading(false);
     }
   };

@@ -605,42 +605,70 @@ export async function getUngradedEssays(): Promise<Array<{ question: QuizQuestio
  * Check if user can access module (prerequisites check)
  */
 export async function canAccessModule(userId: string, moduleId: string, level: Level): Promise<boolean> {
-  const module = await getModuleById(moduleId, level);
-  if (!module) return false;
-  
-  // No prerequisites = always accessible
-  if (module.prerequisites.length === 0) return true;
-  
-  // Check if all prerequisites are completed
-  const userProgress = await getUserProgress(userId);
-  
-  for (const prereqId of module.prerequisites) {
-    // Use getModuleById to ensure we get complete module with lessons
-    const prereqModule = await getModuleById(prereqId, level);
-    
-    if (!prereqModule) continue;
-    
-    // Check if all lessons are completed
-    const prereqProgress = userProgress.filter(p => p.moduleId === prereqId && p.completed);
-    const totalLessons = prereqModule.lessons?.length || 0;
-    
-    if (totalLessons === 0) {
-      // If module has no lessons, skip to quiz check
-      console.warn(`Module ${prereqId} has no lessons`);
-    } else if (prereqProgress.length < totalLessons) {
-      console.log(`User ${userId} missing lessons for module ${prereqId}: ${prereqProgress.length}/${totalLessons}`);
-      return false; // Prerequisite lessons not fully completed
+  try {
+    const module = await getModuleById(moduleId, level);
+    if (!module) {
+      console.error(`Module not found: ${moduleId} with level ${level}`);
+      return false;
     }
     
-    // Check if quiz is passed (>= 70%)
-    const quizScore = await getUserQuizScore(userId, prereqId);
-    if (!quizScore.isPassed) {
-      console.log(`User ${userId} quiz not passed for module ${prereqId}: ${quizScore.percentage}%`);
-      return false; // Quiz not passed
+    // No prerequisites = always accessible
+    if (!module.prerequisites || module.prerequisites.length === 0) return true;
+    
+    // Check if all prerequisites are completed
+    const userProgress = await getUserProgress(userId);
+    
+    for (const prereqId of module.prerequisites) {
+      try {
+        // Use getModuleById to ensure we get complete module with lessons
+        const prereqModule = await getModuleById(prereqId, level);
+        
+        if (!prereqModule) {
+          console.warn(`Prerequisite module not found: ${prereqId}`);
+          continue;
+        }
+        
+        // Check if all lessons are completed
+        const prereqProgress = userProgress.filter(p => p.moduleId === prereqId && p.completed);
+        const totalLessons = prereqModule.lessons?.length || 0;
+        
+        if (totalLessons === 0) {
+          // If module has no lessons, skip to quiz check
+          console.warn(`Module ${prereqId} has no lessons`);
+        } else if (prereqProgress.length < totalLessons) {
+          console.log(`User ${userId} missing lessons for module ${prereqId}: ${prereqProgress.length}/${totalLessons}`);
+          return false; // Prerequisite lessons not fully completed
+        }
+        
+        // Check if quiz is passed (>= 70%)
+        let quizScore: QuizScore | null = null;
+        try {
+          quizScore = await getUserQuizScore(userId, prereqId);
+        } catch (error) {
+          console.error(`Error getting quiz score for prerequisite ${prereqId}:`, error);
+          // If we can't get quiz score, require lessons to be complete as fallback
+          if (prereqProgress.length < totalLessons) {
+            return false;
+          }
+        }
+
+        if (quizScore && !quizScore.isPassed) {
+          console.log(`User ${userId} quiz not passed for module ${prereqId}: ${quizScore.percentage}%`);
+          return false; // Quiz not passed
+        }
+      } catch (error) {
+        console.error(`Error checking prerequisite ${prereqId}:`, error);
+        // Continue to next prerequisite instead of throwing
+        continue;
+      }
     }
+    
+    return true;
+  } catch (error) {
+    console.error(`Error in canAccessModule for user ${userId}, module ${moduleId}:`, error);
+    // Fail safely - don't grant access if there's an error
+    return false;
   }
-  
-  return true;
 }
 // ==================== LEADERBOARD SYSTEM ====================
 

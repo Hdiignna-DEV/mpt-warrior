@@ -26,12 +26,33 @@ export async function GET(
     }
 
     const { moduleId } = await params;
+    
+    if (!moduleId) {
+      return NextResponse.json({ error: 'Missing moduleId parameter' }, { status: 400 });
+    }
 
     // Get quiz score
-    const score = await getUserQuizScore(decoded.userId, moduleId);
+    let score;
+    let answers: Array<{ question: any; answer: any | null }> = [];
+    
+    try {
+      score = await getUserQuizScore(decoded.userId, moduleId);
+    } catch (error) {
+      console.error(`Failed to get quiz score for module ${moduleId}:`, error);
+      return NextResponse.json(
+        { error: 'Failed to get quiz score', details: error instanceof Error ? error.message : 'Unknown error' },
+        { status: 500 }
+      );
+    }
     
     // Get user's answers with questions
-    const answers = await getUserQuizAnswers(decoded.userId, moduleId);
+    try {
+      answers = await getUserQuizAnswers(decoded.userId, moduleId);
+    } catch (error) {
+      console.error(`Failed to get quiz answers for module ${moduleId}:`, error);
+      // Continue without answers rather than failing completely
+      answers = [];
+    }
 
     return NextResponse.json({
       success: true,

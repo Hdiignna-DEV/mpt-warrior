@@ -26,9 +26,22 @@ export async function GET(
     }
 
     const { moduleId } = await params;
+    
+    if (!moduleId) {
+      return NextResponse.json({ error: 'Missing moduleId parameter' }, { status: 400 });
+    }
 
     // Get quiz questions (without correct answers for non-admins)
-    const questions = await getQuizQuestions(moduleId);
+    let questions = [];
+    try {
+      questions = await getQuizQuestions(moduleId);
+    } catch (error) {
+      console.error(`Failed to fetch quiz questions for module ${moduleId}:`, error);
+      return NextResponse.json(
+        { error: 'Failed to fetch quiz questions' },
+        { status: 500 }
+      );
+    }
 
     // Remove correct answers from response (security)
     const sanitizedQuestions = questions.map(q => ({

@@ -22,10 +22,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      console.warn('Quiz submit: Invalid JSON body');
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      );
+    }
+
     const { moduleId, questionId, answer } = body;
 
-    if (!moduleId || !questionId || answer === undefined) {
+    if (!moduleId || !questionId || answer === undefined || answer === null || answer === '') {
       console.warn('Quiz submit: Missing fields', { moduleId, questionId, hasAnswer: answer !== undefined });
       return NextResponse.json(
         { error: 'Missing required fields: moduleId, questionId, answer' },
@@ -36,12 +46,24 @@ export async function POST(request: NextRequest) {
     console.log(`📝 Quiz submit: User ${decoded.userId}, Module ${moduleId}, Question ${questionId}`);
 
     // Submit answer (auto-grades MC/TF, queues essay for manual grading)
-    const userAnswer = await submitQuizAnswer(
-      decoded.userId,
-      moduleId,
-      questionId,
-      answer
-    );
+    let userAnswer;
+    try {
+      userAnswer = await submitQuizAnswer(
+        decoded.userId,
+        moduleId,
+        questionId,
+        answer
+      );
+    } catch (error: any) {
+      console.error(`❌ Error submitting answer:`, error.message);
+      return NextResponse.json(
+        { 
+          error: 'Failed to submit answer', 
+          details: error.message,
+        },
+        { status: 500 }
+      );
+    }
 
     console.log(`✅ Quiz answer submitted successfully for question ${questionId}`);
 
@@ -54,7 +76,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('❌ Error submitting answer:', error.message, error.stack);
+    console.error('❌ Error in quiz submit route:', error.message, error.stack);
     return NextResponse.json(
       { 
         error: 'Failed to submit answer', 

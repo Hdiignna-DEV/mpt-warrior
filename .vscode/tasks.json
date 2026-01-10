@@ -1,69 +1,101 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "🚀 WARRIOR RANKING - Setup Otomatis (Recommended)",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "phase1:setup"],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "focus": true,
-        "echo": true
-      },
-      "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
-    },
-    {
-      "label": "⚙️ WARRIOR RANKING - Setup Environment (Set Credentials)",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "phase1:env"],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "focus": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "🗄️ WARRIOR RANKING - Migration Database Only",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "migrate-leaderboard"],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "focus": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "✅ WARRIOR RANKING - Verify Setup",
-      "type": "shell",
-      "command": "npm",
-      "args": ["run", "phase1:verify"],
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared",
-        "focus": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "📚 WARRIOR RANKING - View Documentation",
-      "type": "shell",
-      "command": "code",
-      "args": ["PHASE_1_ENVIRONMENT_SETUP.md"],
-      "presentation": {
-        "reveal": "silent",
-        "panel": "shared"
-      },
-      "problemMatcher": []
-    }
-  ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "🚀 WARRIOR RANKING - Setup Otomatis (Recommended)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"phase1:setup"
+			],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"focus": true,
+				"echo": true
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "⚙️ WARRIOR RANKING - Setup Environment (Set Credentials)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"phase1:env"
+			],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"focus": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "🗄️ WARRIOR RANKING - Migration Database Only",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"migrate-leaderboard"
+			],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"focus": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "✅ WARRIOR RANKING - Verify Setup",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"phase1:verify"
+			],
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared",
+				"focus": true
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "📚 WARRIOR RANKING - View Documentation",
+			"type": "shell",
+			"command": "code",
+			"args": [
+				"PHASE_1_ENVIRONMENT_SETUP.md"
+			],
+			"presentation": {
+				"reveal": "silent",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Build Project",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			]
+		},
+		{
+			"label": "Build Project",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			]
+		}
+	]
 }
