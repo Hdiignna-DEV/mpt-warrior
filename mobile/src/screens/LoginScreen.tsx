@@ -11,7 +11,7 @@ import {
 import { authService } from '../services/auth';
 import { useAppStore } from '../store/useAppStore';
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,7 @@ export default function LoginScreen() {
       const response = await authService.login({ email, password });
       await setToken(response.token);
       setUser(response.user);
-      // Navigation to dashboard will be handled by auth flow
+      // Navigation handled by RootNavigator based on auth state
     } catch (error) {
       Alert.alert('Login Failed', 'Invalid credentials');
       console.error(error);

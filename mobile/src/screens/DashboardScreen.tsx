@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
 
-export default function DashboardScreen() {
+export default function DashboardScreen({ navigation }: any) {
   const { user, logout } = useAppStore();
 
   return (
