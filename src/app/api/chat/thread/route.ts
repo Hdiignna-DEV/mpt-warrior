@@ -1,5 +1,5 @@
 /**
- * PUT /api/chat/thread
+ * POST /api/chat/thread
  * Create or update a chat thread
  */
 
@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { createChatThread, updateChatThread } from '@/lib/db/chat-service';
 
-export async function PUT(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     // Verify authentication
     const user = await verifyToken(request);

@@ -10,8 +10,8 @@ export interface ChatThread {
   userId: string;
   title: string;
   messageCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface ChatMessage {
@@ -21,7 +21,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   model?: string; // Which AI model responded (e.g., 'Warrior Vision', 'Warrior Buddy')
-  createdAt: Date;
+  createdAt: Date | string;
 }
 
 /**

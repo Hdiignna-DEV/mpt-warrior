@@ -193,12 +193,17 @@ export function useChatHistory(threadId?: string) {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to save message: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to save message: ${response.status}`);
       }
 
       const message: ChatMessage = await response.json();
       
-      // Add to local state (optimistic update)
+      if (!message.id) {
+        throw new Error('Invalid response - message not saved');
+      }
+      
+      // Add to local state with the saved message from DB
       setMessages(prev => [...prev, message]);
       setError(null);
       

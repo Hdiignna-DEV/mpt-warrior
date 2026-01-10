@@ -1,11 +1,72 @@
 /**
+ * GET /api/chat/thread/[threadId]
+ * Load a specific thread with all its messages
+ * 
  * DELETE /api/chat/thread/[threadId]
  * Delete a chat thread and all its messages
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
-import { deleteChatThread } from '@/lib/db/chat-service';
+import { getChatThread, getChatMessages, deleteChatThread } from '@/lib/db/chat-service';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ threadId: string }> }
+) {
+  const { threadId } = await params;
+  try {
+    // Verify authentication
+    const user = await verifyToken(request);
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const userId = user.userId;
+
+    if (!threadId) {
+      return NextResponse.json(
+        { error: 'Missing threadId parameter' },
+        { status: 400 }
+      );
+    }
+
+    // Get thread (verify it exists and belongs to user)
+    const thread = await getChatThread(threadId);
+    if (!thread) {
+      return NextResponse.json(
+        { error: 'Thread not found' },
+        { status: 404 }
+      );
+    }
+
+    if (thread.userId !== userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized - thread does not belong to user' },
+        { status: 403 }
+      );
+    }
+
+    // Get all messages in thread
+    const messages = await getChatMessages(threadId);
+
+    return NextResponse.json({
+      success: true,
+      thread,
+      messages
+    });
+
+  } catch (error: any) {
+    console.error('Error loading thread:', error);
+    return NextResponse.json(
+      { error: 'Failed to load thread' },
+      { status: 500 }
+    );
+  }
+}
 
 export async function DELETE(
   request: NextRequest,

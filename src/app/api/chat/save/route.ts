@@ -53,18 +53,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save message (fire-and-forget pattern)
-    // Don't await - respond immediately while saving in background
-    saveChatMessage(threadId, userId, role, content, model)
-      .catch(err => {
-        console.error('Background error saving message:', err);
-        // Silent fail - message already showed in UI, just not persisted
-      });
+    // Save message - wait for it to be saved to DB
+    const savedMessage = await saveChatMessage(threadId, userId, role, content, model);
 
-    return NextResponse.json({
-      success: true,
-      message: 'Message queued for persistence',
-    });
+    if (!savedMessage) {
+      return NextResponse.json(
+        { error: 'Failed to save message to database' },
+        { status: 500 }
+      );
+    }
+
+    // Return the saved message so client can display it
+    return NextResponse.json(savedMessage);
 
   } catch (error: any) {
     console.error('Error saving chat message:', error);
