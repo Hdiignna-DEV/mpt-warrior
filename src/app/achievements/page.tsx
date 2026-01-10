@@ -22,30 +22,71 @@ interface Trade {
 export default function AchievementsPage() {
   const { t } = useTranslation();
   const { loading: authLoading } = useAuth();
-  const [trades, setTrades] = useState<Trade[]>([]);
+  const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsLoading(true);
-    const saved = localStorage.getItem('trades');
-
-    if (saved) {
+    const fetchAchievements = async () => {
       try {
-        const parsedTrades = JSON.parse(saved);
-        setTrades(Array.isArray(parsedTrades) ? parsedTrades : []);
-      } catch (error) {
-        console.error('Error parsing trades:', error);
-        setTrades([]);
-      }
-    }
+        setIsLoading(true);
+        setError(null);
+        
+        const token = localStorage.getItem('mpt_token');
+        const response = await fetch('/api/achievements', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
 
-    setIsLoading(false);
-  }, []);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch achievements: ${response.status}`);
+        }
+
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        console.error('Error fetching achievements:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load achievements');
+        // Fallback: try to load from localStorage
+        const saved = localStorage.getItem('trades');
+        if (saved) {
+          try {
+            const trades = JSON.parse(saved);
+            setData({ trades: Array.isArray(trades) ? trades : [] });
+          } catch (e) {
+            console.error('Error parsing localStorage:', e);
+          }
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (!authLoading) {
+      fetchAchievements();
+    }
+  }, [authLoading]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 flex items-center justify-center">
-        <div className="animate-spin text-5xl">⏳</div>
+        <div className="text-center">
+          <div className="animate-spin text-5xl mb-4">⏳</div>
+          <p className="text-slate-400">Loading achievements...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !data) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-5xl mb-4">⚠️</div>
+          <p className="text-red-400">{error}</p>
+          <p className="text-slate-400 text-sm mt-2">Please refresh the page or try again</p>
+        </div>
       </div>
     );
   }
@@ -77,9 +118,27 @@ export default function AchievementsPage() {
           </div>
         </div>
 
+        {/* Stats Section */}
+        {data && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <Card className="glass-premium rounded-xl p-4 text-center">
+              <div className="text-3xl font-bold text-amber-400">{data.totalEarned || 0}</div>
+              <div className="text-sm text-slate-400">Badges Earned</div>
+            </Card>
+            <Card className="glass-premium rounded-xl p-4 text-center">
+              <div className="text-3xl font-bold text-cyan-400">{data.totalAvailable || 0}</div>
+              <div className="text-sm text-slate-400">Available to Earn</div>
+            </Card>
+            <Card className="glass-premium rounded-xl p-4 text-center">
+              <div className="text-3xl font-bold text-purple-400">{data.trades || 0}</div>
+              <div className="text-sm text-slate-400">Total Trades</div>
+            </Card>
+          </div>
+        )}
+
         {/* Achievements Component */}
         <div className="animate-fadeIn" style={{ animationDelay: '100ms' }}>
-          <Achievements trades={trades} />
+          <Achievements data={data} />
         </div>
       </div>
     </div>
