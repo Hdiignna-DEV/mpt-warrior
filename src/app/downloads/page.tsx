@@ -78,7 +78,7 @@ export default function DownloadsPage() {
             </div>
 
             <div className="grid sm:grid-cols-3 gap-3 mb-6">
-              <a href="https://github.com/Hdiignna-DEV/mpt-warrior/releases/download/v1.0.0/mpt-warrior.apk" target="_blank" rel="noopener noreferrer" className="col-span-1">
+              <a href="/api/app/download/apk" download="mpt-warrior-v1.0.0.apk" className="col-span-1">
                 <button className="bg-green-500 text-white hover:bg-green-400 font-bold w-full py-3 rounded-lg transition">
                   <Download className="inline mr-2" size={18} />
                   Download APK
