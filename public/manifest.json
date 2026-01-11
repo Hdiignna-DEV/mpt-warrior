@@ -28,6 +28,18 @@
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "screenshots": [

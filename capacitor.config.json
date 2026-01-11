@@ -1,9 +1,10 @@
 {
-  "appId": "com.mpttradinghub.app",
-  "appName": "MPT Trading HUB",
-  "webDir": "out",
+  "appId": "com.mpt.commandcenter",
+  "appName": "MPT Command Center",
+  "webDir": ".next/standalone/.next/static",
   "server": {
-    "androidScheme": "https"
+    "url": "http://localhost:3000",
+    "cleartext": true
   },
   "plugins": {
     "SplashScreen": {

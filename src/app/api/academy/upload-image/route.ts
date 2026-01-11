@@ -21,8 +21,9 @@ export async function POST(request: NextRequest) {
 
     // Parse form data
     const formData = await request.formData();
-    const file = formData.get('file') as File | null;
-    if (!file) {
+    const file = (formData as any).get?.('file') as File | undefined;
+    
+    if (!file || !(file instanceof File)) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 

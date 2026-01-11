@@ -9,28 +9,41 @@ import { UserProvider } from "@/contexts/UserContext";
 import { Toaster } from "sonner";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import PushNotificationPrompt from "@/components/PushNotificationPrompt";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MPT Warrior - Adapt to Every Market Condition",
-  description: "Command your trades in the dark of the night or the light of the day. MPT Warrior provides the clarity you need, whenever you need it.",
+  title: "MPT Trading HUB - Adapt to Every Market Condition",
+  description: "MPT Trading HUB - Professional trading platform for Warriors. Complete trading management, AI mentor, and real-time leaderboard.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "MPT Warrior",
+    title: "MPT Command Center",
+    startupImage: [
+      {
+        url: "/mpt-logo.png",
+        media: "(device-width: 375px) and (device-height: 667px)",
+      },
+      {
+        url: "/mpt-logo.png",
+        media: "(device-width: 414px) and (device-height: 896px)",
+      }
+    ],
   },
   formatDetection: {
     telephone: false,
   },
-  themeColor: "#0ea5e9",
+  themeColor: "#0f172a",
   viewport: {
     width: "device-width",
     initialScale: 1,
     maximumScale: 5,
+    minimumScale: 1,
     viewportFit: "cover",
+    userScalable: true,
   },
 };
 
@@ -88,6 +101,11 @@ export default function RootLayout({
             <ThemeProviderWrapper>
               {/* Conditional Layout: Landing vs Dashboard */}
               <LayoutWrapper>{children}</LayoutWrapper>
+              
+              {/* Mobile Bottom Navigation */}
+              <div className="md:hidden">
+                <MobileBottomNav />
+              </div>
             </ThemeProviderWrapper>
             
             {/* PWA Install Prompt */}

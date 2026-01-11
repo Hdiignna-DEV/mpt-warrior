@@ -48,8 +48,8 @@ export function useArkaPoseController(
   const [currentPose, setCurrentPose] = useState<CommanderArkaPose>(defaultPose);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [displayMessage, setDisplayMessage] = useState<string>('');
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const messageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Internal method to set pose with auto-reset

@@ -26,9 +26,14 @@
       },
       "usesNonExemptEncryption": false,
       "infoPlist": {
-        "NSBonjourServices": ["_http._tcp"],
+        "NSBonjourServices": [
+          "_http._tcp"
+        ],
         "NSLocalNetworkUsageDescription": "This app uses local network to sync trading data",
-        "NSBonjourServiceTypes": ["_http._tcp", "_ws._tcp"]
+        "NSBonjourServiceTypes": [
+          "_http._tcp",
+          "_ws._tcp"
+        ]
       }
     },
     "android": {
@@ -56,14 +61,17 @@
       [
         "expo-notifications",
         {
-          "icons": ["./public/mpt-logo.png"]
+          "icons": [
+            "./public/mpt-logo.png"
+          ]
         }
       ]
     ],
     "extra": {
       "eas": {
-        "projectId": "01cbff08-a5b5-4e32-b7d6-11eebe07c986"
+        "projectId": "b3070fe0-6424-4629-a023-4223b888f200"
       }
-    }
+    },
+    "owner": "mpt_community"
   }
 }

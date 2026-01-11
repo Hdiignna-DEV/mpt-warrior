@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Shield, Zap, Target, Brain, Lock, TrendingUp, Users, CheckCircle, Rocket, Download, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import MptLogo from '@/components/MptLogo';
+import { WarriorAccessSection } from '@/components/WarriorAccessSection';
 
 export default function LandingPage() {
   return (
@@ -324,6 +325,9 @@ export default function LandingPage() {
           </p>
         </motion.div>
       </section>
+
+      {/* WARRIOR ACCESS SECTION - Device Detection */}
+      <WarriorAccessSection />
 
       {/* FOOTER */}
       <footer className="border-t border-amber-500/20 bg-slate-950/50 backdrop-blur-xl">

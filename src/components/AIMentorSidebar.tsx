@@ -32,7 +32,7 @@ export function AIMentorSidebar({
   const [currentOpacity, setCurrentOpacity] = useState(opacity);
   const [isHovering, setIsHovering] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Update opacity based on active state, hovering, and scrolling
   // Priority: isActive > isHovering > isScrolling > idle
@@ -166,7 +166,7 @@ export function AIMentorSidebarLeft({
   const [currentOpacity, setCurrentOpacity] = useState(opacity);
   const [isHovering, setIsHovering] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (isActive || isHovering) {

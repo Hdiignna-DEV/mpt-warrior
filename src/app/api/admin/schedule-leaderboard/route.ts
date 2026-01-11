@@ -23,7 +23,7 @@ let leaderboardSchedule: {
   runCount: 0
 };
 
-let schedulerInterval: NodeJS.Timeout | null = null;
+let schedulerInterval: ReturnType<typeof setInterval> | null = null;
 
 /**
  * Start automatic scheduler

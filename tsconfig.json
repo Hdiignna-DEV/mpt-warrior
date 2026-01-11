@@ -40,7 +40,8 @@
     "node_modules",
     "mobile",
     "mpt-warrior-mobile",
-    "mobile-app"
+    "mobile-app",
+    "test-build"
   ],
   "extends": "expo/tsconfig.base"
 }

@@ -1,18 +1,28 @@
 {
-  "name": "MPT Warrior - Trading Hub",
-  "short_name": "MPT Warrior",
-  "description": "Mindset Plan Trader - Complete Trading Management & Journal System for Professional Traders",
-  "start_url": "/",
+  "name": "MPT Trading HUB - Professional Trading Platform",
+  "short_name": "MPT Trading HUB",
+  "description": "Mindset Plan Trader - Platform Trading Profesional untuk Warrior Indonesia. Dashboard lengkap, trading journal, AI mentor, risk calculator, leaderboard real-time, dan achievement system untuk mengembangkan skill trading Anda.",
+  "start_url": "/dashboard",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": ["standalone", "minimal-ui", "fullscreen"],
   "background_color": "#0f172a",
-  "theme_color": "#0ea5e9",
+  "theme_color": "#fbbf24",
   "orientation": "portrait-primary",
-  "categories": ["finance", "productivity", "education"],
+  "categories": ["finance", "productivity", "business"],
   "lang": "id",
   "dir": "ltr",
   "prefer_related_applications": false,
+  "share_target": {
+    "action": "/share-trade",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
   "icons": [
     {
       "src": "/mpt-logo.png",
@@ -67,30 +77,46 @@
     {
       "src": "/mpt-logo.png",
       "sizes": "1280x720",
-      "type": "image/png"
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "MPT Dashboard"
+    },
+    {
+      "src": "/mpt-logo.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "MPT Mobile Dashboard"
     }
   ],
   "shortcuts": [
     {
       "name": "Trade Journal",
       "short_name": "Journal",
-      "description": "Add new trade to journal",
-      "url": "/journal",
-      "icons": [{ "src": "/mpt-logo.png", "sizes": "192x192" }]
+      "description": "Tambah trade baru ke journal",
+      "url": "/journal?mode=new",
+      "icons": [{ "src": "/mpt-logo.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
-      "description": "View trading dashboard",
+      "description": "Lihat dashboard trading Anda",
       "url": "/dashboard",
-      "icons": [{ "src": "/mpt-logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/mpt-logo.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
-      "name": "Calculator",
-      "short_name": "Calc",
-      "description": "Risk calculator",
+      "name": "Risk Calculator",
+      "short_name": "Calculator",
+      "description": "Hitung risk management",
       "url": "/calculator",
-      "icons": [{ "src": "/mpt-logo.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/mpt-logo.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Leaderboard",
+      "short_name": "Ranking",
+      "description": "Lihat ranking warrior",
+      "url": "/leaderboard",
+      "icons": [{ "src": "/mpt-logo.png", "sizes": "192x192", "type": "image/png" }]
     }
   ],
   "related_applications": [],

@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
     if (contentType.includes('multipart/form-data')) {
       // Handle file upload
       const formData = await req.formData();
-      const imageFile = formData.get('image') as File;
-      const messageText = formData.get('message') as string;
+      const imageFile = (formData as any).get?.('image') as File | undefined;
+      const messageText = (formData as any).get?.('message') as string | undefined;
 
       if (!imageFile) {
         return NextResponse.json(

@@ -44,8 +44,8 @@ export function useArkaController(initialPose: CommanderArkaPose = 'vision') {
   });
 
   const messageQueueRef = useRef<ArkaMessage[]>([]);
-  const opacityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const messageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const opacityTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const messageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
    * Set pose with optional smooth transition

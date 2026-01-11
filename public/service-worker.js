@@ -1,6 +1,6 @@
 // MPT Command Center - Service Worker for PWA
 // Supports offline access, caching, and push notifications
-const CACHE_NAME = 'mpt-command-center-v1';
+const CACHE_NAME = 'mpt-command-center-v3';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to cache immediately on install
@@ -10,6 +10,10 @@ const PRECACHE_ASSETS = [
   '/mpt-logo.png',
   '/manifest.json',
   '/manifest.webmanifest',
+  '/dashboard',
+  '/journal',
+  '/calculator',
+  '/leaderboard',
 ];
 
 // API routes to always keep fresh
@@ -26,7 +30,9 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[SW] Precaching essential assets');
-      return cache.addAll(PRECACHE_ASSETS);
+      return cache.addAll(PRECACHE_ASSETS).catch(err => {
+        console.warn('[SW] Some assets could not be cached:', err);
+      });
     })
   );
   self.skipWaiting();
@@ -48,6 +54,64 @@ self.addEventListener('activate', (event) => {
     })
   );
   self.clients.claim();
+});
+
+// Push notification event
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+  
+  let notificationData = {
+    title: 'MPT Command Center',
+    body: 'Notifikasi dari MPT',
+    icon: '/mpt-logo.png',
+    badge: '/mpt-logo.png',
+    tag: 'mpt-notification',
+    requireInteraction: false,
+  };
+
+  try {
+    const data = event.data.json();
+    notificationData = {
+      ...notificationData,
+      title: data.title || notificationData.title,
+      body: data.body || notificationData.body,
+      icon: data.icon || notificationData.icon,
+      badge: data.badge || notificationData.badge,
+      tag: data.tag || notificationData.tag,
+      data: data.data || {},
+    };
+  } catch (e) {
+    notificationData.body = event.data.text();
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(notificationData.title, notificationData)
+  );
+});
+
+// Notification click event
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  
+  const urlToOpen = event.notification.data?.url || '/';
+  event.waitUntil(
+    clients.matchAll({
+      type: 'window',
+      includeUncontrolled: true,
+    }).then((clientList) => {
+      // Check if we have a window/tab open with target URL
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // If not, open new window
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
+  );
 });
 
 // Fetch event - smart caching strategy
@@ -106,45 +170,6 @@ self.addEventListener('fetch', (event) => {
       })
     );
   }
-});
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Clone the response before caching
-        const responseToCache = response.clone();
-        
-        // Cache successful responses
-        if (response.status === 200) {
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        
-        return response;
-      })
-      .catch(() => {
-        // Network failed, try cache
-        return caches.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          
-          // If navigating to a page and offline, show offline page
-          if (event.request.mode === 'navigate') {
-            return caches.match(OFFLINE_URL);
-          }
-          
-          // For other requests, return a simple offline response
-          return new Response('Offline - Content not available', {
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: new Headers({
-              'Content-Type': 'text/plain',
-            }),
-          });
-        });
-      })
-  );
 });
 
 // Background sync for trades (when back online)

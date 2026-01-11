@@ -104,7 +104,7 @@ export default function AIMentor() {
   const [userEmotionState, setUserEmotionState] = useState<'Tenang' | 'Takut' | 'Serakah' | null>(null);
   const [isScrolling, setIsScrolling] = useState(false);
   const [mascotOpacity, setMascotOpacity] = useState<'opacity-100' | 'opacity-30'>('opacity-100');
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Mobile dragging state
   const [avatarPos, setAvatarPos] = useState({ x: 0, y: 0 });
