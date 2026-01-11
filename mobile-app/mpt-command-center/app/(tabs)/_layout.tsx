@@ -32,7 +32,7 @@ export default function TabsLayout() {
         name="dashboard"
         options={{
           title: 'Dashboard',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="dashboard" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,
           headerTitle: 'Dashboard Trading',
         }}
       />
@@ -40,7 +40,7 @@ export default function TabsLayout() {
         name="journal"
         options={{
           title: 'Journal',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="book" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="list" color={color} />,
           headerTitle: 'Trading Journal',
         }}
       />
@@ -48,7 +48,7 @@ export default function TabsLayout() {
         name="ai-mentor"
         options={{
           title: 'AI Mentor',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="brain" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="lightbulb" color={color} />,
           headerTitle: 'AI Mentor',
         }}
       />
