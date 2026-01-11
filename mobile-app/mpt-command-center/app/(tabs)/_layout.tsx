@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
-import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 import Colors from '@/constants/colors';
 
 export default function TabsLayout() {
@@ -40,7 +40,7 @@ export default function TabsLayout() {
         name="journal"
         options={{
           title: 'Journal',
-          tabBarIcon: ({ color }) => <MaterialCommunityIcons size={28} name="notebook" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="book" color={color} />,
           headerTitle: 'Trading Journal',
         }}
       />
@@ -48,7 +48,7 @@ export default function TabsLayout() {
         name="ai-mentor"
         options={{
           title: 'AI Mentor',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="lightbulb-o" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="brain" color={color} />,
           headerTitle: 'AI Mentor',
         }}
       />
