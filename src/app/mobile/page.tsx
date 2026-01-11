@@ -15,6 +15,7 @@ import {
   Settings,
   LogOut,
 } from 'lucide-react';
+import { initializeMessaging } from '@/lib/firebase-messaging';
 
 export default function MobileApp() {
   const [currentTab, setCurrentTab] = useState('home');
@@ -22,6 +23,11 @@ export default function MobileApp() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Initialize Firebase Messaging for push notifications
+    initializeMessaging().catch(error => {
+      console.warn('Firebase Messaging initialization skipped (normal for web-only mode):', error);
+    });
+
     // Simulate loading user data
     setTimeout(() => {
       setUser({
@@ -37,7 +43,7 @@ export default function MobileApp() {
       <div className="fixed inset-0 bg-gradient-to-b from-slate-950 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <Image src="/mpt-logo.png" alt="MPT" width={80} height={80} className="mx-auto mb-4 animate-bounce" />
-          <h1 className="text-2xl font-black text-amber-400">MPT TRADING HUB</h1>
+          <h1 className="text-2xl font-black text-amber-400">MPT COMMAND CENTER</h1>
           <p className="text-slate-400 text-sm mt-2">Mempersiapkan aplikasi...</p>
         </div>
       </div>

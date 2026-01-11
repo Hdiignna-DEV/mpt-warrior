@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MPT Trading HUB",
-    "slug": "mpt-trading-hub",
+    "name": "MPT Command Center",
+    "slug": "mpt-command-center",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./public/mpt-logo.png",
@@ -16,23 +16,43 @@
     ],
     "ios": {
       "supportsTabletMode": true,
-      "bundleIdentifier": "com.mpttradinghub.app",
-      "buildNumber": "1"
+      "bundleIdentifier": "com.mptcommandcenter.app",
+      "buildNumber": "1",
+      "splash": {
+        "image": "./public/mpt-logo.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#0f172a"
+      }
     },
     "android": {
-      "package": "com.mpttradinghub.app",
+      "package": "com.mptcommandcenter.app",
       "versionCode": 1,
       "icon": "./public/mpt-logo.png",
+      "splash": {
+        "image": "./public/mpt-logo.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#0f172a"
+      },
       "adaptive": false,
       "permissions": [
         "INTERNET",
-        "ACCESS_NETWORK_STATE"
+        "ACCESS_NETWORK_STATE",
+        "POST_NOTIFICATIONS"
       ]
     },
     "web": {
       "favicon": "./public/mpt-logo.png"
     },
-    "description": "MPT Trading HUB - Platform Trading Lengkap untuk Trader Indonesia. Kelola trading Anda dengan dashboard, journal, AI mentor, risk calculator, leaderboard, dan achievements.",
+    "description": "MPT Command Center - Platform Trading Profesional untuk Warrior Indonesia. Dashboard lengkap, trading journal, AI mentor, risk calculator, leaderboard real-time, dan achievement system untuk mengembangkan skill trading Anda.",
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./public/mpt-logo.png",
+          "color": "#b45309"
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "01cbff08-a5b5-4e32-b7d6-11eebe07c986"

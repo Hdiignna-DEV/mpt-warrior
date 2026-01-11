@@ -1,18 +1,28 @@
-// MPT Warrior - Service Worker for PWA
-const CACHE_NAME = 'mpt-warrior-v1';
+// MPT Command Center - Service Worker for PWA
+// Supports offline access, caching, and push notifications
+const CACHE_NAME = 'mpt-command-center-v1';
 const OFFLINE_URL = '/offline.html';
 
-// Assets to cache immediately
+// Assets to cache immediately on install
 const PRECACHE_ASSETS = [
   '/',
   '/offline.html',
   '/mpt-logo.png',
+  '/manifest.json',
   '/manifest.webmanifest',
+];
+
+// API routes to always keep fresh
+const NETWORK_FIRST_ROUTES = [
+  '/api/',
+  '/dashboard',
+  '/leaderboard',
+  '/journal',
 ];
 
 // Install event - cache essential assets
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
+  console.log('[SW] Installing service worker for MPT Command Center...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       console.log('[SW] Precaching essential assets');
@@ -40,7 +50,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - network first, fallback to cache
+// Fetch event - smart caching strategy
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (event.request.method !== 'GET') return;
@@ -48,6 +58,55 @@ self.addEventListener('fetch', (event) => {
   // Skip chrome extensions and non-http(s) requests
   if (!event.request.url.startsWith('http')) return;
 
+  // Check if this is a network-first route
+  const isNetworkFirst = NETWORK_FIRST_ROUTES.some(route =>
+    event.request.url.includes(route)
+  );
+
+  if (isNetworkFirst) {
+    // Network first for API routes
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Cache successful responses
+          if (response.ok) {
+            const cache = caches.open(CACHE_NAME);
+            cache.then((c) => c.put(event.request, response.clone()));
+          }
+          return response;
+        })
+        .catch(() => {
+          // Fall back to cache on network failure
+          return caches.match(event.request);
+        })
+    );
+  } else {
+    // Cache first for static assets
+    event.respondWith(
+      caches.match(event.request).then((response) => {
+        return (
+          response ||
+          fetch(event.request)
+            .then((response) => {
+              // Cache new assets
+              if (response.ok) {
+                const cache = caches.open(CACHE_NAME);
+                cache.then((c) => c.put(event.request, response.clone()));
+              }
+              return response;
+            })
+            .catch(() => {
+              // Return offline page for navigation requests
+              if (event.request.mode === 'navigate') {
+                return caches.match(OFFLINE_URL);
+              }
+              return null;
+            })
+        );
+      })
+    );
+  }
+});
   event.respondWith(
     fetch(event.request)
       .then((response) => {

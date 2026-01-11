@@ -1,7 +1,7 @@
 {
-  "name": "MPT Trading HUB",
-  "short_name": "MPT Hub",
-  "description": "Mindset Plan Trader - Aplikasi Trading Lengkap untuk Trader Indonesia",
+  "name": "MPT Command Center",
+  "short_name": "MPT Center",
+  "description": "MPT Command Center - Platform Trading Profesional untuk Warrior Indonesia. Dashboard trading, journal, AI mentor, risk calculator, leaderboard, dan achievement system.",
   "start_url": "/?utm_source=pwa",
   "scope": "/",
   "display": "standalone",
@@ -9,6 +9,7 @@
   "theme_color": "#b45309",
   "prefer_related_applications": false,
   "orientation": "portrait-primary",
+  "categories": ["finance", "productivity", "business"],
   "icons": [
     {
       "src": "/mpt-logo.png",
