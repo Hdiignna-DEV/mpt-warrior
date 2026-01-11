@@ -240,7 +240,8 @@ export default function GetAppPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="https://drive.google.com/uc?export=download&id=YOUR_FILE_ID"
+              href="/apk/mpt-trading-hub-v1.0.apk"
+              download="mpt-trading-hub-v1.0.apk"
               className="inline-flex items-center justify-center gap-2 bg-white text-amber-600 font-bold py-4 px-8 rounded-lg hover:bg-amber-50 transition transform hover:scale-105 text-lg"
             >
               <Download size={22} />
@@ -328,8 +329,8 @@ function DeviceDetector() {
           )}
           
           <a 
-            href="https://drive.google.com/uc?export=download&id=YOUR_FILE_ID"
-            download="mpt-trading-hub.apk"
+            href="/apk/mpt-trading-hub-v1.0.apk"
+            download="mpt-trading-hub-v1.0.apk"
             className="inline-flex items-center justify-center gap-2 w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105"
           >
             <Download className="w-5 h-5" />
