@@ -17,7 +17,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "MPT Trading HUB - Adapt to Every Market Condition",
   description: "MPT Trading HUB - Professional trading platform for Warriors. Complete trading management, AI mentor, and real-time leaderboard.",
-  manifest: "/manifest.webmanifest",
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
