@@ -14,7 +14,7 @@ export default function GetAppPage() {
             <div className="flex items-center gap-3">
               <Image src="/mpt-logo.png" alt="MPT Logo" width={40} height={40} />
               <div>
-                <h1 className="text-lg sm:text-xl font-black text-amber-400">MPT TRADING HUB</h1>
+                <h1 className="text-lg sm:text-xl font-black text-amber-400">MPT COMMAND CENTER</h1>
                 <p className="text-xs text-amber-500/70 font-mono">DOWNLOAD APP</p>
               </div>
             </div>
@@ -41,13 +41,13 @@ export default function GetAppPage() {
           </div>
           
           <h1 className="text-5xl md:text-6xl font-black mb-6 text-white">
-            MPT Trading HUB
+            MPT Command Center
           </h1>
           <p className="text-xl md:text-2xl text-amber-400 font-bold mb-4">
-            Tradingmu, Dimana Saja, Kapan Saja
+            Platform Trading Profesional untuk Warrior Indonesia
           </p>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            Download aplikasi mobile MPT Trading HUB. Kelola semua trading Anda dengan mudah, kapan pun dan di mana pun. Analisis, catat, dan tingkatkan skill trading Anda.
+            Download aplikasi mobile MPT Command Center. Dashboard lengkap, trading journal, AI mentor, risk calculator, leaderboard real-time, dan achievement system untuk mengembangkan skill trading Anda.
           </p>
         </div>
 
@@ -171,7 +171,7 @@ export default function GetAppPage() {
                 </li>
                 <li className="flex gap-4">
                   <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">4</span>
-                  <span>Edit nama ke "MPT Trading HUB"</span>
+                  <span>Edit nama ke "MPT Command Center"</span>
                 </li>
                 <li className="flex gap-4">
                   <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">5</span>
@@ -236,7 +236,7 @@ export default function GetAppPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-black mb-4 text-white">Siap Memulai Trading Lebih Smart?</h2>
           <p className="text-lg md:text-xl mb-8 opacity-95 text-white max-w-2xl mx-auto">
-            Download MPT Trading HUB sekarang dan kelola semua trading Anda dengan lebih terorganisir, analitis, dan menguntungkan
+            Download MPT Command Center sekarang dan kelola semua trading Anda dengan dashboard lengkap, AI mentor cerdas, dan komunitas warrior yang supportif.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
@@ -264,9 +264,9 @@ export default function GetAppPage() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Image src="/mpt-logo.png" alt="MPT Logo" width={32} height={32} />
-                <span className="font-black text-amber-400">MPT TRADING HUB</span>
+                <span className="font-black text-amber-400">MPT COMMAND CENTER</span>
               </div>
-              <p className="text-slate-400 text-sm">Platform trading terlengkap untuk trader Indonesia</p>
+              <p className="text-slate-400 text-sm">Platform trading profesional dengan AI mentor dan komunitas warrior</p>
             </div>
             <div>
               <h3 className="font-bold text-amber-400 mb-4">Fitur Utama</h3>
@@ -288,8 +288,8 @@ export default function GetAppPage() {
             </div>
           </div>
           <div className="border-t border-slate-800 pt-8 text-center text-slate-400">
-            <p className="mb-2">MPT Trading HUB - Mindset Plan Trader</p>
-            <p className="text-sm">© 2025 MPT Community. All rights reserved. | Dibuat dengan ❤️ untuk trader Indonesia</p>
+            <p className="mb-2">MPT Command Center - Mindset Plan Trader</p>
+            <p className="text-sm">© 2025 MPT Community. All rights reserved. | Dibuat dengan ❤️ untuk warrior Indonesia</p>
           </div>
         </div>
       </footer>
@@ -329,8 +329,8 @@ function DeviceDetector() {
           )}
           
           <a 
-            href="/apk/mpt-trading-hub-v1.0.apk"
-            download="mpt-trading-hub-v1.0.apk"
+            href="/apk/mpt-command-center-v1.0.apk"
+            download="mpt-command-center-v1.0.apk"
             className="inline-flex items-center justify-center gap-2 w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105"
           >
             <Download className="w-5 h-5" />

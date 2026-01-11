@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "MPT Command Center",
-    "slug": "mpt-command-center",
+    "slug": "mpt-warrior",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./public/mpt-logo.png",
@@ -44,15 +44,6 @@
       "favicon": "./public/mpt-logo.png"
     },
     "description": "MPT Command Center - Platform Trading Profesional untuk Warrior Indonesia. Dashboard lengkap, trading journal, AI mentor, risk calculator, leaderboard real-time, dan achievement system untuk mengembangkan skill trading Anda.",
-    "plugins": [
-      [
-        "expo-notifications",
-        {
-          "icon": "./public/mpt-logo.png",
-          "color": "#b45309"
-        }
-      ]
-    ],
     "extra": {
       "eas": {
         "projectId": "01cbff08-a5b5-4e32-b7d6-11eebe07c986"

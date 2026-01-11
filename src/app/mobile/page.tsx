@@ -15,7 +15,6 @@ import {
   Settings,
   LogOut,
 } from 'lucide-react';
-import { initializeMessaging } from '@/lib/firebase-messaging';
 
 export default function MobileApp() {
   const [currentTab, setCurrentTab] = useState('home');
@@ -23,11 +22,6 @@ export default function MobileApp() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize Firebase Messaging for push notifications
-    initializeMessaging().catch(error => {
-      console.warn('Firebase Messaging initialization skipped (normal for web-only mode):', error);
-    });
-
     // Simulate loading user data
     setTimeout(() => {
       setUser({
