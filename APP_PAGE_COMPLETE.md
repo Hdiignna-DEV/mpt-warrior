@@ -145,6 +145,13 @@ Lengkap untuk **Android & iPhone**:
 - **Check Icon**: Visual feedback yang device terdeteksi
 - **Fallback**: Kedua opsi visible jika tidak terdeteksi
 
+### APK Download - Direct Server Download ✅
+- **Status**: Working!
+- **File**: `/public/apk/mpt-trading-hub-v1.0.apk` (83.5 MB)
+- **Link**: `/apk/mpt-trading-hub-v1.0.apk`
+- **Method**: Direct server download (tidak melalui Google Drive)
+- **User Flow**: Click button → Automatic download triggered
+
 ### Mobile Friendly
 - Touch-friendly buttons (min 44x44px)
 - Readable font sizes (16px minimum)

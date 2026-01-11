@@ -109,12 +109,16 @@ Auto-detection untuk smart UX:
 
 ## 🔗 Download Links
 
-Placeholder untuk Google Drive APK:
+**Live APK Download**:
 ```
-https://drive.google.com/uc?export=download&id=YOUR_FILE_ID
+/apk/mpt-trading-hub-v1.0.apk
 ```
 
-⚠️ **TODO**: Replace `YOUR_FILE_ID` dengan actual APK file ID dari Google Drive
+✅ **Direct server download** - No Google Drive needed!
+- File size: ~83.5 MB
+- Format: APK (Android Package)
+- Version: 1.0.0
+- Direct download dari server, tidak melalui pihak ketiga
 
 ---
 
