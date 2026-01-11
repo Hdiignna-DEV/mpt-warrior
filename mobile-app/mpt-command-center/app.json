@@ -5,37 +5,24 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mptcommandcenter",
     "userInterfaceStyle": "dark",
-    "description": "Platform Trading Profesional untuk Warrior Indonesia. Dashboard lengkap, trading journal, AI mentor, risk calculator, leaderboard real-time, dan achievement system.",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#0f172a"
     },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.mptcommandcenter.app",
-      "buildNumber": "1"
+      "supportsTablet": true
     },
     "android": {
-      "package": "com.mptcommandcenter.app",
-      "versionCode": 1,
-      "permissions": [
-        "INTERNET",
-        "ACCESS_NETWORK_STATE"
-      ]
+      "package": "com.mptcommandcenter.app"
     },
     "plugins": [
-      "expo-router",
-      "expo-splash-screen"
+      "expo-router"
     ],
     "extra": {
       "eas": {
         "projectId": "b5322b44-eea7-4cf8-9ce3-972088762b6c"
-      },
-      "router": {
-        "origin": false
       }
     }
   }
