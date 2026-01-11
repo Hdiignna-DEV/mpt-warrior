@@ -58,7 +58,7 @@ const menuSections = [
   {
     title: '📱 Mobile App',
     items: [
-      { href: '/downloads', label: 'Download App', fallback: 'Download App', icon: Download, description: 'Get APK' },
+      { href: '/get-app', label: 'Download App', fallback: 'Download App', icon: Download, description: 'Get APK' },
     ]
   },
 ];

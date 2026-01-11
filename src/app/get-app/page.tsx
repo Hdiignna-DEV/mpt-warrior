@@ -200,7 +200,6 @@ export default function GetAppPage() {
 
 function DeviceDetector() {
   const [device, setDevice] = useState<'android' | 'ios' | 'unknown'>('unknown');
-  const [apkUrl, setApkUrl] = useState('');
 
   useEffect(() => {
     // Detect device
@@ -210,9 +209,6 @@ function DeviceDetector() {
     } else if (/iphone|ipad|ipod/i.test(ua)) {
       setDevice('ios');
     }
-
-    // APK download URL - hosted on Vercel or Google Drive
-    setApkUrl('/downloads/mpt-warrior.apk');
   }, []);
 
   return (
@@ -233,7 +229,7 @@ function DeviceDetector() {
           )}
           
           <a 
-            href={apkUrl}
+            href="https://drive.google.com/uc?export=download&id=YOUR_FILE_ID"
             download="mpt-warrior.apk"
             className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105"
           >
