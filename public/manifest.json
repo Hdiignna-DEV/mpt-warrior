@@ -2,11 +2,12 @@
   "name": "MPT Warrior - Trading Hub",
   "short_name": "MPT Warrior",
   "description": "Mindset Plan Trader - Complete Trading Management System",
-  "start_url": "/",
+  "start_url": "/?utm_source=pwa",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#eab308",
+  "theme_color": "#0284c7",
+  "prefer_related_applications": false,
   "orientation": "portrait-primary",
   "icons": [
     {

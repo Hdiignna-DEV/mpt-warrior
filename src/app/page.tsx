@@ -20,6 +20,13 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/get-app">
+              <Button className="bg-sky-600 hover:bg-sky-700 text-white text-xs sm:text-sm px-3 py-2 sm:px-4 flex items-center gap-1">
+                <Download size={16} className="hidden sm:block" />
+                <span className="hidden sm:inline">Download App</span>
+                <span className="sm:hidden">App</span>
+              </Button>
+            </Link>
             <Link href="/login">
               <Button variant="outline" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 text-xs sm:text-sm px-3 py-2 sm:px-4">
                 Login
