@@ -4,8 +4,13 @@ import path from 'path';
 
 export async function GET(req: NextRequest) {
   try {
-    // Check if APK file exists
-    const apkPath = path.join(process.cwd(), 'public', 'apk', 'mpt-warrior-release.apk');
+    // Check if APK file exists - try debug version first
+    let apkPath = path.join(process.cwd(), 'public', 'downloads', 'mpt-command-center-debug.apk');
+    
+    if (!fs.existsSync(apkPath)) {
+      // Fallback to legacy filename
+      apkPath = path.join(process.cwd(), 'public', 'downloads', 'mpt-warrior.apk');
+    }
     
     if (fs.existsSync(apkPath)) {
       // Serve existing APK
@@ -13,7 +18,7 @@ export async function GET(req: NextRequest) {
       return new NextResponse(fileBuffer, {
         headers: {
           'Content-Type': 'application/vnd.android.package-archive',
-          'Content-Disposition': 'attachment; filename="mpt-warrior-v1.0.0.apk"',
+          'Content-Disposition': 'attachment; filename="mpt-command-center-debug.apk"',
           'Cache-Control': 'public, max-age=86400',
         },
       });
