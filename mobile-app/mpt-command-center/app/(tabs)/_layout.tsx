@@ -48,7 +48,7 @@ export default function TabsLayout() {
         name="ai-mentor"
         options={{
           title: 'AI Mentor',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="lightbulb" color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome size={28} name="lightbulb-o" color={color} />,
           headerTitle: 'AI Mentor',
         }}
       />
