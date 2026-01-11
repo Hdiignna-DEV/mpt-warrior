@@ -1,11 +1,13 @@
-import { View, ScrollView, StyleSheet, Text } from 'react-native';
-import Colors from '@/constants/colors';
+import { View, Text } from 'react-native';
 
 export default function LeaderboardScreen() {
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.content}>
-        <View style={styles.card}>
+    <View style={{ flex: 1, padding: 16, backgroundColor: '#0f172a' }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#b45309', marginBottom: 8 }}>🏆 Leaderboard</Text>
+      <Text style={{ color: '#fff' }}>Leaderboard Screen</Text>
+    </View>
+  );
+}
           <Text style={styles.title}>🏆 Leaderboard</Text>
           <Text style={styles.subtitle}>Kompetisi dengan Warrior Lain</Text>
         </View>
