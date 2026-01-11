@@ -1,19 +1,53 @@
 'use client';
 
-import { ChevronDownIcon, Download, Apple, Smartphone } from 'lucide-react';
+import { ChevronDownIcon, Download, Apple, Smartphone, CheckCircle, TrendingUp, BarChart3, MessageSquare, Target, Trophy, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 export default function GetAppPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+      {/* Header */}
+      <header className="border-b border-amber-500/20 bg-slate-950/50 backdrop-blur-xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Image src="/mpt-logo.png" alt="MPT Logo" width={40} height={40} />
+              <div>
+                <h1 className="text-lg sm:text-xl font-black text-amber-400">MPT TRADING HUB</h1>
+                <p className="text-xs text-amber-500/70 font-mono">DOWNLOAD APP</p>
+              </div>
+            </div>
+            <a 
+              href="/"
+              className="text-amber-400 hover:text-amber-300 text-sm font-semibold transition"
+            >
+              ← Kembali
+            </a>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-20">
+      <div className="container mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-sky-400 to-cyan-400 bg-clip-text text-transparent">
-            Get MPT Warrior App
+          <div className="mb-8 flex justify-center">
+            <Image 
+              src="/mpt-logo.png" 
+              alt="MPT Trading HUB" 
+              width={80} 
+              height={80}
+            />
+          </div>
+          
+          <h1 className="text-5xl md:text-6xl font-black mb-6 text-white">
+            MPT Trading HUB
           </h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Download langsung ke perangkat Anda. Tanpa perlu App Store atau Play Store.
+          <p className="text-xl md:text-2xl text-amber-400 font-bold mb-4">
+            Tradingmu, Dimana Saja, Kapan Saja
+          </p>
+          <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+            Download aplikasi mobile MPT Trading HUB. Kelola semua trading Anda dengan mudah, kapan pun dan di mana pun. Analisis, catat, dan tingkatkan skill trading Anda.
           </p>
         </div>
 
@@ -22,158 +56,171 @@ export default function GetAppPage() {
       </div>
 
       {/* Features Section */}
-      <div className="bg-slate-800/50 py-20 border-t border-slate-700">
+      <div className="bg-gradient-to-r from-amber-500/10 to-amber-500/5 py-16 md:py-24 border-y border-amber-500/20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Keuntungan Aplikasi Langsung</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <h2 className="text-3xl md:text-4xl font-black text-center mb-12">
+            Fitur Unggulan Aplikasi
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                icon: '⚡',
-                title: 'Akses Cepat',
-                desc: 'Buka aplikasi langsung tanpa membuka browser'
+                icon: <BarChart3 className="w-8 h-8 text-amber-400" />,
+                title: 'Dashboard Real-time',
+                desc: 'Monitor semua statistik trading Anda dengan update real-time'
               },
               {
-                icon: '📱',
-                title: 'Full Features',
-                desc: 'Semua fitur tersedia dengan performa optimal'
+                icon: <TrendingUp className="w-8 h-8 text-amber-400" />,
+                title: 'Trading Journal',
+                desc: 'Catat setiap trade dan analisis performa Anda secara detail'
               },
               {
-                icon: '🔔',
-                title: 'Push Notifications',
-                desc: 'Notifikasi real-time untuk alert trading'
+                icon: <MessageSquare className="w-8 h-8 text-amber-400" />,
+                title: 'AI Mentor',
+                desc: 'Dapatkan saran & insight dari AI mentor yang cerdas'
               },
               {
-                icon: '💾',
-                title: 'Offline Mode',
-                desc: 'Akses data bahkan tanpa koneksi internet'
+                icon: <Target className="w-8 h-8 text-amber-400" />,
+                title: 'Risk Calculator',
+                desc: 'Hitung risk & position size dengan akurat sebelum trade'
               },
               {
-                icon: '🔒',
-                title: 'Secure',
-                desc: 'Enkripsi end-to-end untuk data Anda'
+                icon: <Trophy className="w-8 h-8 text-amber-400" />,
+                title: 'Leaderboard',
+                desc: 'Kompetisi dengan trader lain di komunitas MPT'
               },
               {
-                icon: '🎨',
-                title: 'Native Feel',
-                desc: 'Pengalaman seperti aplikasi native'
+                icon: <Zap className="w-8 h-8 text-amber-400" />,
+                title: 'Achievements',
+                desc: 'Raih badge & milestone untuk setiap pencapaian trading'
               }
             ].map((feature, idx) => (
-              <div key={idx} className="bg-slate-700/50 p-6 rounded-lg border border-slate-600 hover:border-sky-500 transition">
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
-                <p className="text-slate-300">{feature.desc}</p>
+              <div key={idx} className="bg-slate-800/50 p-6 rounded-lg border border-amber-500/30 hover:border-amber-500/80 hover:bg-slate-800/80 transition duration-300">
+                <div className="mb-4">{feature.icon}</div>
+                <h3 className="text-lg font-bold text-amber-300 mb-2">{feature.title}</h3>
+                <p className="text-slate-400">{feature.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Instructions Section */}
-      <div className="container mx-auto px-4 py-20">
-        <h2 className="text-3xl font-bold text-center mb-12">Panduan Instalasi</h2>
-        
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Android Instructions */}
-          <div className="bg-slate-800/50 p-8 rounded-lg border border-slate-700">
-            <div className="flex items-center mb-6">
-              <Smartphone className="w-8 h-8 text-sky-400 mr-3" />
-              <h3 className="text-2xl font-bold">Android</h3>
-            </div>
-            <ol className="space-y-4 text-slate-300">
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center font-bold">1</span>
-                <span>Klik tombol "Download APK" di atas</span>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center font-bold">2</span>
-                <span>Tunggu file selesai diunduh (~50MB)</span>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center font-bold">3</span>
-                <span>Buka folder Downloads</span>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center font-bold">4</span>
-                <span>Tap file APK untuk install</span>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center font-bold">5</span>
-                <span>Klik "Install" dan tunggu selesai</span>
-              </li>
-            </ol>
-            <div className="mt-6 bg-yellow-500/10 border border-yellow-500/30 rounded p-4">
-              <p className="text-sm text-yellow-200">
-                💡 Jika muncul warning "Install dari sumber tidak dikenal", tekan "Settings" → "Install Anyway"
-              </p>
-            </div>
-          </div>
+      {/* Device Detector Component */}
+      <div className="container mx-auto px-4 py-16 md:py-24">
+        <h2 className="text-3xl md:text-4xl font-black text-center mb-12">Download Sekarang</h2>
+        <DeviceDetector />
+      </div>
 
-          {/* iOS Instructions */}
-          <div className="bg-slate-800/50 p-8 rounded-lg border border-slate-700">
-            <div className="flex items-center mb-6">
-              <Apple className="w-8 h-8 text-slate-300 mr-3" />
-              <h3 className="text-2xl font-bold">iPhone/iPad</h3>
+      {/* Installation Guide */}
+      <div className="bg-slate-800/30 py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-black text-center mb-12">Panduan Instalasi</h2>
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+            {/* Android Instructions */}
+            <div className="bg-slate-800/60 p-8 rounded-lg border border-amber-500/30 hover:border-amber-500/80 transition">
+              <div className="flex items-center mb-6">
+                <Smartphone className="w-8 h-8 text-amber-400 mr-3" />
+                <h3 className="text-2xl font-bold">Android</h3>
+              </div>
+              <ol className="space-y-4 text-slate-300">
+                <li className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">1</span>
+                  <span>Klik tombol "Download APK" di atas</span>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">2</span>
+                  <span>Tunggu file selesai diunduh (~75MB)</span>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">3</span>
+                  <span>Buka folder Downloads dan tap file APK</span>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">4</span>
+                  <span>Tap "Install" dan tunggu proses selesai</span>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">5</span>
+                  <span>Buka app dan login dengan akun Anda</span>
+                </li>
+              </ol>
+              <div className="mt-6 bg-amber-500/10 border border-amber-500/30 rounded p-4">
+                <p className="text-sm text-amber-200">
+                  ⚠️ Jika ada warning "Install dari sumber tidak dikenal", tap Settings → Install Anyway
+                </p>
+              </div>
             </div>
-            <ol className="space-y-4 text-slate-300">
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center font-bold">1</span>
-                <span>Buka Safari dan kunjungi website kami</span>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center font-bold">2</span>
-                <span>Tap tombol "Share" (panah ke atas)</span>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center font-bold">3</span>
-                <span>Scroll dan tap "Add to Home Screen"</span>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center font-bold">4</span>
-                <span>Edit nama (opsional)</span>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-sky-500 rounded-full flex items-center justify-center font-bold">5</span>
-                <span>Tap "Add" dan aplikasi siap digunakan!</span>
-              </li>
-            </ol>
-            <div className="mt-6 bg-blue-500/10 border border-blue-500/30 rounded p-4">
-              <p className="text-sm text-blue-200">
-                ℹ️ Aplikasi akan muncul di home screen seperti app biasa tanpa address bar
-              </p>
+
+            {/* iOS Instructions */}
+            <div className="bg-slate-800/60 p-8 rounded-lg border border-amber-500/30 hover:border-amber-500/80 transition">
+              <div className="flex items-center mb-6">
+                <Apple className="w-8 h-8 text-amber-400 mr-3" />
+                <h3 className="text-2xl font-bold">iPhone/iPad</h3>
+              </div>
+              <ol className="space-y-4 text-slate-300">
+                <li className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">1</span>
+                  <span>Buka Safari dan kunjungi website kami</span>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">2</span>
+                  <span>Tap tombol Share (panah ke atas)</span>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">3</span>
+                  <span>Scroll dan tap "Add to Home Screen"</span>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">4</span>
+                  <span>Edit nama ke "MPT Trading HUB"</span>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 bg-amber-500/30 border border-amber-500/50 rounded-full flex items-center justify-center font-bold text-amber-400">5</span>
+                  <span>Tap "Add" dan aplikasi siap digunakan!</span>
+                </li>
+              </ol>
+              <div className="mt-6 bg-amber-500/10 border border-amber-500/30 rounded p-4">
+                <p className="text-sm text-amber-200">
+                  ℹ️ Aplikasi akan muncul di home screen seperti native app
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Troubleshooting Section */}
-      <div className="bg-slate-800/30 py-20">
+      <div className="bg-gradient-to-r from-amber-500/10 to-amber-500/5 py-16 md:py-24 border-y border-amber-500/20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Troubleshooting</h2>
+          <h2 className="text-3xl md:text-4xl font-black text-center mb-12">Pertanyaan Umum (FAQ)</h2>
           <div className="max-w-3xl mx-auto space-y-6">
             {[
               {
-                q: 'Mengapa APK tidak bisa diinstall?',
-                a: 'Pastikan Anda telah mengaktifkan "Unknown Sources" di Settings > Security. APK hanya untuk Android 10 ke atas.'
-              },
-              {
                 q: 'Berapa ukuran file APK?',
-                a: 'Sekitar 50-70MB tergantung versi. Pastikan Anda memiliki ruang kosong yang cukup.'
+                a: 'File APK sekitar 75-80MB. Pastikan perangkat Anda memiliki ruang kosong minimal 200MB untuk instalasi.'
               },
               {
-                q: 'Apakah aman menginstall dari file APK?',
-                a: 'Ya, file APK kami ditandatangani secara digital. File ini aman dan tidak mengandung malware.'
+                q: 'Apakah aman download dari link ini?',
+                a: 'Ya, 100% aman. File APK kami ditandatangani secara digital dan tidak mengandung malware apapun. Kami selalu mengutamakan keamanan data Anda.'
               },
               {
-                q: 'Apakah bisa update otomatis?',
-                a: 'Saat ini update manual. Kami akan notifikasi jika ada versi baru tersedia untuk download.'
+                q: 'Bagaimana jika saya ingin update aplikasi?',
+                a: 'Kami akan memberikan notifikasi ketika ada versi baru. Download file APK terbaru dan install ulang untuk mendapatkan versi terbaru dengan fitur-fitur baru.'
               },
               {
-                q: 'Aplikasi iOS tidak muncul di home screen?',
-                a: 'Pastikan Anda menggunakan Safari, bukan Chrome. Proses "Add to Home Screen" khusus untuk Safari.'
+                q: 'Apakah bisa menggunakan di browser saja?',
+                a: 'Bisa! Aplikasi juga dapat diakses melalui browser. Namun aplikasi mobile memberikan performa lebih baik, offline access, dan push notifications.'
+              },
+              {
+                q: 'Berapa ruang storage yang dibutuhkan?',
+                a: 'Aplikasi butuh ~150MB storage. Pastikan perangkat memiliki ruang kosong minimal 200-300MB untuk instalasi dan data cache.'
+              },
+              {
+                q: 'Aplikasi tersedia untuk sistem operasi apa saja?',
+                a: 'Tersedia untuk Android (APK) dan iPhone/iPad (PWA via Add to Home Screen). Download sekarang dari halaman ini!'
               }
             ].map((item, idx) => (
-              <details key={idx} className="bg-slate-700/50 p-6 rounded-lg border border-slate-600 cursor-pointer group">
-                <summary className="flex items-center justify-between font-semibold text-lg">
+              <details key={idx} className="bg-slate-800/60 p-6 rounded-lg border border-amber-500/30 hover:border-amber-500/80 cursor-pointer group transition">
+                <summary className="flex items-center justify-between font-semibold text-lg text-amber-300 group-open:text-amber-200">
                   {item.q}
                   <ChevronDownIcon className="w-5 h-5 transform group-open:rotate-180 transition" />
                 </summary>
@@ -185,15 +232,66 @@ export default function GetAppPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-sky-600 to-cyan-600 py-20">
+      <div className="bg-gradient-to-r from-amber-600 to-amber-500 py-16 md:py-24">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Siap Mulai?</h2>
-          <p className="text-lg mb-8 opacity-90">Download aplikasi MPT Warrior sekarang juga dan mulai trading dengan confidence</p>
-          <button className="bg-white text-sky-600 font-bold py-3 px-8 rounded-lg hover:bg-slate-100 transition transform hover:scale-105">
-            Download Sekarang
-          </button>
+          <h2 className="text-3xl md:text-4xl font-black mb-4 text-white">Siap Memulai Trading Lebih Smart?</h2>
+          <p className="text-lg md:text-xl mb-8 opacity-95 text-white max-w-2xl mx-auto">
+            Download MPT Trading HUB sekarang dan kelola semua trading Anda dengan lebih terorganisir, analitis, dan menguntungkan
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a 
+              href="https://drive.google.com/uc?export=download&id=YOUR_FILE_ID"
+              className="inline-flex items-center justify-center gap-2 bg-white text-amber-600 font-bold py-4 px-8 rounded-lg hover:bg-amber-50 transition transform hover:scale-105 text-lg"
+            >
+              <Download size={22} />
+              Download Sekarang
+            </a>
+            <a 
+              href="/"
+              className="inline-flex items-center justify-center gap-2 bg-white/20 text-white font-bold py-4 px-8 rounded-lg hover:bg-white/30 transition border border-white/50 text-lg"
+            >
+              Kembali ke Website
+            </a>
+          </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-slate-950 border-t border-amber-500/20 py-8 md:py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Image src="/mpt-logo.png" alt="MPT Logo" width={32} height={32} />
+                <span className="font-black text-amber-400">MPT TRADING HUB</span>
+              </div>
+              <p className="text-slate-400 text-sm">Platform trading terlengkap untuk trader Indonesia</p>
+            </div>
+            <div>
+              <h3 className="font-bold text-amber-400 mb-4">Fitur Utama</h3>
+              <ul className="text-slate-400 text-sm space-y-2">
+                <li><a href="/" className="hover:text-amber-400 transition">Dashboard Trading</a></li>
+                <li><a href="/" className="hover:text-amber-400 transition">Journal Analisis</a></li>
+                <li><a href="/" className="hover:text-amber-400 transition">Risk Calculator</a></li>
+                <li><a href="/" className="hover:text-amber-400 transition">Leaderboard</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold text-amber-400 mb-4">Informasi</h3>
+              <ul className="text-slate-400 text-sm space-y-2">
+                <li><a href="/" className="hover:text-amber-400 transition">Hubungi Kami</a></li>
+                <li><a href="/" className="hover:text-amber-400 transition">Privacy Policy</a></li>
+                <li><a href="/" className="hover:text-amber-400 transition">Terms of Service</a></li>
+                <li><a href="/" className="hover:text-amber-400 transition">Dokumentasi</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-slate-800 pt-8 text-center text-slate-400">
+            <p className="mb-2">MPT Trading HUB - Mindset Plan Trader</p>
+            <p className="text-sm">© 2025 MPT Community. All rights reserved. | Dibuat dengan ❤️ untuk trader Indonesia</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -214,48 +312,51 @@ function DeviceDetector() {
   return (
     <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
       {/* Android Download Card */}
-      <div className={`bg-slate-800/70 p-8 rounded-lg border-2 transition ${
-        device === 'android' ? 'border-sky-500 ring-2 ring-sky-500/30' : 'border-slate-700'
+      <div className={`bg-gradient-to-br from-slate-800/70 to-slate-900/70 p-8 rounded-lg border-2 transition ${
+        device === 'android' ? 'border-amber-500 ring-2 ring-amber-500/30 shadow-lg shadow-amber-500/20' : 'border-slate-700'
       }`}>
         <div className="text-center">
-          <Smartphone className="w-16 h-16 mx-auto mb-4 text-sky-400" />
+          <Smartphone className="w-16 h-16 mx-auto mb-4 text-amber-400" />
           <h3 className="text-2xl font-bold mb-2">Android App</h3>
-          <p className="text-slate-400 mb-6">File APK untuk direct install</p>
+          <p className="text-slate-400 mb-6">Download file APK untuk instalasi langsung</p>
           
           {device === 'android' && (
-            <div className="bg-sky-500/20 border border-sky-500 rounded-lg p-3 mb-4 text-sm">
-              ✅ Kami deteksi Anda pakai Android
+            <div className="bg-amber-500/20 border border-amber-500 rounded-lg p-3 mb-4 text-sm flex items-center justify-center gap-2">
+              <CheckCircle size={16} className="text-amber-400" />
+              <span className="text-amber-300 font-semibold">Anda menggunakan Android</span>
             </div>
           )}
           
           <a 
             href="https://drive.google.com/uc?export=download&id=YOUR_FILE_ID"
-            download="mpt-warrior.apk"
-            className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105"
+            download="mpt-trading-hub.apk"
+            className="inline-flex items-center justify-center gap-2 w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105"
           >
             <Download className="w-5 h-5" />
             Download APK (v1.0)
           </a>
           
-          <div className="mt-4 text-xs text-slate-400">
-            <p>⚠️ Ukuran: 65MB</p>
+          <div className="mt-4 text-xs text-slate-400 space-y-1">
+            <p>📦 Size: ~75MB</p>
             <p>📱 Android 10+</p>
+            <p>⚡ Offline Ready</p>
           </div>
         </div>
       </div>
 
       {/* iOS Add to Home Screen Card */}
-      <div className={`bg-slate-800/70 p-8 rounded-lg border-2 transition ${
-        device === 'ios' ? 'border-sky-500 ring-2 ring-sky-500/30' : 'border-slate-700'
+      <div className={`bg-gradient-to-br from-slate-800/70 to-slate-900/70 p-8 rounded-lg border-2 transition ${
+        device === 'ios' ? 'border-amber-500 ring-2 ring-amber-500/30 shadow-lg shadow-amber-500/20' : 'border-slate-700'
       }`}>
         <div className="text-center">
-          <Apple className="w-16 h-16 mx-auto mb-4 text-slate-300" />
+          <Apple className="w-16 h-16 mx-auto mb-4 text-amber-400" />
           <h3 className="text-2xl font-bold mb-2">iPhone/iPad</h3>
           <p className="text-slate-400 mb-6">Add to Home Screen (PWA)</p>
           
           {device === 'ios' && (
-            <div className="bg-sky-500/20 border border-sky-500 rounded-lg p-3 mb-4 text-sm">
-              ✅ Kami deteksi Anda pakai iPhone
+            <div className="bg-amber-500/20 border border-amber-500 rounded-lg p-3 mb-4 text-sm flex items-center justify-center gap-2">
+              <CheckCircle size={16} className="text-amber-400" />
+              <span className="text-amber-300 font-semibold">Anda menggunakan iPhone</span>
             </div>
           )}
           
@@ -266,15 +367,16 @@ function DeviceDetector() {
                 instructions.scrollIntoView({ behavior: 'smooth' });
               }
             }}
-            className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 w-full justify-center"
+            className="inline-flex items-center justify-center gap-2 w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105"
           >
             <ChevronDownIcon className="w-5 h-5" />
             Lihat Panduan
           </button>
           
-          <div className="mt-4 text-xs text-slate-400">
-            <p>📖 Ikuti 5 langkah</p>
-            <p>⏱️ Hanya 1 menit</p>
+          <div className="mt-4 text-xs text-slate-400 space-y-1">
+            <p>📖 5 Langkah Mudah</p>
+            <p>⏱️ Hanya 1 Menit</p>
+            <p>⚡ No Installation</p>
           </div>
         </div>
       </div>

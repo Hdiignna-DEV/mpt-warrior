@@ -1,12 +1,12 @@
 {
-  "name": "MPT Warrior - Trading Hub",
-  "short_name": "MPT Warrior",
-  "description": "Mindset Plan Trader - Complete Trading Management System",
+  "name": "MPT Trading HUB",
+  "short_name": "MPT Hub",
+  "description": "Mindset Plan Trader - Aplikasi Trading Lengkap untuk Trader Indonesia",
   "start_url": "/?utm_source=pwa",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#0284c7",
+  "theme_color": "#b45309",
   "prefer_related_applications": false,
   "orientation": "portrait-primary",
   "icons": [

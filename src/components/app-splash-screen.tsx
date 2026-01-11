@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 /**
  * Splash Screen Component
- * Menampilkan logo MPT Warrior selama 2-3 detik saat app dibuka
+ * Menampilkan logo MPT Trading HUB selama 3 detik saat app dibuka
  * Hanya ditampilkan di Capacitor/native app
  */
 export function AppSplashScreen({ onLoadComplete }: { onLoadComplete: () => void }) {
@@ -28,30 +29,31 @@ export function AppSplashScreen({ onLoadComplete }: { onLoadComplete: () => void
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center z-50">
+    <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center z-50">
       {/* Logo Animation */}
       <div className="text-center animate-fade-in">
         <div className="mb-8 animate-bounce">
-          <svg width="120" height="120" viewBox="0 0 120 120" className="mx-auto">
-            {/* MPT Logo SVG */}
-            <circle cx="60" cy="60" r="55" fill="none" stroke="#0284c7" strokeWidth="2" />
-            <text x="60" y="70" textAnchor="middle" className="text-white font-bold text-4xl" fill="#ffffff">
-              MPT
-            </text>
-          </svg>
+          <Image 
+            src="/mpt-logo.png" 
+            alt="MPT Logo" 
+            width={120} 
+            height={120}
+            priority
+            className="mx-auto"
+          />
         </div>
 
         {/* Title */}
-        <h1 className="text-4xl font-bold text-white mb-2">MPT Warrior</h1>
-        <p className="text-lg text-slate-400">Trading Hub</p>
+        <h1 className="text-4xl font-black text-amber-400 mb-2">MPT TRADING HUB</h1>
+        <p className="text-lg text-amber-500/70 font-mono">Mindset Plan Trader</p>
 
         {/* Loading Bar */}
         <div className="mt-8 w-48 h-1 bg-slate-700 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-sky-400 to-cyan-400 animate-pulse"></div>
+          <div className="h-full bg-gradient-to-r from-amber-500 to-amber-400 animate-pulse"></div>
         </div>
 
         {/* Loading Text */}
-        <p className="text-slate-500 text-sm mt-4 animate-pulse">Loading...</p>
+        <p className="text-slate-500 text-sm mt-4 animate-pulse">Mempersiapkan aplikasi...</p>
       </div>
 
       {/* Version Info */}

@@ -1,6 +1,6 @@
 {
-  "appId": "com.mptwarrior.app",
-  "appName": "MPT Warrior",
+  "appId": "com.mpttradinghub.app",
+  "appName": "MPT Trading HUB",
   "webDir": "out",
   "server": {
     "androidScheme": "https"
