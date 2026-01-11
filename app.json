@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "MPT Command Center",
+    "name": "MPT Trading HUB",
     "slug": "mpt-warrior",
-    "version": "1.0.0",
+    "version": "1.0.1",
+    "runtimeVersion": "1.0.1",
     "orientation": "portrait",
     "icon": "./public/mpt-logo.png",
     "userInterfaceStyle": "dark",
@@ -17,33 +18,48 @@
     "ios": {
       "supportsTabletMode": true,
       "bundleIdentifier": "com.mptcommandcenter.app",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "splash": {
         "image": "./public/mpt-logo.png",
         "resizeMode": "contain",
         "backgroundColor": "#0f172a"
+      },
+      "usesNonExemptEncryption": false,
+      "infoPlist": {
+        "NSBonjourServices": ["_http._tcp"],
+        "NSLocalNetworkUsageDescription": "This app uses local network to sync trading data",
+        "NSBonjourServiceTypes": ["_http._tcp", "_ws._tcp"]
       }
     },
     "android": {
       "package": "com.mptcommandcenter.app",
-      "versionCode": 1,
+      "versionCode": 2,
       "icon": "./public/mpt-logo.png",
       "splash": {
         "image": "./public/mpt-logo.png",
         "resizeMode": "contain",
         "backgroundColor": "#0f172a"
       },
-      "adaptive": false,
+      "adaptive": true,
       "permissions": [
-        "INTERNET",
-        "ACCESS_NETWORK_STATE",
-        "POST_NOTIFICATIONS"
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.VIBRATE"
       ]
     },
     "web": {
       "favicon": "./public/mpt-logo.png"
     },
-    "description": "MPT Command Center - Platform Trading Profesional untuk Warrior Indonesia. Dashboard lengkap, trading journal, AI mentor, risk calculator, leaderboard real-time, dan achievement system untuk mengembangkan skill trading Anda.",
+    "description": "MPT Trading HUB - Platform Trading Profesional untuk Warrior Indonesia. Dashboard lengkap, trading journal, AI mentor, risk calculator, leaderboard real-time, dan achievement system untuk mengembangkan skill trading Anda.",
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icons": ["./public/mpt-logo.png"]
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "01cbff08-a5b5-4e32-b7d6-11eebe07c986"
