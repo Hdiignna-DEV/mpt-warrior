@@ -1,12 +1,42 @@
 {
   "expo": {
+    "name": "MPT Trading HUB",
+    "slug": "mpt-trading-hub",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./public/mpt-logo.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./public/mpt-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f172a"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.mpttradinghub.app",
+      "buildNumber": "1"
+    },
+    "android": {
+      "package": "com.mpttradinghub.app",
+      "versionCode": 1,
+      "icon": "./public/mpt-logo.png",
+      "adaptive": false,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./public/mpt-logo.png"
+    },
+    "description": "MPT Trading HUB - Platform Trading Lengkap untuk Trader Indonesia. Kelola trading Anda dengan dashboard, journal, AI mentor, risk calculator, leaderboard, dan achievements.",
     "extra": {
       "eas": {
         "projectId": "01cbff08-a5b5-4e32-b7d6-11eebe07c986"
       }
-    },
-    "android": {
-      "package": "com.mpt_community.mptwarrior"
     }
   }
 }
