@@ -1,25 +1,20 @@
 'use client';
 
 import { useEffect, useState, ReactNode } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 interface MaintenanceModeGuardProps {
   children: ReactNode;
-  allowedRoles?: ('ADMIN' | 'SUPER_ADMIN')[];
 }
 
 /**
- * Client-side guard untuk melindungi routes dari maintenance mode
- * Non-admin users akan redirect ke halaman maintenance
+ * Simple wrapper untuk halaman yang perlu admin access
+ * Akan redirect non-admin ke maintenance page
  */
-export function MaintenanceModeGuard({ 
-  children, 
-  allowedRoles = ['ADMIN', 'SUPER_ADMIN'] 
-}: MaintenanceModeGuardProps) {
+export function MaintenanceModeGuard({ children }: MaintenanceModeGuardProps) {
   const router = useRouter();
-  const pathname = usePathname();
-  const [isChecking, setIsChecking] = useState(true);
   const [isAllowed, setIsAllowed] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -29,41 +24,35 @@ export function MaintenanceModeGuard({
 
     try {
       const userData = localStorage.getItem('mpt_user');
-      
-      if (!userData) {
-        // Not logged in, don't block
+      const token = localStorage.getItem('mpt_token');
+
+      if (!userData || !token) {
+        // Not logged in - show login page (handled by useAuth)
         setIsAllowed(true);
         setIsChecking(false);
         return;
       }
 
       const user = JSON.parse(userData);
-      const hasAccess = allowedRoles.includes(user.role);
+      const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
-      if (!hasAccess) {
-        // Non-admin user, redirect to maintenance
-        router.push('/maintenance-migration');
+      if (!isAdmin) {
+        // Non-admin, redirect to maintenance
+        router.replace('/maintenance-migration');
         setIsAllowed(false);
       } else {
         setIsAllowed(true);
       }
     } catch (error) {
-      console.error('Error checking maintenance access:', error);
-      setIsAllowed(true); // Allow on error
+      // Silently fail and allow
+      setIsAllowed(true);
     } finally {
       setIsChecking(false);
     }
-  }, [router, allowedRoles]);
+  }, [router]);
 
-  // While checking, show nothing or loading state
-  if (isChecking) {
-    return null;
-  }
-
-  // If not allowed, don't render children
-  if (!isAllowed) {
-    return null;
-  }
+  if (isChecking) return null;
+  if (!isAllowed) return null;
 
   return <>{children}</>;
 }

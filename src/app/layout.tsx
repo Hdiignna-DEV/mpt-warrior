@@ -10,14 +10,7 @@ import { Toaster } from "sonner";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import PushNotificationPrompt from "@/components/PushNotificationPrompt";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
-import dynamic from "next/dynamic";
 import Script from "next/script";
-
-// Dynamic import to avoid hydration issues
-const MaintenanceModeProvider = dynamic(
-  () => import("@/components/MaintenanceModeProvider").then(mod => ({ default: mod.MaintenanceModeProvider })),
-  { ssr: false }
-);
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -90,8 +83,7 @@ export default function RootLayout({
 
         <I18nProvider>
           <UserProvider>
-            {/* Maintenance Mode Provider - SSR disabled to prevent hydration issues */}
-            <MaintenanceModeProvider />
+            {/* Maintenance Mode - Check handled client-side in page components */}
             
             {/* Toast Notifications */}
             <Toaster 
