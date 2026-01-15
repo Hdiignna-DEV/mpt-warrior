@@ -13,6 +13,17 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
+  onDemandEntries: {
+    maxInactiveAge: 60 * 1000,
+    pagesBufferLength: 5,
+  },
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: true,
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+  turbopack: {
+    resolveAlias: {},
+  },
 };
 
 export default nextConfig;

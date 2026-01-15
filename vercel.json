@@ -1,9 +1,32 @@
 {
   "buildCommand": "npm run build",
-  "env": {},
+  "env": {
+    "NODE_OPTIONS": "--max-old-space-size=4096"
+  },
   "git": {
     "deploymentEnabled": {
       "main": true
     }
-  }
+  },
+  "crons": [],
+  "headers": [
+    {
+      "source": "/_next/static/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(_next/data|api)/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=60, stale-while-revalidate=30"
+        }
+      ]
+    }
+  ]
 }
