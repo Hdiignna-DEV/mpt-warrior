@@ -41,7 +41,8 @@
     "mobile",
     "mpt-warrior-mobile",
     "mobile-app",
-    "test-build"
-  ],
-  "extends": "expo/tsconfig.base"
+    "test-build",
+    "scripts",
+    ".next"
+  ]
 }
