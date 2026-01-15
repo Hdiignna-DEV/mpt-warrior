@@ -1,0 +1,41 @@
+{
+  "files.exclude": {
+    "node_modules": true,
+    ".expo": true,
+    "dist": true,
+    "build": true
+  },
+  "search.exclude": {
+    "node_modules": true,
+    ".expo": true,
+    "dist": true,
+    "build": true,
+    ".next": true
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "extensions.ignoreRecommendations": true,
+  "[java]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "java.import.gradle.enabled": false,
+  "java.import.maven.enabled": false,
+  "redhat.telemetry.enabled": false
+}

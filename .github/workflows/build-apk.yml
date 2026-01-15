@@ -1,26 +1,13 @@
-name: 🚀 Build & Deploy Mobile App APK
+name: 🚀 Build Android APK
 
 on:
   push:
     branches:
       - main
-    paths:
-      - 'mobile/**'
-      - '.github/workflows/build-apk.yml'
-      - 'package.json'
   workflow_dispatch:
-    inputs:
-      build_type:
-        description: 'Build type'
-        required: true
-        default: 'development'
-        type: choice
-        options:
-          - development
-          - production
 
 env:
-  EXPO_PUBLIC_API_URL: 'https://mpt-community.vercel.app'
+  ANDROID_HOME: /usr/local/android-sdk-linux
 
 jobs:
   build:
@@ -31,24 +18,29 @@ jobs:
     steps:
       - name: 🔍 Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: 📱 Setup Node.js
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.9.0'
           cache: 'npm'
 
-      - name: 📦 Install mobile dependencies
-        working-directory: ./mobile
+      - name: Install dependencies
         run: npm ci --legacy-peer-deps
-        env:
-          NODE_ENV: production
 
-      - name: 🔐 Setup EAS CLI
-        run: npm install -g eas-cli
+      - name: Build Next.js
+        run: npm run build
         env:
+          NEXT_PUBLIC_API_URL: 'https://mpt-warrior.vercel.app'
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
       - name: 🏗️ Build APK with EAS
@@ -125,12 +117,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🌐 Deploy to Vercel
-        uses: amondnet/vercel-action@v26
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          production: true
+        run: echo "Deployed via git push to Vercel"
         continue-on-error: true
 
       - name: 📊 Build Summary

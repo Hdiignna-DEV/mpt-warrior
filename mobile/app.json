@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "MPT Command Center",
+    "slug": "mpt-warrior",
+    "version": "1.0.0",
+    "runtimeVersion": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.mptcommandcenter.mobile",
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.VIBRATE"
+      ],
+      "usesCleartextTraffic": false
+    },
+    "description": "MPT Trading Platform Mobile - Professional Trading Hub",
+    "plugins": [
+      "expo-notifications"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b3070fe0-6424-4629-a023-4223b888f200"
+      },
+      "apiUrl": "https://mpt-warrior.vercel.app/api",
+      "websiteUrl": "https://mpt-warrior.vercel.app"
+    },
+    "owner": "mpt_community"
+  }
+}
