@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useState, ReactNode } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface MaintenanceModeGuardProps {
   children: ReactNode;
@@ -10,7 +9,7 @@ interface MaintenanceModeGuardProps {
 }
 
 /**
- * HOC untuk melindungi routes dari maintenance mode
+ * Client-side guard untuk melindungi routes dari maintenance mode
  * Non-admin users akan redirect ke halaman maintenance
  */
 export function MaintenanceModeGuard({ 
@@ -18,27 +17,51 @@ export function MaintenanceModeGuard({
   allowedRoles = ['ADMIN', 'SUPER_ADMIN'] 
 }: MaintenanceModeGuardProps) {
   const router = useRouter();
-  const { user, loading } = useAuth(false); // Don't require auth to check
+  const pathname = usePathname();
+  const [isChecking, setIsChecking] = useState(true);
+  const [isAllowed, setIsAllowed] = useState(false);
 
   useEffect(() => {
-    if (!loading && user) {
-      // Check if user role is allowed
-      if (!allowedRoles.includes(user.role as 'ADMIN' | 'SUPER_ADMIN')) {
-        // Redirect to maintenance page
-        router.push('/maintenance-migration');
-      }
+    if (typeof window === 'undefined') {
+      setIsChecking(false);
+      return;
     }
-  }, [user, loading, router, allowedRoles]);
 
-  // Show nothing while checking
-  if (loading) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <div className="text-slate-400">Loading...</div>
-    </div>;
+    try {
+      const userData = localStorage.getItem('mpt_user');
+      
+      if (!userData) {
+        // Not logged in, don't block
+        setIsAllowed(true);
+        setIsChecking(false);
+        return;
+      }
+
+      const user = JSON.parse(userData);
+      const hasAccess = allowedRoles.includes(user.role);
+
+      if (!hasAccess) {
+        // Non-admin user, redirect to maintenance
+        router.push('/maintenance-migration');
+        setIsAllowed(false);
+      } else {
+        setIsAllowed(true);
+      }
+    } catch (error) {
+      console.error('Error checking maintenance access:', error);
+      setIsAllowed(true); // Allow on error
+    } finally {
+      setIsChecking(false);
+    }
+  }, [router, allowedRoles]);
+
+  // While checking, show nothing or loading state
+  if (isChecking) {
+    return null;
   }
 
-  // If user doesn't have admin access, don't render
-  if (user && !allowedRoles.includes(user.role as 'ADMIN' | 'SUPER_ADMIN')) {
+  // If not allowed, don't render children
+  if (!isAllowed) {
     return null;
   }
 

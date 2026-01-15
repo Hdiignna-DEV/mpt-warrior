@@ -1,31 +1,42 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useState } from 'react';
 
 /**
- * Komponen untuk inject user role ke header request
+ * Komponen untuk inject user role ke cookie
  * Digunakan oleh middleware untuk maintenance mode check
  * 
- * IMPORTANT: Letakkan ini di root layout sehingga berjalan untuk semua routes
+ * Lightweight version tanpa dependency ke useAuth
  */
 export function MaintenanceModeProvider() {
-  const { user } = useAuth(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      // Set user role di localStorage sehingga bisa dibaca oleh middleware
-      localStorage.setItem('user_role', user.role);
-      
-      // Juga set sebagai header untuk next requests (jika menggunakan fetch interceptor)
-      // Tapi karena middleware tidak bisa membaca localStorage, kita gunakan cookie
-      const token = localStorage.getItem('mpt_token');
-      if (token) {
-        // Set cookie dengan user role untuk middleware
-        document.cookie = `x-user-role=${user.role}; path=/; max-age=86400`;
-      }
-    }
-  }, [user]);
+    // Only run on client
+    setMounted(true);
+    
+    if (typeof window === 'undefined') return;
 
-  return null; // This component doesn't render anything
+    try {
+      const userData = localStorage.getItem('mpt_user');
+      const token = localStorage.getItem('mpt_token');
+      
+      if (userData && token) {
+        try {
+          const user = JSON.parse(userData);
+          if (user?.role) {
+            // Set cookie dengan user role untuk middleware
+            document.cookie = `x-user-role=${user.role}; path=/; max-age=86400`;
+          }
+        } catch (e) {
+          console.error('Error parsing user data:', e);
+        }
+      }
+    } catch (e) {
+      console.error('Error in MaintenanceModeProvider:', e);
+    }
+  }, []);
+
+  // Don't render anything, just set cookies
+  return null;
 }

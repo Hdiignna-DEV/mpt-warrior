@@ -8,6 +8,7 @@
     "icon": "./public/mpt-logo.png",
     "userInterfaceStyle": "dark",
     "entryPoint": "./App.js",
+    "projectId": "mpt-warrior",
     "splash": {
       "image": "./public/mpt-logo.png",
       "resizeMode": "contain",

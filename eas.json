@@ -2,7 +2,6 @@
   "cli": {
     "version": ">= 16.0.0"
   },
-  "projectId": "mpt-warrior",
   "build": {
     "production": {
       "distribution": "internal",
