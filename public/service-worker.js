@@ -171,7 +171,6 @@ self.addEventListener('fetch', (event) => {
           });
       })
     );
-    );
   }
 });
 
