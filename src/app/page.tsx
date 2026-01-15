@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/Button';
 import MptLogo from '@/components/MptLogo';
 import { WarriorAccessSection } from '@/components/WarriorAccessSection';
 
+// Mark as dynamic to ensure proper rendering
+export const dynamic = 'force-dynamic';
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
