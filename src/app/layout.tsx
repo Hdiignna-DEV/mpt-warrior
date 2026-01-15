@@ -84,8 +84,8 @@ export default function RootLayout({
 
         <I18nProvider>
           <UserProvider>
-            {/* Maintenance Mode Provider */}
-            <MaintenanceModeProvider />
+            {/* Maintenance Mode Provider - Temporarily disabled for debugging */}
+            {/* <MaintenanceModeProvider /> */}
             
             {/* Toast Notifications */}
             <Toaster 
