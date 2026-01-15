@@ -1,44 +1,23 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getCookie } from 'cookies-next';
-import { jwtDecode } from 'jwt-decode';
-
-interface DecodedToken {
-  role?: string;
-  userId?: string;
-  email?: string;
-}
 
 export default function MaintenancePage() {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if user info is available in localStorage (set by auth)
+    // Or check if they have admin-related data accessible
     try {
-      const token = getCookie('token') as string;
-      if (token) {
-        const decoded: DecodedToken = jwtDecode(token);
-        const userRole = decoded.role?.toUpperCase();
-        setIsAdmin(userRole === 'ADMIN' || userRole === 'SUPER_ADMIN');
+      const userRole = localStorage.getItem('userRole');
+      if (userRole) {
+        const role = userRole.toUpperCase();
+        setIsAdmin(role === 'ADMIN' || role === 'SUPER_ADMIN');
       }
     } catch (error) {
-      console.error('Error decoding token:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error checking user role:', error);
     }
   }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-          <p className="text-white mt-4">Loading...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
