@@ -148,26 +148,29 @@ self.addEventListener('fetch', (event) => {
     // Cache first for static assets
     event.respondWith(
       caches.match(event.request).then((response) => {
-        return (
-          response ||
-          fetch(event.request)
-            .then((response) => {
-              // Cache new assets
-              if (response.ok) {
-                const cache = caches.open(CACHE_NAME);
-                cache.then((c) => c.put(event.request, response.clone()));
-              }
-              return response;
-            })
-            .catch(() => {
-              // Return offline page for navigation requests
-              if (event.request.mode === 'navigate') {
-                return caches.match(OFFLINE_URL);
-              }
-              return null;
-            })
-        );
+        if (response) {
+          return response; // Return cached if exists
+        }
+        return fetch(event.request)
+          .then((response) => {
+            // Cache new assets (only if successful)
+            if (response && response.ok) {
+              const responseClone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, responseClone);
+              });
+            }
+            return response;
+          })
+          .catch(() => {
+            // Return offline page for navigation requests
+            if (event.request.mode === 'navigate') {
+              return caches.match(OFFLINE_URL);
+            }
+            return null;
+          });
       })
+    );
     );
   }
 });
