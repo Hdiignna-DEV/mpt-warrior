@@ -8,8 +8,10 @@ interface MaintenanceModeGuardProps {
 }
 
 /**
- * Simple wrapper untuk halaman yang perlu admin access
- * Akan redirect non-admin ke maintenance page
+ * Wrapper untuk halaman yang perlu admin access
+ * - Cek MAINTENANCE_MODE environment variable
+ * - Redirect non-admin ke maintenance page
+ * - Set role cookie untuk middleware validation
  */
 export function MaintenanceModeGuard({ children }: MaintenanceModeGuardProps) {
   const router = useRouter();
@@ -36,15 +38,24 @@ export function MaintenanceModeGuard({ children }: MaintenanceModeGuardProps) {
       const user = JSON.parse(userData);
       const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
 
-      if (!isAdmin) {
-        // Non-admin, redirect to maintenance
+      // Set user role cookie untuk middleware validation
+      if (user?.role) {
+        document.cookie = `mpt_user_role=${user.role}; path=/; max-age=86400`;
+      }
+
+      // Check maintenance mode status
+      const maintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
+
+      if (maintenanceMode && !isAdmin) {
+        // Maintenance mode ON dan user bukan admin
         router.replace('/maintenance-migration');
         setIsAllowed(false);
       } else {
         setIsAllowed(true);
       }
     } catch (error) {
-      // Silently fail and allow
+      console.error('[MaintenanceModeGuard] Error:', error);
+      // Silently fail dan allow
       setIsAllowed(true);
     } finally {
       setIsChecking(false);
