@@ -1,16 +1,34 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import LayoutWrapper from "@/components/LayoutWrapper";
+import dynamic from "next/dynamic";
 import { ThemeProviderWrapper } from "@/components/ThemeProvider";
 import { ThemeScript } from "@/components/ThemeScript";
 import I18nProvider from "@/components/I18nProvider";
 import { UserProvider } from "@/contexts/UserContext";
 import { Toaster } from "sonner";
-import PWAInstallPrompt from "@/components/PWAInstallPrompt";
-import PushNotificationPrompt from "@/components/PushNotificationPrompt";
-import { MobileBottomNav } from "@/components/MobileBottomNav";
 import Script from "next/script";
+
+// Lazy load components with heavy dependencies
+const LayoutWrapper = dynamic(() => import("@/components/LayoutWrapper"), {
+  ssr: true,
+  loading: () => null,
+});
+
+const PWAInstallPrompt = dynamic(() => import("@/components/PWAInstallPrompt"), {
+  ssr: false,
+  loading: () => null,
+});
+
+const PushNotificationPrompt = dynamic(() => import("@/components/PushNotificationPrompt"), {
+  ssr: false,
+  loading: () => null,
+});
+
+const MobileBottomNav = dynamic(() => import("@/components/MobileBottomNav").then(mod => ({ default: mod.MobileBottomNav })), {
+  ssr: false,
+  loading: () => null,
+});
 
 const inter = Inter({ subsets: ["latin"] });
 
