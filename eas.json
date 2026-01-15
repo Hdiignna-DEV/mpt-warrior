@@ -2,12 +2,22 @@
   "cli": {
     "version": ">= 16.0.0"
   },
+  "projectId": "mpt-warrior",
   "build": {
     "production": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
       }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     }
+  },
+  "submit": {
+    "production": {}
   }
 }

@@ -7,6 +7,7 @@
     "orientation": "portrait",
     "icon": "./public/mpt-logo.png",
     "userInterfaceStyle": "dark",
+    "entryPoint": "./App.js",
     "splash": {
       "image": "./public/mpt-logo.png",
       "resizeMode": "contain",
@@ -14,6 +15,14 @@
     },
     "assetBundlePatterns": [
       "**/*"
+    ],
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "origin": false
+        }
+      ]
     ],
     "ios": {
       "supportsTabletMode": true,
