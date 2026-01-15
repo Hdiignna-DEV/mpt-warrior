@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 
 export default function LandingPage() {
@@ -11,15 +10,11 @@ export default function LandingPage() {
             <h1 className="text-sm sm:text-xl font-black text-amber-400">MPT COMMUNITY</h1>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/login">
-              <Button variant="outline" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10">
-                Login
-              </Button>
+            <Link href="/login" className="px-4 py-2 text-amber-400 hover:text-amber-300 border border-amber-500/30 rounded-lg transition">
+              Login
             </Link>
-            <Link href="/register">
-              <Button className="bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold">
-                Join Now
-              </Button>
+            <Link href="/register" className="px-4 py-2 bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold rounded-lg transition">
+              Join Now
             </Link>
           </div>
         </div>
@@ -35,15 +30,11 @@ export default function LandingPage() {
             Professional trading platform for elite warriors. Download the mobile app to get started.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/download">
-              <Button className="bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold px-8 py-3">
-                Download App
-              </Button>
+            <Link href="/download" className="inline-block px-8 py-3 bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold rounded-lg transition">
+              Download App
             </Link>
-            <Link href="/login">
-              <Button variant="outline" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 px-8 py-3">
-                Member Login
-              </Button>
+            <Link href="/login" className="inline-block px-8 py-3 text-amber-400 hover:text-amber-300 border border-amber-500/30 rounded-lg transition">
+              Member Login
             </Link>
           </div>
         </section>

@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 
 export default function DownloadPage() {
@@ -11,15 +10,11 @@ export default function DownloadPage() {
             <h1 className="text-sm sm:text-xl font-black text-amber-400">MPT COMMUNITY</h1>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/login">
-              <Button variant="outline" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10">
-                Login
-              </Button>
+            <Link href="/login" className="px-4 py-2 text-amber-400 hover:text-amber-300 border border-amber-500/30 rounded-lg transition">
+              Login
             </Link>
-            <Link href="/register">
-              <Button className="bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold">
-                Join Now
-              </Button>
+            <Link href="/register" className="px-4 py-2 bg-amber-500 text-slate-950 hover:bg-amber-400 font-bold rounded-lg transition">
+              Join Now
             </Link>
           </div>
         </div>
@@ -38,26 +33,22 @@ export default function DownloadPage() {
           <div className="bg-slate-900/50 border border-amber-500/20 rounded-lg p-8 mb-8">
             <h3 className="text-xl font-bold text-white mb-4">Android</h3>
             <p className="text-slate-300 mb-4">Download directly from our server:</p>
-            <a href="/downloads/mpt-warrior.apk" download className="inline-block">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3">
-                Download APK
-              </Button>
+            <a href="/downloads/mpt-warrior.apk" download className="inline-block px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition">
+              Download APK
             </a>
           </div>
 
           <div className="bg-slate-900/50 border border-amber-500/20 rounded-lg p-8 mb-8">
             <h3 className="text-xl font-bold text-white mb-4">iOS</h3>
             <p className="text-slate-300 mb-4">Coming soon on the App Store</p>
-            <Button disabled className="bg-slate-700 text-slate-400 font-bold px-8 py-3">
+            <button disabled className="px-8 py-3 bg-slate-700 text-slate-400 font-bold rounded-lg cursor-not-allowed">
               Coming Soon
-            </Button>
+            </button>
           </div>
 
           <div className="mt-8">
-            <Link href="/login">
-              <Button variant="outline" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 px-8 py-3">
-                Already have an account? Login
-              </Button>
+            <Link href="/login" className="inline-block px-8 py-3 text-amber-400 hover:text-amber-300 border border-amber-500/30 rounded-lg transition">
+              Already have an account? Login
             </Link>
           </div>
         </section>
