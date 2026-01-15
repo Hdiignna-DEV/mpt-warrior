@@ -6,12 +6,12 @@ const nextConfig: NextConfig = {
     remotePatterns: [],
     unoptimized: false,
   },
-  experimental: {
-    optimizePackageImports: ['lucide-react'],
-  },
   typescript: {
     tsconfigPath: './tsconfig.json',
     ignoreBuildErrors: false,
+  },
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
   },
 };
 
