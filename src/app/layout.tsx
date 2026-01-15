@@ -58,6 +58,27 @@ export default function RootLayout({
         <ThemeScript />
         <link rel="apple-touch-icon" href="/mpt-logo.png" />
         <link rel="icon" type="image/png" href="/mpt-logo.png" />
+        {/* Handle chunk loading errors early */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined') {
+                window.addEventListener('error', function(event) {
+                  if (event.message && (event.message.includes('Failed to load chunk') || event.message.includes('ChunkLoadError'))) {
+                    console.error('[MPT] Chunk load error detected, reloading page...');
+                    window.location.href = window.location.pathname + '?t=' + Date.now();
+                  }
+                });
+                window.addEventListener('unhandledrejection', function(event) {
+                  if (event.reason && ((event.reason.message || event.reason).includes('ChunkLoadError') || (event.reason.message || event.reason).includes('Failed to load chunk'))) {
+                    console.error('[MPT] ChunkLoadError detected, reloading page...');
+                    window.location.href = window.location.pathname + '?t=' + Date.now();
+                  }
+                });
+              }
+            `,
+          }}
+        />
       </head>
       <body className={`${inter.className}`} suppressHydrationWarning>
         {/* Register Service Worker */}
