@@ -8,12 +8,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-
-// Lazy load CommanderArka component
-const CommanderArkaFullDisplay = dynamic(() => 
-  import('@/components/ChatUIEnhancers').then(mod => ({ default: mod.CommanderArkaFullDisplay })),
-  { loading: () => <div className="w-full h-full bg-slate-800/30 rounded-lg animate-pulse" /> }
-);
+import { CommanderArkaFullDisplay } from '@/components/ChatUIEnhancers';
 
 export default function LoginSplit({ onSubmit }: { onSubmit?: (data: { email: string; password: string }) => void }) {
   const [formData, setFormData] = useState({ email: '', password: '' });
