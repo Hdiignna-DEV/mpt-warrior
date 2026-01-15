@@ -10,6 +10,7 @@ import { Toaster } from "sonner";
 import PWAInstallPrompt from "@/components/PWAInstallPrompt";
 import PushNotificationPrompt from "@/components/PushNotificationPrompt";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { MaintenanceModeProvider } from "@/components/MaintenanceModeProvider";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -83,6 +84,9 @@ export default function RootLayout({
 
         <I18nProvider>
           <UserProvider>
+            {/* Maintenance Mode Provider */}
+            <MaintenanceModeProvider />
+            
             {/* Toast Notifications */}
             <Toaster 
               position="top-right"
