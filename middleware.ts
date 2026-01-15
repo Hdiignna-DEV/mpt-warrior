@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-/**
- * MAINTENANCE MODE MIDDLEWARE
- * Implements role-based access control for mobile migration phase
- */
-
 export function middleware(request: NextRequest) {
-  // Temporarily disabled for debugging route generation issue
+  const pathname = request.nextUrl.pathname;
+  
+  // Redirect root "/" to /download since root page.tsx isn't being built by Turbopack
+  if (pathname === '/') {
+    return NextResponse.redirect(new URL('/download', request.url));
+  }
+
+  // Redirect /get-app to /download
+  if (pathname === '/get-app') {
+    return NextResponse.redirect(new URL('/download', request.url));
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-  ],
+  matcher: ['/', '/get-app'],
 };
