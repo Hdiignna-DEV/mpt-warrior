@@ -7,9 +7,14 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const maintenanceMode = process.env.MAINTENANCE_MODE === 'true';
 
-  // Redirect root "/" to /download
+  // When maintenance mode is ON, allow root "/" to show landing page with documentation
+  // When maintenance mode is OFF, redirect "/" to "/download"
   if (pathname === '/') {
-    return NextResponse.redirect(new URL('/download', request.url));
+    if (!maintenanceMode) {
+      return NextResponse.redirect(new URL('/download', request.url));
+    }
+    // Maintenance mode ON: show landing page with documentation
+    return NextResponse.next();
   }
 
   // Redirect /get-app to /download
