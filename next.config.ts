@@ -21,6 +21,27 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   generateEtags: true,
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+  webpack: (config, { isServer }) => {
+    // Optimize chunk splitting
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        chunks: 'all',
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          // Vendor chunk
+          vendor: {
+            filename: 'chunks/vendor-[contenthash].js',
+            test: /node_modules/,
+            priority: 10,
+            reuseExistingChunk: true,
+          },
+        },
+      },
+    };
+    return config;
+  },
   turbopack: {
     resolveAlias: {},
   },
