@@ -8,10 +8,16 @@ export async function middleware(request: NextRequest) {
   const maintenanceMode = process.env.MAINTENANCE_MODE === 'true';
 
   // When maintenance mode is ON, allow root "/" to show landing page with documentation
-  // When maintenance mode is OFF, redirect "/" to "/download"
+  // When maintenance mode is OFF, check if user is logged in
   if (pathname === '/') {
     if (!maintenanceMode) {
-      return NextResponse.redirect(new URL('/download', request.url));
+      const token = request.cookies.get('token')?.value;
+      // If no token and not in maintenance mode, redirect to login (not download)
+      if (!token) {
+        return NextResponse.next(); // Allow access to landing page
+      }
+      // If token exists, allow to proceed to landing page
+      return NextResponse.next();
     }
     // Maintenance mode ON: show landing page with documentation
     return NextResponse.next();

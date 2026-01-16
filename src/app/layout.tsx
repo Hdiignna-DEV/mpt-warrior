@@ -69,9 +69,13 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/service-worker.js')
+                  navigator.serviceWorker.register('/service-worker.js?v=' + Date.now())
                     .then(function(registration) {
                       console.log('[PWA] Service Worker registered:', registration.scope);
+                      // Check for updates every minute
+                      setInterval(function() {
+                        registration.update();
+                      }, 60000);
                     })
                     .catch(function(error) {
                       console.log('[PWA] Service Worker registration failed:', error);
